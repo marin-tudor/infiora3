@@ -1,0 +1,473 @@
+export interface GenericResponse {
+  status: string
+  message: string
+}
+
+export interface GenericResultResponse<T> {
+  status: string
+  results: T[]
+  page: number
+  limit: number
+}
+
+export interface IUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  createdAt: string
+}
+export interface IBatch {
+  id: string
+  name?: string
+  description?: string
+}
+export interface ITag {
+  id: string
+  title?: string
+  headline?: string
+  image?: string
+  type?: string
+}
+
+export interface ITicket {
+  id: string
+  user: string
+  category?: string
+  subject: string
+  message: string
+  status?: string
+}
+export interface IHotel {
+  id: string
+  user: string
+  name?: string
+  description?: string
+  socialLinks?: string[]
+  image: string
+  cover?: string
+  isActive: boolean
+  map?: IHotelMapSettings
+  mapPoints?: IMapPoint[]
+}
+
+export type MapMarkerIcon =
+  | 'hotel'
+  | 'food'
+  | 'drink'
+  | 'beach'
+  | 'pool'
+  | 'spa'
+  | 'taxi'
+  | 'parking'
+  | 'activity'
+  | 'shopping'
+  | 'info'
+  | 'viewpoint'
+  | 'transport'
+  | 'coffee'
+  | 'custom'
+
+export interface IMapCustomPreset {
+  id: string
+  name: string
+  icon: string
+  color?: string
+  text?: string
+}
+
+export interface IMapPoint {
+  id?: string
+  title: string
+  description?: string
+  image?: string
+  address?: string
+  lat: number
+  lng: number
+  color?: string
+  icon?: MapMarkerIcon
+  customPresetId?: string
+  customIconClass?: string
+  customIconImage?: string
+  isActive?: boolean
+  sortOrder?: number
+}
+
+export interface IHotelMapSettings {
+  enabled?: boolean
+  defaultState?: 'collapsed' | 'expanded'
+  centerAddress?: string
+  centerLat?: number
+  centerLng?: number
+  zoom?: number
+  showHotelMarker?: boolean
+  customPresets?: IMapCustomPreset[]
+}
+export interface INewsletter {
+  message?: string
+  successMessage?: string
+  buttonText?: string
+  mainButtonText?: string
+  type?: string
+  color?: string
+  image?: string
+  imageType?: 'none' | 'image' | 'icon' | 'url'
+  isActive?: boolean
+}
+
+export interface IFeedback {
+  isActive?: boolean
+  emailRequirement?: 'none' | 'optional' | 'mandatory'
+  textRequirement?: 'none' | 'optional' | 'mandatory'
+  emails?: string[]
+  googleMapsLink?: string
+}
+
+export interface ISurveyQuestion {
+  id: string
+  type: 'rating' | 'yes_no' | 'single_choice' | 'multi_choice' | 'open_text' | 'nps' | 'matrix' | 'contact'
+  text: string
+  options?: string[]
+  matrixRows?: string[]
+  matrixColumns?: string[]
+  required?: boolean
+}
+
+export interface ISurvey {
+  isActive?: boolean
+  type?: 'popup' | 'button'
+  buttonText?: string
+  mainButtonText?: string
+  imageType?: 'none' | 'image' | 'icon' | 'url'
+  image?: string
+  questions?: ISurveyQuestion[]
+}
+
+export interface IPopup {
+  message?: string
+  buttonText?: string
+  link?: string
+  backgroundColor?: string
+  fontColor?: string
+  size?: string
+  position?: string
+  image?: string
+  imageType?: 'none' | 'image' | 'icon' | 'url'
+  isActive?: boolean
+}
+
+export interface IRoom {
+  id: string
+  hotel: IHotel
+  group?: IGroup
+  isActive?: boolean
+  number: string
+  description?: string
+  orderedLinks?: string[]
+  background?: {
+    color?: string
+    direction?: string
+    type?: string
+  }
+  font?: {
+    color?: string
+    family?: string
+  }
+  button?: {
+    color?: string
+    backgroundColor?: string
+    variant?: 'outlined' | 'contained'
+    borderRadius?: string
+  }
+  popup?: IPopup
+  newsletter?: INewsletter
+  feedback?: IFeedback
+  survey?: ISurvey
+}
+
+export interface IGroup {
+  id: string
+  title: string
+  hotel: string
+  description?: string
+  background?: {
+    color?: string
+    direction?: string
+    type?: string
+  }
+  font?: {
+    color?: string
+    family?: string
+  }
+  button?: {
+    color?: string
+    backgroundColor?: string
+    variant?: 'outlined' | 'contained'
+    borderRadius?: string
+  }
+  popup?: IPopup
+  newsletter?: INewsletter
+  feedback?: IFeedback
+  survey?: ISurvey
+}
+
+export interface ILink {
+  id: string
+  position: number
+  room?: string
+  group?: string
+  title?: string
+  value: string
+  type: string
+  items: IItem[]
+  sections: ISection[]
+  image?: string
+  imageType?: 'none' | 'image' | 'icon' | 'url'
+  isActive: boolean
+  data: any
+}
+
+export interface ISubscriber {
+  id: string
+  user: string
+  room: string
+  name: string
+  email: string
+}
+
+export interface IItem {
+  id: string
+  title: string
+  value: string
+  type: string
+  data: any
+}
+export interface ISection {
+  id: string
+  title: string
+  description?: string
+  url?: string
+  urlButtonText?: string
+  links?: { url: string; urlButtonText: string }[]
+  phone?: string
+  address?: string
+  images?: string[]
+  video?: string
+  items?: any
+  mapEnabled?: boolean
+  mapTitle?: string
+  mapDescription?: string
+  mapImage?: string
+  mapLat?: number
+  mapLng?: number
+  mapColor?: string
+  mapIcon?: MapMarkerIcon
+  linkedMapPointId?: string
+}
+
+export interface IActivity {
+  id: string
+  user: string
+  action: 'tap' | 'view'
+  details: {
+    visitorId?: string
+    image: string
+    title: string
+    headline: string
+    link?: string
+    room?: string
+    hotel?: string
+    time?: number
+    device?: string
+    engaged?: boolean
+    language?: string
+    socialLink?: string
+  }
+  createdAt: string
+}
+
+export interface IInsights {
+  overTime: Record<
+    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'returningViews' | 'bounceRate' | 'engagedViews',
+    Record<string, number>
+  >
+  change: Record<
+    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'returningViews' | 'bounceRate' | 'engagedViews',
+    number
+  >
+  keyMetrics: {
+    topPerforming: { room: string; link: string }
+    viewsByLanguages: Record<string, number>
+    viewsByDevices: Record<string, number>
+    views: number
+    liveViews: number
+    taps: number
+    uniqueViews: number
+    returningViews: number
+    timeSpent: number
+    bounceRate: number
+  }
+  hotels: (IHotel & { views: number; redirects: number })[]
+  rooms: (IRoom & {
+    views: number
+    taps: number
+    topPerformingLink: string
+    uniqueViews: number
+    returningViews: number
+    timeSpent: number
+    bounceRate: string
+  })[]
+  links: (ILink & {
+    taps: number
+  })[]
+  activities: IActivity[]
+  topRoom: IRoom & {
+    views: number
+    taps: number
+    topPerformingLink: string
+    uniqueViews: number
+    returningViews: number
+    timeSpent: number
+    bounceRate: string
+  }
+  topLink: ILink & {
+    taps: number
+  }
+}
+
+// Orders types
+export interface IOrderCategory {
+  id: string
+  hotelId: string
+  name: string
+  icon: string
+  availableFrom?: string
+  availableTo?: string
+  sortOrder: number
+  active: boolean
+  createdAt: string
+  parentId?: string | null
+}
+
+export interface ICatalogItem {
+  id: string
+  hotelId: string
+  categoryId: string
+  name: string
+  description?: string
+  price: number
+  discount?: number
+  imageType: 'emoji' | 'url' | 'upload'
+  image?: string
+  tags?: string[]
+  badge?: 'new' | 'hit' | 'sale' | ''
+  available: boolean
+  sortOrder: number
+  createdAt: string
+}
+
+export type OrderStatus =
+  | 'Awaiting confirmation'
+  | 'Processing'
+  | 'On the way'
+  | 'Completed'
+  | 'Cancelled'
+
+export interface IGuestOrderItem {
+  itemId: string
+  name: string
+  qty: number
+  price: number
+  originalPrice: number
+  image?: string
+}
+
+export interface IGuestOrder {
+  id: string
+  orderId: string
+  hotelId: string
+  roomId: string
+  roomNumber: string
+  items: IGuestOrderItem[]
+  status: OrderStatus
+  note?: string
+  guestEmail?: string
+  guestRoomNumber?: string
+  total?: number
+  acceptedEta?: number
+  acceptedAt?: string
+  completedAt?: string
+  rating?: number
+  ratingComment?: string
+  createdAt: string
+}
+
+export interface IOrderAnalytics {
+  totalOrders: number
+  totalRevenue: number
+  avgOrderValue: number
+  completedOrders: number
+  cancelledOrders: number
+  pendingOrders: number
+  avgFulfillTime: number | null
+  avgFulfillmentTime: number | null
+  avgRating: number | null
+  byStatus: Record<string, number>
+  byPayment: Record<string, number>
+  topItems: { itemId: string; name: string; count: number; revenue: number }[]
+  topRooms: { roomId: string; roomNumber: string; count: number; revenue: number }[]
+  overTime: { date: string; orders: number; revenue: number }[]
+}
+
+export interface IReservationCode {
+  id: string
+  hotelId: string
+  roomId: string
+  roomNumber: string
+  code: string
+  guestName: string
+  checkIn: string
+  checkOut: string
+  active: boolean
+  createdAt: string
+}
+
+export interface IOrderSettings {
+  enabled: boolean
+  availableFrom: string
+  availableTo: string
+  currencySymbol: string
+  processingLabel: string
+  onTheWayLabel: string
+  completedLabel: string
+  emails?: string[]
+  paymentMethods?: {
+    cash: boolean
+    card: boolean
+    online: boolean
+  }
+  // Venue mode
+  venueType?: 'hotel' | 'restaurant'
+  requireCode?: boolean
+  requireLocation?: boolean
+  locationLabel?: string
+  tablePin?: string
+}
+
+export interface ISurveyAnswerItem {
+  questionId?: string
+  questionText: string
+  questionType?: string
+  answer: any
+}
+
+export interface IFeedbackSubmission {
+  id: string
+  room: { id: string; number: string } | string
+  hotel: string
+  rating?: number
+  email?: string
+  message?: string
+  surveyAnswers?: ISurveyAnswerItem[]
+  createdAt: string
+}
