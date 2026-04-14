@@ -44,8 +44,8 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       setProcessingLabel(settings.processingLabel || 'Processing')
       setOnTheWayLabel(settings.onTheWayLabel || 'On the way')
       setCompletedLabel(settings.completedLabel || 'Completed')
-      setEmails((settings as any).emails || [])
-      const pm = (settings as any).paymentMethods
+      setEmails(settings.emails || [])
+      const pm = settings.paymentMethods
 
       if (pm) {
         setPaymentCash(pm.cash ?? true)
@@ -53,11 +53,11 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         setPaymentOnline(pm.online ?? false)
       }
 
-      setVenueType((settings as any).venueType || 'hotel')
-      setRequireCode((settings as any).requireCode ?? true)
-      setRequireLocation((settings as any).requireLocation ?? true)
-      setLocationLabel((settings as any).locationLabel || 'Room number')
-      setTablePin((settings as any).tablePin || '')
+      setVenueType(settings.venueType || 'hotel')
+      setRequireCode(settings.requireCode ?? true)
+      setRequireLocation(settings.requireLocation ?? true)
+      setLocationLabel(settings.locationLabel || 'Room number')
+      setTablePin(settings.tablePin || '')
     }
   }, [settings])
 
@@ -86,7 +86,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         requireCode,
         requireLocation,
         locationLabel,
-        tablePin,
+        tablePin: venueType === 'restaurant' ? tablePin : '',
       } as any).unwrap()
       toast.success('Settings saved')
     } catch {
@@ -232,7 +232,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant='outlined'>
         <CardContent>
           <Typography variant='h6' gutterBottom>Venue</Typography>
 
@@ -246,6 +246,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                     variant={venueType === type ? 'contained' : 'outlined'}
                     size='small'
                     onClick={() => {
+                      if (type === venueType) return
                       setVenueType(type)
                       if (type === 'hotel') {
                         setRequireCode(true)
@@ -274,7 +275,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
 
             <FormControlLabel
               control={<Switch checked={requireLocation} onChange={e => setRequireLocation(e.target.checked)} />}
-              label='Require location number'
+              label={venueType === 'hotel' ? 'Require room number' : 'Require table number'}
             />
 
             <TextField
@@ -307,7 +308,14 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                   <Button
                     size='small'
                     variant='outlined'
-                    onClick={() => { navigator.clipboard.writeText(tablePin) }}
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(tablePin)
+                        toast.success('PIN copied to clipboard')
+                      } catch {
+                        toast.error('Could not copy — please copy manually')
+                      }
+                    }}
                     disabled={!tablePin}
                   >
                     Copy
