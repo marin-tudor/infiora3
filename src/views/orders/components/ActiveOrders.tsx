@@ -1,15 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { Box, Button, CircularProgress, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { endOfToday, formatISO, isSameDay, parseISO, startOfToday } from 'date-fns'
-import { toast } from 'react-toastify'
 
 import RangePicker from '@/components/common/RangePicker'
 import type { IGuestOrder } from '@/types'
 import { useGetOrdersQuery } from '@/redux/api/ordersApi'
-import { playNotificationSound } from '@/utils/soundUtils'
 
 import OrderCard from './OrderCard'
 
@@ -54,8 +52,6 @@ function exportToCSV(orders: IGuestOrder[], currency: string) {
 export default function ActiveOrders({ hotelId, currency }: { hotelId: string; currency?: string }) {
   const [statusFilter, setStatusFilter] = useState('')
   const [range, setRange] = useState<{ startDate?: string; endDate?: string }>({})
-  const prevAwaitingIds = useRef<Set<string>>(new Set())
-  const isFirstLoad = useRef(true)
 
   const startDate = range.startDate || formatISO(startOfToday())
   const endDate = range.endDate || formatISO(endOfToday())
@@ -87,37 +83,6 @@ export default function ActiveOrders({ hotelId, currency }: { hotelId: string; c
     ...mainOrders,
     ...carryOrders.filter(o => !mainOrders.find(m => m.id === o.id)),
   ].sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime())
-
-  useEffect(() => {
-    if (isLoading) return
-
-    const awaitingOrders = allOrders.filter(o => o.status === 'Awaiting confirmation')
-    const currentIds = new Set<string>(awaitingOrders.map(o => o.id))
-
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false
-      prevAwaitingIds.current = currentIds
-
-      return
-    }
-
-    const newOrders = awaitingOrders.filter(o => !prevAwaitingIds.current.has(o.id))
-
-    if (newOrders.length > 0) {
-      playNotificationSound()
-      newOrders.forEach(o => {
-        const orderTotal =
-          o.items?.reduce((sum: number, item: any) => sum + item.price * item.qty, 0) || 0
-
-        toast.warning(
-          `New order! Infiora ${o.roomNumber || 'N/A'} · Guest ${(o as any).guestRoomNumber || 'Not provided'} · ${o.items?.length} item(s) · ${orderTotal.toFixed(2)} ${currency || 'EUR'}`,
-          { autoClose: 8000 }
-        )
-      })
-    }
-
-    prevAwaitingIds.current = currentIds
-  }, [allOrders, currency, isLoading])
 
   return (
     <Stack gap={2}>
