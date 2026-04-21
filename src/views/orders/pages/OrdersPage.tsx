@@ -20,7 +20,8 @@ export default function OrdersPage() {
   const authUser = useAuthUser()
   const hotelId = authUser?.hotel?.id
 
-  const { count: pendingCount } = useUnfinishedOrdersCount(hotelId)
+  const isFeatureLocked = (authUser?.hotel as any)?.features?.ordersEnabled === false
+  const { count: pendingCount } = useUnfinishedOrdersCount(hotelId, { skip: isFeatureLocked })
 
   if (!authUser) return <Loader center />
 
@@ -32,7 +33,7 @@ export default function OrdersPage() {
     )
   }
 
-  if ((authUser.hotel as any)?.features?.ordersEnabled === false) {
+  if (isFeatureLocked) {
     return <FeatureLocked featureName='Orders' />
   }
 
