@@ -6,7 +6,8 @@ import { Stack, Typography, Tabs, Tab, Box, Chip } from '@mui/material'
 
 import { useAuthUser } from '@/hooks/useAuthUser'
 import Loader from '@/components/common/Loader'
-import { useGetOrdersQuery } from '@/redux/api/ordersApi'
+import FeatureLocked from '@/components/common/FeatureLocked'
+import { useUnfinishedOrdersCount } from '@/hooks/useUnfinishedOrdersCount'
 
 import OrdersDashboard from '../components/OrdersDashboard'
 import ActiveOrders from '../components/ActiveOrders'
@@ -19,12 +20,7 @@ export default function OrdersPage() {
   const authUser = useAuthUser()
   const hotelId = authUser?.hotel?.id
 
-  const { data: pendingData } = useGetOrdersQuery(
-    { hotelId: hotelId!, status: 'Awaiting confirmation', limit: 50 },
-    { skip: !hotelId }
-  )
-
-  const pendingCount = pendingData?.results?.length || 0
+  const { count: pendingCount } = useUnfinishedOrdersCount(hotelId)
 
   if (!authUser) return <Loader center />
 
@@ -34,6 +30,10 @@ export default function OrdersPage() {
         <Typography color='text.secondary'>No hotel selected</Typography>
       </Box>
     )
+  }
+
+  if ((authUser.hotel as any)?.features?.ordersEnabled === false) {
+    return <FeatureLocked featureName='Orders' />
   }
 
   const currency = (authUser.hotel as any)?.orders?.currencySymbol || 'EUR'
