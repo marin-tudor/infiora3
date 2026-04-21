@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: infiora-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ConnectionStrings__DefaultConnection=Host=${POSTGRES_HOST:-db};Port=${POSTGRES_PORT:-5432};Database=${POSTGRES_DB:-infioradb};Username=${POSTGRES_USER:-infiora};Password=${POSTGRES_PASSWORD:-InfioraDevPassword123!}
+      - DatabaseProvider=${DATABASE_PROVIDER:-PostgreSQL}
+      - Jwt__SecretKey=${JWT_SECRET_KEY:-DevSecretKeyThatIsAtLeast32CharactersLongForTesting!}
+      - Jwt__Issuer=${JWT_ISSUER:-InfioraApi}
+      - Jwt__Audience=${JWT_AUDIENCE:-InfioraApi}
+      - Jwt__ExpirationMinutes=${JWT_EXPIRATION_MINUTES:-60}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - infiora-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: infiora-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-infioradb}
+      - POSTGRES_USER=${POSTGRES_USER:-infiora}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-InfioraDevPassword123!}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-infiora} -d ${POSTGRES_DB:-infioradb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - infiora-network
+
+volumes:
+  postgres_data:
+    name: infiora-postgres-data
+
+networks:
+  infiora-network:
+    name: infiora-network

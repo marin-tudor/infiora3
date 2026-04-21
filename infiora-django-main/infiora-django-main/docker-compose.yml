@@ -1,0 +1,98 @@
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME:-infiora}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  web:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_ENVIRONMENT=dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python src/manage.py migrate &&
+        python src/manage.py runserver 0.0.0.0:8000
+      "
+
+  celery:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    environment:
+      - DJANGO_ENVIRONMENT=dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "cd src && PYTHONPATH=/app/src celery -A core worker -l info"
+
+  celery-beat:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    environment:
+      - DJANGO_ENVIRONMENT=dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "cd src && PYTHONPATH=/app/src celery -A core beat -l info"
+
+volumes:
+  postgres_data:
+  redis_data:

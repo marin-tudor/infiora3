@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infiora — Digital Guest Experience for Hotels</title>
+  <meta name="description" content="Give every guest a five-star digital experience. Infiora replaces paper room directories with beautiful, multilingual QR-accessible pages — with in-room ordering, analytics, and real-time feedback." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* =============================================
+       DESIGN TOKENS
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #07111C;
+      --bg-2:        #0C1928;
+      --bg-3:        #112233;
+      --bg-card:     #0F1F30;
+      --text:        #EDE4D3;
+      --text-2:      #8FA3B5;
+      --text-3:      #3E5568;
+      --gold:        #C4A25A;
+      --gold-2:      #D4B460;
+      --coral:       #C87B62;
+      --green:       #5BAA73;
+      --border:      rgba(237,228,211,0.07);
+      --border-2:    rgba(237,228,211,0.14);
+      --font-d:      'Cormorant Garamond', Georgia, serif;
+      --font-b:      'DM Sans', system-ui, sans-serif;
+      --sp:          120px;
+      --w:           1200px;
+      --ease:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* grain overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+    }
+
+    .container {
+      max-width: var(--w);
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* =============================================
+       TYPOGRAPHY
+    ============================================= */
+    h1, h2, h3, h4 {
+      font-family: var(--font-d);
+      font-weight: 400;
+      line-height: 1.12;
+    }
+    em {
+      font-family: var(--font-d);
+      font-style: italic;
+      color: var(--gold);
+      font-weight: 300;
+    }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 18px;
+    }
+    .section-label::before {
+      content: ''; width: 28px; height: 1px; background: var(--gold);
+    }
+    .section-head {
+      text-align: center; max-width: 640px;
+      margin: 0 auto 80px;
+    }
+    .section-head h2 {
+      font-size: clamp(2.4rem, 3.8vw, 3.4rem);
+      margin-bottom: 20px;
+    }
+    .section-head p {
+      color: var(--text-2); font-size: 1.05rem; line-height: 1.75;
+    }
+
+    /* =============================================
+       BUTTONS
+    ============================================= */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border-radius: 3px;
+      font-family: var(--font-b); font-size: 0.88rem;
+      font-weight: 500; letter-spacing: 0.02em;
+      text-decoration: none; transition: all 0.22s var(--ease);
+      cursor: pointer; border: none; white-space: nowrap;
+    }
+    .btn-lg { padding: 16px 34px; font-size: 0.95rem; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-primary {
+      background: var(--gold); color: var(--bg); font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: var(--gold-2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(196,162,90,0.3);
+    }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border-2);
+    }
+    .btn-outline:hover {
+      background: rgba(237,228,211,0.05);
+      border-color: rgba(237,228,211,0.28);
+    }
+
+    /* =============================================
+       SCROLL ANIMATIONS
+    ============================================= */
+    .anim {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .anim.vis { opacity: 1; transform: none; }
+
+    .anim-kids > * {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+    }
+    .anim-kids.vis > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .anim-kids.vis > *:nth-child(2) { opacity:1; transform:none; transition-delay:.08s; }
+    .anim-kids.vis > *:nth-child(3) { opacity:1; transform:none; transition-delay:.16s; }
+    .anim-kids.vis > *:nth-child(4) { opacity:1; transform:none; transition-delay:.24s; }
+    .anim-kids.vis > *:nth-child(5) { opacity:1; transform:none; transition-delay:.32s; }
+    .anim-kids.vis > *:nth-child(6) { opacity:1; transform:none; transition-delay:.40s; }
+
+    @keyframes fade-up {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:none; }
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%     { opacity:.4; transform:scale(.65); }
+    }
+
+    /* =============================================
+       NAVIGATION
+    ============================================= */
+    #nav {
+      position: fixed; top:0; left:0; right:0; z-index:1000;
+      transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+    }
+    #nav.scrolled {
+      background: rgba(7,17,28,0.88);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--w); margin: 0 auto; padding: 0 40px;
+      height: 72px; display: flex; align-items: center; gap: 40px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--font-d); font-size: 1.5rem; font-weight: 500;
+      color: var(--text); text-decoration: none; flex-shrink: 0;
+      letter-spacing: -0.01em;
+    }
+    .logo-gem {
+      width: 22px; height: 22px; flex-shrink: 0;
+    }
+    .nav-links {
+      flex: 1; display: flex; justify-content: center;
+      list-style: none; gap: 36px;
+    }
+    .nav-links a {
+      color: var(--text-2); text-decoration: none;
+      font-size: 0.875rem; font-weight: 400;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { flex-shrink: 0; padding: 10px 22px; font-size: .85rem; }
+    .nav-toggle {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 4px; margin-left: auto;
+    }
+    .nav-toggle span {
+      display: block; width: 22px; height: 1.5px;
+      background: var(--text); transition: all .3s;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+    .nav-drawer {
+      display: none; background: var(--bg-2);
+      border-top: 1px solid var(--border); padding: 28px 40px 36px;
+    }
+    .nav-drawer.open { display: block; }
+    .nav-drawer ul { list-style:none; display:flex; flex-direction:column; gap:16px; }
+    .nav-drawer a { color:var(--text-2); text-decoration:none; font-size:1rem; }
+    .nav-drawer .btn { margin-top:8px; display:flex; width:100%; justify-content:center; }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 140px 0 80px; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset:0; z-index:0;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(110px); opacity: .32;
+    }
+    .orb-1 {
+      width:700px; height:700px;
+      background: radial-gradient(circle, #1A3858 0%, transparent 70%);
+      top:-160px; right:-120px;
+      animation: drift-1 18s ease-in-out infinite;
+    }
+    .orb-2 {
+      width:500px; height:500px;
+      background: radial-gradient(circle, #C4A25A18 0%, transparent 70%);
+      bottom:60px; left:-80px;
+      animation: drift-2 22s ease-in-out infinite;
+    }
+    .orb-3 {
+      width:360px; height:360px;
+      background: radial-gradient(circle, #C87B6218 0%, transparent 70%);
+      top:45%; right:25%;
+      animation: drift-3 14s ease-in-out infinite;
+    }
+    .hero-grid {
+      position:absolute; inset:0; opacity:1;
+      background-image:
+        linear-gradient(rgba(237,228,211,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(237,228,211,.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+    .hero-grid::after {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, transparent 60%, var(--bg) 100%);
+    }
+    @keyframes drift-1 {
+      0%,100% { transform:translate(0,0) scale(1); }
+      33%     { transform:translate(-28px,40px) scale(1.04); }
+      66%     { transform:translate(18px,-22px) scale(.96); }
+    }
+    @keyframes drift-2 {
+      0%,100% { transform:translate(0,0); }
+      50%     { transform:translate(36px,-28px); }
+    }
+    @keyframes drift-3 {
+      0%,100% { transform:translate(0,0) scale(1); }
+      50%     { transform:translate(-20px,26px) scale(1.08); }
+    }
+
+    #hero .container { position:relative; z-index:1; max-width:940px; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 15px;
+      background: rgba(196,162,90,.1);
+      border: 1px solid rgba(196,162,90,.24);
+      border-radius: 100px;
+      font-size: .78rem; color: var(--gold); margin-bottom: 36px;
+      animation: fade-up .7s var(--ease) .1s both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold); animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .hero-h1 {
+      font-size: clamp(3rem, 6.5vw, 6.2rem);
+      letter-spacing: -.025em; margin-bottom: 28px;
+      animation: fade-up .8s var(--ease) .2s both;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--text-2);
+      max-width: 600px; line-height: 1.8; margin-bottom: 44px;
+      animation: fade-up .8s var(--ease) .3s both;
+    }
+    .hero-actions {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 80px;
+      animation: fade-up .8s var(--ease) .4s both;
+    }
+    .hero-metrics {
+      display: flex; align-items: center;
+      padding-top: 40px; border-top: 1px solid var(--border);
+      animation: fade-up .8s var(--ease) .55s both;
+    }
+    .hm { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .hm + .hm { padding-left: 40px; }
+    .hm-num {
+      font-family: var(--font-d); font-size: 2.4rem; font-weight: 400;
+      color: var(--text); line-height: 1;
+    }
+    .hm-lab {
+      font-size: .75rem; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .hm-div { width: 1px; height: 44px; background: var(--border-2); margin: 0 40px; }
+
+    /* =============================================
+       PRODUCT PREVIEW — floating phone mockup
+    ============================================= */
+    #preview {
+      padding: 0 0 var(--sp);
+      display: flex; justify-content: center;
+    }
+    .preview-frame {
+      position: relative; width: 100%; max-width: 880px;
+      margin: 0 auto;
+    }
+    .preview-screen {
+      background: var(--bg-2);
+      border: 1px solid var(--border-2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(237,228,211,.06);
+    }
+    .preview-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-3);
+    }
+    .pbar-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .pbar-dot:nth-child(1) { background: #FF6058; }
+    .pbar-dot:nth-child(2) { background: #FFBE2F; }
+    .pbar-dot:nth-child(3) { background: #2DCA43; }
+    .pbar-url {
+      margin-left: auto; margin-right: auto;
+      background: rgba(237,228,211,.06); border-radius: 6px;
+      padding: 5px 14px; font-size: .75rem; color: var(--text-2);
+      letter-spacing: .02em;
+    }
+    .preview-content {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .pc-panel {
+      background: var(--bg-card); padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .pc-panel-title {
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-2); margin-bottom: 4px;
+    }
+    /* Room page mock */
+    .mock-room-header {
+      background: linear-gradient(135deg, #1A3858, #0F2338);
+      border-radius: 8px; padding: 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .mock-hotel-name {
+      font-family: var(--font-d); font-size: 1.1rem;
+      font-weight: 500; color: var(--text);
+    }
+    .mock-room-num {
+      font-size: .8rem; color: var(--gold);
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .mock-lang-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .mock-lang {
+      padding: 3px 8px; border-radius: 4px;
+      background: rgba(196,162,90,.12); font-size: .65rem;
+      color: var(--gold); border: 1px solid rgba(196,162,90,.25);
+    }
+    .mock-lang.active {
+      background: var(--gold); color: var(--bg); font-weight: 600;
+    }
+    .mock-buttons { display:flex; flex-direction:column; gap:6px; }
+    .mock-btn {
+      padding: 10px 14px; border-radius: 6px;
+      background: rgba(237,228,211,.06);
+      border: 1px solid var(--border-2);
+      display: flex; align-items: center; gap: 10px;
+      font-size: .78rem; color: var(--text);
+      cursor: default;
+    }
+    .mock-btn-icon {
+      width: 22px; height: 22px; border-radius: 4px;
+      background: rgba(196,162,90,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; flex-shrink: 0;
+    }
+    /* Analytics mock */
+    .mock-kpi-row { display:flex; gap:8px; }
+    .mock-kpi {
+      flex:1; background:rgba(237,228,211,.04);
+      border:1px solid var(--border); border-radius:8px;
+      padding:12px; display:flex; flex-direction:column; gap:4px;
+    }
+    .mock-kpi-val {
+      font-family: var(--font-d); font-size: 1.3rem; color:var(--text);
+    }
+    .mock-kpi-lab { font-size:.6rem; color:var(--text-2); letter-spacing:.05em; text-transform:uppercase; }
+    .mock-chart {
+      background: rgba(237,228,211,.03); border:1px solid var(--border);
+      border-radius:8px; padding:16px; height:90px;
+      display:flex; align-items:flex-end; gap:4px;
+    }
+    .mock-bar {
+      flex:1; border-radius:2px 2px 0 0;
+      background: rgba(196,162,90,.3);
+      transition: height .3s;
+    }
+    .mock-bar.hi { background: var(--gold); }
+    /* Orders mock */
+    .mock-order { display:flex; flex-direction:column; gap:8px; }
+    .mock-order-item {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:6px;
+      background: rgba(237,228,211,.04);
+      border: 1px solid var(--border);
+    }
+    .mock-order-dot {
+      width:8px; height:8px; border-radius:50%; flex-shrink:0;
+    }
+    .mock-order-text { flex:1; font-size:.75rem; color:var(--text); }
+    .mock-order-badge {
+      font-size:.6rem; font-weight:600; padding:2px 8px; border-radius:100px;
+      letter-spacing:.06em;
+    }
+    .badge-new { background:rgba(91,170,115,.15); color:var(--green); border:1px solid rgba(91,170,115,.25); }
+    .badge-prog { background:rgba(196,162,90,.12); color:var(--gold); border:1px solid rgba(196,162,90,.25); }
+    .badge-done { background:rgba(237,228,211,.06); color:var(--text-2); border:1px solid var(--border); }
+
+    .preview-tag {
+      position: absolute; bottom: -20px; right: -20px;
+      background: var(--bg-3); border: 1px solid var(--border-2);
+      border-radius: 12px; padding: 16px 22px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .ptag-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--coral));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .ptag-text strong { display:block; font-size:.85rem; color:var(--text); }
+    .ptag-text span { font-size:.72rem; color:var(--text-2); }
+
+    /* =============================================
+       TRUST BAR
+    ============================================= */
+    #trust {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+      padding: 40px 0;
+      overflow: hidden;
+    }
+    .trust-label {
+      text-align:center; font-size:.72rem; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--text-3); margin-bottom:28px;
+    }
+    .marquee-track { overflow:hidden; position:relative; }
+    .marquee-track::before, .marquee-track::after {
+      content:''; position:absolute; top:0; bottom:0; width:120px; z-index:2;
+    }
+    .marquee-track::before { left:0; background:linear-gradient(to right, var(--bg-2), transparent); }
+    .marquee-track::after  { right:0; background:linear-gradient(to left, var(--bg-2), transparent); }
+    .marquee-inner {
+      display:flex; gap:60px; width:max-content;
+      animation: marquee 28s linear infinite;
+    }
+    @keyframes marquee {
+      from { transform:translateX(0); }
+      to   { transform:translateX(-50%); }
+    }
+    .tl {
+      font-family: var(--font-d); font-size:1rem; font-weight:500;
+      color: var(--text-2); opacity:.45; white-space:nowrap;
+      letter-spacing:.02em; transition:opacity .2s;
+    }
+    .tl:hover { opacity:.85; }
+
+    /* =============================================
+       FEATURES / SERVICES
+    ============================================= */
+    #features { padding: var(--sp) 0; }
+    .features-grid {
+      display:grid; grid-template-columns: repeat(3,1fr);
+      gap:2px; background:var(--border);
+      border:1px solid var(--border);
+    }
+    .feat-card {
+      background:var(--bg); padding:44px 38px;
+      position:relative; overflow:hidden;
+      transition:background .3s var(--ease);
+    }
+    .feat-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--gold), transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .feat-card:hover { background:var(--bg-3); }
+    .feat-card:hover::before { opacity:1; }
+    .feat-card.starred { background:var(--bg-2); }
+    .feat-card.starred::before { opacity:1; background:linear-gradient(90deg, var(--coral), var(--gold)); }
+    .feat-num {
+      font-family:var(--font-d); font-size:3.5rem; font-weight:300;
+      color:var(--text-3); line-height:1; margin-bottom:20px;
+      user-select:none;
+    }
+    .feat-card h3 {
+      font-family:var(--font-d); font-size:1.45rem; font-weight:400;
+      color:var(--text); margin-bottom:14px;
+    }
+    .feat-card p { color:var(--text-2); font-size:.9rem; line-height:1.75; }
+    .feat-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:20px; }
+    .feat-tag {
+      padding:3px 10px; border-radius:3px;
+      background:rgba(237,228,211,.05); border:1px solid var(--border-2);
+      font-size:.68rem; color:var(--text-2); letter-spacing:.04em;
+    }
+
+    /* =============================================
+       RESULTS / STATS BAND
+    ============================================= */
+    #results {
+      background:var(--bg-2);
+      border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    }
+    .results-wrap {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:80px; align-items:center;
+      padding:var(--sp) 0;
+    }
+    .results-copy { display:flex; flex-direction:column; gap:22px; align-items:flex-start; }
+    .results-copy h2 { font-size:clamp(2.2rem,3.5vw,3rem); }
+    .results-copy p { color:var(--text-2); font-size:1rem; line-height:1.8; }
+    .stats-grid {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:2px; background:var(--border);
+    }
+    .stat-cell {
+      background:var(--bg-3); padding:38px 32px;
+      display:flex; flex-direction:column; gap:10px;
+      position:relative; overflow:hidden;
+    }
+    .stat-cell::after {
+      content:''; position:absolute; bottom:0; left:0;
+      width:36px; height:1px; background:var(--gold);
+    }
+    .stat-val-row { display:flex; align-items:baseline; gap:2px; }
+    .stat-num {
+      font-family:var(--font-d); font-size:3rem; font-weight:400;
+      color:var(--text); line-height:1;
+    }
+    .stat-sfx {
+      font-family:var(--font-d); font-size:1.8rem;
+      color:var(--gold); line-height:1;
+    }
+    .stat-lab { font-size:.78rem; color:var(--text-2); letter-spacing:.04em; line-height:1.5; }
+
+    /* =============================================
+       HOW IT WORKS
+    ============================================= */
+    #how { padding:var(--sp) 0; }
+    .steps { display:flex; flex-direction:column; max-width:760px; margin:0 auto; }
+    .step {
+      display:grid; grid-template-columns:80px 1fr;
+      gap:32px; padding:44px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .step:first-child { border-top:1px solid var(--border); }
+    .step-n {
+      font-family:var(--font-d); font-size:3.2rem; font-weight:300;
+      color:var(--text-3); line-height:1; padding-top:6px;
+    }
+    .step-body h3 {
+      font-family:var(--font-d); font-size:1.65rem; font-weight:400;
+      color:var(--text); margin-bottom:12px;
+    }
+    .step-body p { color:var(--text-2); font-size:.95rem; line-height:1.78; }
+    .step-pill {
+      display:inline-flex; align-items:center; gap:6px;
+      margin-top:14px; padding:5px 12px; border-radius:100px;
+      background:rgba(196,162,90,.1); border:1px solid rgba(196,162,90,.2);
+      font-size:.72rem; color:var(--gold); letter-spacing:.05em;
+    }
+
+    /* =============================================
+       TESTIMONIALS
+    ============================================= */
+    #testi {
+      padding:var(--sp) 0;
+      background:var(--bg-2);
+      border-top:1px solid var(--border);
+    }
+    .testi-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:2px; background:var(--border); border:1px solid var(--border);
+    }
+    .testi-card {
+      background:var(--bg); padding:44px 38px;
+      display:flex; flex-direction:column; gap:24px;
+      transition:background .3s;
+    }
+    .testi-card:hover { background:var(--bg-3); }
+    .testi-card.feat { background:var(--bg-2); }
+    .stars { color:var(--gold); letter-spacing:3px; font-size:.85rem; }
+    blockquote {
+      font-family:var(--font-d); font-size:1.08rem; font-style:italic;
+      font-weight:300; color:var(--text); line-height:1.72; flex:1;
+    }
+    .t-author { display:flex; align-items:center; gap:14px; }
+    .t-av {
+      width:44px; height:44px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(135deg,var(--gold),var(--coral));
+      display:flex; align-items:center; justify-content:center;
+      font-size:.7rem; font-weight:700; color:var(--bg);
+    }
+    .t-author strong { display:block; font-size:.88rem; font-weight:500; color:var(--text); }
+    .t-author span { font-size:.75rem; color:var(--text-2); }
+
+    /* =============================================
+       REVENUE CALCULATOR
+    ============================================= */
+    #calc { padding:var(--sp) 0; }
+    .calc-inner { max-width:900px; margin:0 auto; }
+    .calc-header { text-align:center; margin-bottom:60px; }
+    .calc-header h2 { font-size:clamp(2.2rem,3.5vw,3rem); margin-bottom:16px; }
+    .calc-header p { color:var(--text-2); font-size:1rem; }
+    .calc-box {
+      background:var(--bg-2); border:1px solid var(--border-2);
+      border-radius:10px; padding:52px;
+    }
+    .calc-fields { display:flex; flex-direction:column; gap:36px; margin-bottom:48px; }
+    .calc-field label {
+      display:block; font-size:.75rem; font-weight:600;
+      letter-spacing:.12em; text-transform:uppercase;
+      color:var(--text-2); margin-bottom:14px;
+    }
+    .range-row { display:flex; align-items:center; gap:16px; }
+    input[type="range"] {
+      flex:1; -webkit-appearance:none; height:2px;
+      background:var(--border-2); border-radius:2px;
+      outline:none; cursor:pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:18px; height:18px;
+      border-radius:50%; background:var(--gold); cursor:pointer;
+      transition:transform .2s, box-shadow .2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform:scale(1.25);
+      box-shadow:0 0 0 5px rgba(196,162,90,.18);
+    }
+    .rval {
+      min-width:88px; text-align:right;
+      font-family:var(--font-d); font-size:1.5rem;
+      font-weight:400; color:var(--text);
+    }
+    .calc-result {
+      display:flex; align-items:center; gap:28px;
+      padding:38px 40px; background:var(--bg-3);
+      border:1px solid var(--border); border-radius:8px; margin-bottom:20px;
+    }
+    .calc-side { flex:1; display:flex; flex-direction:column; gap:8px; }
+    .cr-lab { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-2); }
+    .cr-amt {
+      font-family:var(--font-d); font-size:2.6rem;
+      font-weight:400; color:var(--text); line-height:1;
+    }
+    .cr-amt.pos { color:var(--gold); }
+    .cr-uplift { font-size:.82rem; color:var(--green); font-weight:500; }
+    .calc-arrow { font-size:1.6rem; color:var(--gold); opacity:.45; }
+    .calc-note { font-size:.72rem; color:var(--text-3); margin-bottom:32px; }
+
+    /* =============================================
+       FAQ
+    ============================================= */
+    #faq {
+      padding:var(--sp) 0;
+      background:var(--bg-2); border-top:1px solid var(--border);
+    }
+    .faq-list { max-width:760px; margin:0 auto; }
+    .faq-item { border-bottom:1px solid var(--border); }
+    .faq-q {
+      width:100%; display:flex; justify-content:space-between; align-items:center;
+      padding:24px 0; background:none; border:none;
+      color:var(--text); font-family:var(--font-b);
+      font-size:1rem; font-weight:400; cursor:pointer; text-align:left; gap:20px;
+      transition:color .2s;
+    }
+    .faq-q:hover { color:var(--gold); }
+    .faq-ic {
+      font-size:1.5rem; color:var(--gold); flex-shrink:0;
+      transition:transform .3s var(--ease); font-weight:300;
+    }
+    .faq-item.open .faq-ic { transform:rotate(45deg); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height .35s ease; }
+    .faq-item.open .faq-a { max-height:220px; }
+    .faq-a p { padding-bottom:24px; color:var(--text-2); font-size:.95rem; line-height:1.78; }
+
+    /* =============================================
+       CONTACT / FINAL CTA
+    ============================================= */
+    #contact { padding:var(--sp) 0; }
+    .cta-wrap {
+      display:grid; grid-template-columns:1fr 1.2fr;
+      gap:80px; align-items:start;
+    }
+    .cta-copy { display:flex; flex-direction:column; gap:22px; align-items:flex-start; }
+    .cta-copy h2 { font-size:clamp(2.2rem,3.5vw,3rem); }
+    .cta-copy p { color:var(--text-2); font-size:1rem; line-height:1.8; }
+    .cta-perks { display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+    .perk { display:flex; align-items:center; gap:10px; font-size:.9rem; color:var(--text-2); }
+    .perk-ck { color:var(--gold); font-weight:700; }
+
+    /* Form */
+    .form { display:flex; flex-direction:column; gap:20px; }
+    .frow { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .ff { display:flex; flex-direction:column; gap:8px; }
+    .ff label {
+      font-size:.72rem; font-weight:600; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--text-2);
+    }
+    .ff input, .ff select, .ff textarea {
+      background:var(--bg-2); border:1px solid var(--border-2);
+      color:var(--text); font-family:var(--font-b);
+      font-size:.92rem; padding:13px 16px; border-radius:4px;
+      outline:none; transition:border-color .2s; -webkit-appearance:none;
+    }
+    .ff textarea { resize:vertical; min-height:100px; line-height:1.6; }
+    .ff input:focus, .ff select:focus, .ff textarea:focus { border-color:var(--gold); }
+    .ff input::placeholder, .ff textarea::placeholder { color:var(--text-3); }
+    .ff select option { background:var(--bg-2); }
+    .form-note { text-align:center; font-size:.72rem; color:var(--text-3); }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer {
+      background:var(--bg-2); border-top:1px solid var(--border);
+      padding:80px 0 40px;
+    }
+    .ft-top {
+      display:grid; grid-template-columns:1fr 2fr;
+      gap:80px; margin-bottom:60px;
+    }
+    .ft-brand { display:flex; flex-direction:column; gap:16px; }
+    .ft-brand p {
+      font-size:.86rem; color:var(--text-2); line-height:1.72; max-width:280px;
+    }
+    .ft-cols {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:40px;
+    }
+    .ft-col h4 {
+      font-family:var(--font-b); font-size:.7rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.12em;
+      color:var(--text); margin-bottom:20px;
+    }
+    .ft-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .ft-col a { color:var(--text-2); text-decoration:none; font-size:.86rem; transition:color .2s; }
+    .ft-col a:hover { color:var(--text); }
+    .ft-col li:not(:has(a)) { color:var(--text-2); font-size:.86rem; }
+    .ft-bot {
+      padding-top:32px; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .ft-bot p { font-size:.78rem; color:var(--text-3); }
+    .ft-legal { display:flex; gap:24px; }
+    .ft-legal a { font-size:.78rem; color:var(--text-3); text-decoration:none; transition:color .2s; }
+    .ft-legal a:hover { color:var(--text-2); }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width:1024px) {
+      :root { --sp:80px; }
+      .container { padding:0 24px; }
+      .features-grid, .testi-grid { grid-template-columns:repeat(2,1fr); }
+      .results-wrap { grid-template-columns:1fr; gap:60px; }
+      .cta-wrap { grid-template-columns:1fr; gap:56px; }
+      .ft-top { grid-template-columns:1fr; gap:48px; }
+      .preview-content { grid-template-columns:1fr 1fr; }
+      .pc-panel:last-child { display:none; }
+    }
+    @media (max-width:768px) {
+      .nav-links, .nav-cta { display:none; }
+      .nav-toggle { display:flex; }
+      .hero-h1 { font-size:clamp(2.6rem,9vw,4rem); }
+      .hero-metrics { flex-direction:column; align-items:flex-start; gap:24px; }
+      .hm + .hm { padding-left:0; }
+      .hm-div { width:40px; height:1px; margin:0; }
+      .features-grid, .testi-grid { grid-template-columns:1fr; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .step { grid-template-columns:1fr; gap:12px; }
+      .frow { grid-template-columns:1fr; }
+      .ft-cols { grid-template-columns:repeat(2,1fr); }
+      .ft-bot { flex-direction:column; gap:16px; text-align:center; }
+      .calc-box { padding:32px 24px; }
+      .calc-result { flex-direction:column; align-items:flex-start; gap:20px; }
+      .calc-arrow { transform:rotate(90deg); }
+      .preview-content { grid-template-columns:1fr; }
+      .pc-panel:nth-child(2), .pc-panel:last-child { display:none; }
+    }
+    @media (max-width:480px) {
+      .hero-actions { flex-direction:column; }
+      .btn-lg { padding:14px 24px; }
+      .stats-grid { grid-template-columns:1fr; }
+      .ft-cols { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg class="logo-gem" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11 1L20.5 7.5V14.5L11 21L1.5 14.5V7.5L11 1Z" stroke="#C4A25A" stroke-width="1.2"/>
+        <path d="M11 1L20.5 7.5H1.5L11 1Z" fill="rgba(196,162,90,0.15)" stroke="#C4A25A" stroke-width=".8"/>
+        <circle cx="11" cy="12" r="2.5" fill="rgba(196,162,90,0.3)" stroke="#C4A25A" stroke-width=".8"/>
+      </svg>
+      Infiora
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#contact" class="btn btn-primary nav-cta">Book a Free Demo</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="nav-drawer" id="nav-drawer">
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#contact" class="btn btn-primary">Book a Free Demo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-grid"></div>
+  </div>
+  <div class="container">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Now live in 340+ properties across the Adriatic
+    </div>
+    <h1 class="hero-h1">
+      Turn every room<br/>into a <em>five-star</em><br/>digital experience
+    </h1>
+    <p class="hero-sub">
+      Infiora replaces paper room directories with a stunning, QR-accessible guest page — featuring in-room ordering, real-time analytics, and automatic multilingual support. No app required.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn btn-primary btn-lg">
+        Book a Free Demo
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#preview" class="btn btn-outline btn-lg">See the Platform</a>
+    </div>
+    <div class="hero-metrics">
+      <div class="hm">
+        <span class="hm-num">340+</span>
+        <span class="hm-lab">Properties onboarded</span>
+      </div>
+      <div class="hm-div"></div>
+      <div class="hm">
+        <span class="hm-num">180K+</span>
+        <span class="hm-lab">Guest sessions / month</span>
+      </div>
+      <div class="hm-div"></div>
+      <div class="hm">
+        <span class="hm-num">4.6★</span>
+        <span class="hm-lab">Average guest satisfaction</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PRODUCT PREVIEW
+══════════════════════════════════════════ -->
+<section id="preview">
+  <div class="container">
+    <div class="preview-frame anim">
+      <div class="preview-screen">
+        <div class="preview-bar">
+          <div class="pbar-dot"></div>
+          <div class="pbar-dot"></div>
+          <div class="pbar-dot"></div>
+          <div class="pbar-url">app.infiora.hr / hotel-vela / room-204</div>
+        </div>
+        <div class="preview-content">
+          <!-- Panel 1: Guest Room Page -->
+          <div class="pc-panel">
+            <div class="pc-panel-title">Guest Room Page</div>
+            <div class="mock-room-header">
+              <div class="mock-hotel-name">Hotel Vela, Split</div>
+              <div class="mock-room-num">Room 204 — Superior Sea View</div>
+              <div class="mock-lang-row">
+                <span class="mock-lang active">EN</span>
+                <span class="mock-lang">HR</span>
+                <span class="mock-lang">DE</span>
+                <span class="mock-lang">IT</span>
+                <span class="mock-lang">+28</span>
+              </div>
+            </div>
+            <div class="mock-buttons">
+              <div class="mock-btn">
+                <div class="mock-btn-icon">🍽</div>
+                Room Service Menu
+              </div>
+              <div class="mock-btn">
+                <div class="mock-btn-icon">🛎</div>
+                Request Housekeeping
+              </div>
+              <div class="mock-btn">
+                <div class="mock-btn-icon">🌊</div>
+                Book Beach Chairs
+              </div>
+              <div class="mock-btn">
+                <div class="mock-btn-icon">📍</div>
+                Local Recommendations
+              </div>
+            </div>
+          </div>
+          <!-- Panel 2: Analytics Dashboard -->
+          <div class="pc-panel">
+            <div class="pc-panel-title">Live Analytics</div>
+            <div class="mock-kpi-row">
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">847</div>
+                <div class="mock-kpi-lab">Views today</div>
+              </div>
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">3:42</div>
+                <div class="mock-kpi-lab">Avg time</div>
+              </div>
+            </div>
+            <div class="mock-kpi-row">
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">94</div>
+                <div class="mock-kpi-lab">Taps</div>
+              </div>
+              <div class="mock-kpi">
+                <div class="mock-kpi-val">4.7★</div>
+                <div class="mock-kpi-lab">Rating</div>
+              </div>
+            </div>
+            <div class="mock-chart">
+              <div class="mock-bar" style="height:35%"></div>
+              <div class="mock-bar" style="height:55%"></div>
+              <div class="mock-bar" style="height:42%"></div>
+              <div class="mock-bar" style="height:70%"></div>
+              <div class="mock-bar hi" style="height:88%"></div>
+              <div class="mock-bar" style="height:64%"></div>
+              <div class="mock-bar" style="height:78%"></div>
+            </div>
+          </div>
+          <!-- Panel 3: Orders -->
+          <div class="pc-panel">
+            <div class="pc-panel-title">In-Room Orders</div>
+            <div class="mock-order">
+              <div class="mock-order-item">
+                <div class="mock-order-dot" style="background:var(--green)"></div>
+                <div class="mock-order-text">Breakfast for 2 — Rm 204</div>
+                <div class="mock-order-badge badge-new">NEW</div>
+              </div>
+              <div class="mock-order-item">
+                <div class="mock-order-dot" style="background:var(--gold)"></div>
+                <div class="mock-order-text">Extra towels — Rm 118</div>
+                <div class="mock-order-badge badge-prog">IN PREP</div>
+              </div>
+              <div class="mock-order-item">
+                <div class="mock-order-dot" style="background:var(--coral)"></div>
+                <div class="mock-order-text">Late checkout — Rm 302</div>
+                <div class="mock-order-badge badge-prog">IN PREP</div>
+              </div>
+              <div class="mock-order-item">
+                <div class="mock-order-dot" style="background:var(--text-3)"></div>
+                <div class="mock-order-text">Welcome wine — Rm 211</div>
+                <div class="mock-order-badge badge-done">DONE</div>
+              </div>
+              <div class="mock-order-item">
+                <div class="mock-order-dot" style="background:var(--text-3)"></div>
+                <div class="mock-order-text">Spa booking — Rm 405</div>
+                <div class="mock-order-badge badge-done">DONE</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-tag">
+        <div class="ptag-icon">⭐</div>
+        <div class="ptag-text">
+          <strong>New review received</strong>
+          <span>"Loved how easy the digital guide was!"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TRUST BAR
+══════════════════════════════════════════ -->
+<section id="trust">
+  <p class="trust-label">Trusted by hotels, villas & apartments across Croatia and the Adriatic</p>
+  <div class="marquee-track">
+    <div class="marquee-inner" id="marquee">
+      <span class="tl">Hotel Maestral</span>
+      <span class="tl">Vila Adriatica</span>
+      <span class="tl">Boutique Hotel Vela</span>
+      <span class="tl">Apartmani Lumio</span>
+      <span class="tl">Hvar Suites</span>
+      <span class="tl">Pelješac Retreats</span>
+      <span class="tl">Hotel Dubrovnik Palace</span>
+      <span class="tl">Villa Korčula</span>
+      <span class="tl">Makarska Beach Resort</span>
+      <span class="tl">Zadar Boutique Rooms</span>
+      <span class="tl">Šibenik Marina Hotel</span>
+      <span class="tl">Brač Olive Villas</span>
+      <!-- duplicate for seamless loop -->
+      <span class="tl">Hotel Maestral</span>
+      <span class="tl">Vila Adriatica</span>
+      <span class="tl">Boutique Hotel Vela</span>
+      <span class="tl">Apartmani Lumio</span>
+      <span class="tl">Hvar Suites</span>
+      <span class="tl">Pelješac Retreats</span>
+      <span class="tl">Hotel Dubrovnik Palace</span>
+      <span class="tl">Villa Korčula</span>
+      <span class="tl">Makarska Beach Resort</span>
+      <span class="tl">Zadar Boutique Rooms</span>
+      <span class="tl">Šibenik Marina Hotel</span>
+      <span class="tl">Brač Olive Villas</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURES
+══════════════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">Platform Features</span>
+      <h2>Everything your guests need,<br/><em>right in their pocket</em></h2>
+      <p>One QR code unlocks a complete digital concierge experience — no app download, no logins, no friction.</p>
+    </div>
+    <div class="features-grid anim-kids">
+      <div class="feat-card starred">
+        <div class="feat-num">01</div>
+        <h3>Digital Room Companion</h3>
+        <p>Replace printed room directories with a stunning, always-updated digital page. Add your hotel info, amenities, local tips, and house rules — all in one beautiful interface guests access with a single QR scan.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">QR Access</span>
+          <span class="feat-tag">No App Required</span>
+          <span class="feat-tag">Real-Time Updates</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">02</div>
+        <h3>In-Room Ordering</h3>
+        <p>Let guests order room service, book spa slots, request extra amenities, or arrange a late checkout — all from their phone. Reduce front desk calls and unlock a new revenue stream your guests will actually use.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Room Service</span>
+          <span class="feat-tag">Upsells</span>
+          <span class="feat-tag">Order Dashboard</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">03</div>
+        <h3>Guest Engagement Analytics</h3>
+        <p>Know exactly how your guests interact with your property. Track page views, tap rates, time-spent per room, peak engagement hours, and which services drive the most revenue — broken down by language and device.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Live Dashboard</span>
+          <span class="feat-tag">Per-Room Insights</span>
+          <span class="feat-tag">CSV Export</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">04</div>
+        <h3>Automatic Multilingual Support</h3>
+        <p>Infiora automatically detects your guest's browser language and serves content in their preferred tongue — no extra setup needed. Currently supporting 32 languages, including Croatian, German, Italian, and French.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">32 Languages</span>
+          <span class="feat-tag">Auto-Detect</span>
+          <span class="feat-tag">Language Analytics</span>
+        </div>
+      </div>
+      <div class="feat-card starred">
+        <div class="feat-num">05</div>
+        <h3>Feedback & Reputation Shield</h3>
+        <p>Collect guest feedback automatically at the right moment. Intercept dissatisfied guests before they post a negative review — and amplify the happy ones to your TripAdvisor and Booking.com profiles.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Post-Stay Surveys</span>
+          <span class="feat-tag">Review Routing</span>
+          <span class="feat-tag">Rating Trends</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">06</div>
+        <h3>Unified Property Dashboard</h3>
+        <p>Manage every room, floor, or property from a single login. Monitor orders in real time, update content instantly, export reports, and track your property's performance as a whole — or room by room.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Multi-Property</span>
+          <span class="feat-tag">Role-Based Access</span>
+          <span class="feat-tag">Weekly Reports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     RESULTS / STATS
+══════════════════════════════════════════ -->
+<section id="results">
+  <div class="container">
+    <div class="results-wrap">
+      <div class="results-copy anim">
+        <span class="section-label">Results That Matter</span>
+        <h2>Numbers hotel owners<br/><em>actually care about</em></h2>
+        <p>We don't track vanity metrics. Every feature in Infiora is built around outcomes that directly impact your revenue, reputation, and guest satisfaction scores.</p>
+        <a href="#contact" class="btn btn-primary">See How We Achieve This</a>
+      </div>
+      <div class="stats-grid anim-kids">
+        <div class="stat-cell">
+          <div class="stat-val-row">
+            <span class="stat-num" data-target="340">0</span>
+            <span class="stat-sfx">+</span>
+          </div>
+          <span class="stat-lab">Properties currently<br/>using Infiora</span>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val-row">
+            <span class="stat-num" data-target="28">0</span>
+            <span class="stat-sfx">%</span>
+          </div>
+          <span class="stat-lab">Average increase in<br/>in-room order revenue</span>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val-row">
+            <span class="stat-num" style="font-size:2.4rem">4.6</span>
+            <span class="stat-sfx">★</span>
+          </div>
+          <span class="stat-lab">Average guest satisfaction<br/>score achieved</span>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val-row">
+            <span class="stat-num" data-target="180">0</span>
+            <span class="stat-sfx">K+</span>
+          </div>
+          <span class="stat-lab">Guest sessions served<br/>every month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════ -->
+<section id="how">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">Our Process</span>
+      <h2>Live in days,<br/><em>not months</em></h2>
+      <p>Getting Infiora up and running in your property is refreshingly simple. No complex integrations, no developer required.</p>
+    </div>
+    <div class="steps anim-kids">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div class="step-body">
+          <h3>We Build Your Digital Room Pages</h3>
+          <p>Tell us about your hotel — your services, amenities, room types, and brand style. Our team builds your Infiora setup, including custom content, your visual identity, and all service categories. Most properties go live within 3–5 business days.</p>
+          <div class="step-pill">✓ Done for you setup included</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div class="step-body">
+          <h3>Place QR Codes in Every Room</h3>
+          <p>We send you print-ready QR codes for each room. Display them on the bedside table, TV stand, or welcome card. Guests scan once and instantly access their full digital concierge — in their own language, on any device.</p>
+          <div class="step-pill">✓ No app download needed</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div class="step-body">
+          <h3>Manage Orders & Monitor Analytics</h3>
+          <p>From your dashboard, manage incoming orders in real time, update content across all rooms instantly, and explore deep analytics on guest engagement — what they tap, when they engage, and what makes them satisfied.</p>
+          <div class="step-pill">✓ Real-time order & insights dashboard</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">04</div>
+        <div class="step-body">
+          <h3>Grow Reviews & Revenue</h3>
+          <p>As guests engage with Infiora, our feedback system works quietly in the background — capturing satisfaction scores, routing happy guests to review platforms, and flagging issues before they escalate. Over time, your reputation compounds.</p>
+          <div class="step-pill">✓ Reputation management on autopilot</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TESTIMONIALS
+══════════════════════════════════════════ -->
+<section id="testi">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">Client Stories</span>
+      <h2>What hotel owners<br/><em>say about Infiora</em></h2>
+    </div>
+    <div class="testi-grid anim-kids">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"We replaced our outdated paper room guide with Infiora in a weekend. Guests love it — our review scores mentioning 'helpful room info' went from rare to a common theme. The in-room ordering feature alone paid for the subscription in week two."</blockquote>
+        <div class="t-author">
+          <div class="t-av">MK</div>
+          <div>
+            <strong>Marko Kovačević</strong>
+            <span>Owner, Boutique Hotel Vela, Split</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card feat">
+        <div class="stars">★★★★★</div>
+        <blockquote>"The analytics are what surprised me most. I now know exactly which rooms have the highest engagement, what guests are clicking on, and what languages my visitors actually speak. That data has completely changed how we brief our staff and plan our upsells."</blockquote>
+        <div class="t-author">
+          <div class="t-av">IP</div>
+          <div>
+            <strong>Ivana Petrić</strong>
+            <span>General Manager, Vila Horizont, Hvar</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Our biggest issue was international guests not knowing what we offer. Infiora automatically shows everything in German or Italian — guests order more, ask fewer repetitive questions, and feel genuinely taken care of. Our front desk team are less stressed. It's a win everywhere."</blockquote>
+        <div class="t-author">
+          <div class="t-av">TM</div>
+          <div>
+            <strong>Tomislav Marić</strong>
+            <span>Director, Hotel Adriatic Palace, Dubrovnik</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     REVENUE CALCULATOR
+══════════════════════════════════════════ -->
+<section id="calc">
+  <div class="container">
+    <div class="calc-inner">
+      <div class="calc-header anim">
+        <span class="section-label">Revenue Calculator</span>
+        <h2>See your in-room<br/><em>revenue potential</em></h2>
+        <p>Estimate how much additional order revenue Infiora could unlock for your property.</p>
+      </div>
+      <div class="calc-box anim">
+        <div class="calc-fields">
+          <div class="calc-field">
+            <label>Number of Rooms</label>
+            <div class="range-row">
+              <input type="range" id="c-rooms" min="5" max="200" value="40" />
+              <span class="rval" id="v-rooms">40</span>
+            </div>
+          </div>
+          <div class="calc-field">
+            <label>Current Monthly Occupancy</label>
+            <div class="range-row">
+              <input type="range" id="c-occ" min="20" max="95" value="65" />
+              <span class="rval" id="v-occ">65%</span>
+            </div>
+          </div>
+          <div class="calc-field">
+            <label>Average Nightly Rate (€)</label>
+            <div class="range-row">
+              <input type="range" id="c-rate" min="40" max="500" value="130" />
+              <span class="rval" id="v-rate">€130</span>
+            </div>
+          </div>
+        </div>
+        <div class="calc-result">
+          <div class="calc-side">
+            <span class="cr-lab">Current in-room order revenue</span>
+            <span class="cr-amt" id="r-current">€0</span>
+          </div>
+          <div class="calc-arrow">→</div>
+          <div class="calc-side">
+            <span class="cr-lab">With Infiora (+28% avg lift)</span>
+            <span class="cr-amt pos" id="r-potential">€0</span>
+            <span class="cr-uplift" id="r-uplift">+€0 / month</span>
+          </div>
+        </div>
+        <p class="calc-note">* Estimate based on a typical in-room order capture rate of 12% of occupied room-nights at €18 avg order value. Infiora clients see an average 28% lift on this baseline. Individual results vary.</p>
+        <a href="#contact" class="btn btn-primary btn-lg btn-full">
+          Unlock This Revenue for My Property
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FAQ
+══════════════════════════════════════════ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head anim">
+      <span class="section-label">FAQ</span>
+      <h2>Questions we hear<br/><em>from hotel owners</em></h2>
+    </div>
+    <div class="faq-list anim">
+      <div class="faq-item">
+        <button class="faq-q">
+          Do guests need to download an app?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No — and that's one of our core design principles. Guests simply scan the QR code with their phone's camera and the room page opens instantly in their browser. No app download, no account creation, no friction. It works on every smartphone and browser.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          How quickly can we go live?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Most properties are live within 3–5 business days. Our onboarding team handles the setup — you provide your hotel details, menu items, and brand assets, and we build the pages for you. We can also integrate an optional self-service editor for ongoing updates.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          What languages are supported?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Infiora supports 32 languages out of the box, and automatically detects and serves the guest's browser language. We cover all major European languages (Croatian, English, German, Italian, French, Spanish, Dutch, Polish, and more) as well as several non-European options.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          Does it integrate with our PMS or booking system?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Infiora works as a standalone system and does not require PMS integration to function. For enterprise properties that want deeper integration (e.g., auto-populating guest names, linking to reservation systems), we offer custom API connections. Contact us to discuss your setup.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          How does in-room ordering work?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Guests place orders via their room page — selecting items, quantities, and delivery preferences. Orders appear instantly on your dashboard and can trigger notifications to your staff (email, browser notification, or integrated display). You manage fulfillment and can mark orders as "in prep" or "completed" from the dashboard.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          What does it cost?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Infiora is priced as a monthly subscription based on property size. Plans start from €89/month for small properties (up to 15 rooms). Mid-size and enterprise properties receive custom quotes. All plans include onboarding, QR codes, unlimited updates, and analytics. Book a demo to get a precise quote for your property.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CONTACT / FINAL CTA
+══════════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="cta-wrap">
+      <div class="cta-copy anim">
+        <span class="section-label">Let's Talk</span>
+        <h2>Ready to delight<br/><em>every guest?</em></h2>
+        <p>Book a free 30-minute demo. We'll show you exactly how Infiora would look and work for your specific property — no generic slides, just your hotel on our platform.</p>
+        <div class="cta-perks">
+          <div class="perk"><span class="perk-ck">✓</span> No commitment required</div>
+          <div class="perk"><span class="perk-ck">✓</span> Live demo with your hotel's branding</div>
+          <div class="perk"><span class="perk-ck">✓</span> Custom revenue estimate for your property</div>
+          <div class="perk"><span class="perk-ck">✓</span> Available in Croatian &amp; English</div>
+          <div class="perk"><span class="perk-ck">✓</span> Reply within 24 hours</div>
+        </div>
+      </div>
+      <div class="anim">
+        <form class="form" id="main-form">
+          <div class="frow">
+            <div class="ff">
+              <label>Your Name</label>
+              <input type="text" placeholder="Ana Horvat" required />
+            </div>
+            <div class="ff">
+              <label>Email Address</label>
+              <input type="email" placeholder="ana@hotel.hr" required />
+            </div>
+          </div>
+          <div class="ff">
+            <label>Property Name</label>
+            <input type="text" placeholder="Hotel / Villa / Apartments..." required />
+          </div>
+          <div class="frow">
+            <div class="ff">
+              <label>Property Type</label>
+              <select>
+                <option value="">Select type</option>
+                <option>Hotel</option>
+                <option>Boutique Hotel</option>
+                <option>Villa / Luxury Rental</option>
+                <option>Hostel</option>
+                <option>Apartments</option>
+                <option>B&amp;B / Guesthouse</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="ff">
+              <label>Number of Rooms</label>
+              <select>
+                <option>1–10 rooms</option>
+                <option>11–30 rooms</option>
+                <option>31–80 rooms</option>
+                <option>81–150 rooms</option>
+                <option>150+ rooms</option>
+              </select>
+            </div>
+          </div>
+          <div class="ff">
+            <label>What's your biggest challenge right now?</label>
+            <textarea placeholder="e.g. Guests don't know what we offer, too many front desk calls, need better reviews..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-full" id="submit-btn">
+            Book My Free Demo
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="form-note">We'll reach out within 24 hours to schedule your demo.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="#" class="nav-logo">
+          <svg class="logo-gem" viewBox="0 0 22 22" fill="none">
+            <path d="M11 1L20.5 7.5V14.5L11 21L1.5 14.5V7.5L11 1Z" stroke="#C4A25A" stroke-width="1.2"/>
+            <path d="M11 1L20.5 7.5H1.5L11 1Z" fill="rgba(196,162,90,0.15)" stroke="#C4A25A" stroke-width=".8"/>
+            <circle cx="11" cy="12" r="2.5" fill="rgba(196,162,90,0.3)" stroke="#C4A25A" stroke-width=".8"/>
+          </svg>
+          Infiora
+        </a>
+        <p>Digital guest experience platform for hotels, villas, and apartments across Croatia and the Adriatic region.</p>
+      </div>
+      <div class="ft-cols">
+        <div class="ft-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#">Digital Room Pages</a></li>
+            <li><a href="#">In-Room Ordering</a></li>
+            <li><a href="#">Analytics Dashboard</a></li>
+            <li><a href="#">Multilingual Support</a></li>
+            <li><a href="#">Feedback System</a></li>
+            <li><a href="#">Pricing</a></li>
+          </ul>
+        </div>
+        <div class="ft-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Infiora</a></li>
+            <li><a href="#">Client Stories</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="ft-col">
+          <h4>Contact Us</h4>
+          <ul>
+            <li>hello@infiora.hr</li>
+            <li>+385 1 234 5678</li>
+            <li>Zagreb, Croatia</li>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>© 2024 Infiora d.o.o. All rights reserved.</p>
+      <div class="ft-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
+<script>
+  /* ── NAV scroll & mobile ── */
+  const nav = document.getElementById('nav');
+  const toggle = document.getElementById('nav-toggle');
+  const drawer = document.getElementById('nav-drawer');
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 32);
+  }, { passive: true });
+
+  toggle.addEventListener('click', () => {
+    const open = toggle.classList.toggle('open');
+    drawer.classList.toggle('open', open);
+  });
+
+  drawer.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      toggle.classList.remove('open');
+      drawer.classList.remove('open');
+    });
+  });
+
+  /* ── Smooth scroll ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (!t) return;
+      e.preventDefault();
+      const off = nav.offsetHeight + 20;
+      window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+    });
+  });
+
+  /* ── Scroll animations ── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.anim, .anim-kids').forEach(el => io.observe(el));
+
+  /* ── Counter animation ── */
+  function countUp(el, target, duration = 1800) {
+    const start = performance.now();
+    const tick = now => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(eased * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    };
+    requestAnimationFrame(tick);
+  }
+
+  const statIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target.querySelector('[data-target]');
+      if (el && !el.dataset.done) {
+        el.dataset.done = '1';
+        countUp(el, parseInt(el.dataset.target));
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-cell').forEach(c => statIO.observe(c));
+
+  /* ── Revenue Calculator ── */
+  const rRooms    = document.getElementById('c-rooms');
+  const rOcc      = document.getElementById('c-occ');
+  const rRate     = document.getElementById('c-rate');
+  const vRooms    = document.getElementById('v-rooms');
+  const vOcc      = document.getElementById('v-occ');
+  const vRate     = document.getElementById('v-rate');
+  const rCurrent  = document.getElementById('r-current');
+  const rPotential= document.getElementById('r-potential');
+  const rUplift   = document.getElementById('r-uplift');
+
+  function fmt(n) {
+    return '€' + Math.round(n).toLocaleString('de-DE');
+  }
+
+  function calcRevenue() {
+    const rooms = +rRooms.value;
+    const occ   = +rOcc.value / 100;
+    const rate  = +rRate.value;
+
+    vRooms.textContent = rooms;
+    vOcc.textContent   = rOcc.value + '%';
+    vRate.textContent  = '€' + rate;
+
+    // In-room order baseline: 12% of occupied room-nights × €18 avg order
+    const occupiedNights = rooms * occ * 30;
+    const baseline = occupiedNights * 0.12 * 18;
+    const potential = baseline * 1.28;
+    const diff = potential - baseline;
+
+    rCurrent.textContent  = fmt(baseline);
+    rPotential.textContent= fmt(potential);
+    rUplift.textContent   = '+' + fmt(diff) + ' / month';
+
+    updateFill(rRooms);
+    updateFill(rOcc);
+    updateFill(rRate);
+  }
+
+  function updateFill(inp) {
+    const pct = ((+inp.value - +inp.min) / (+inp.max - +inp.min)) * 100;
+    inp.style.background = `linear-gradient(to right, var(--gold) ${pct}%, rgba(237,228,211,0.14) ${pct}%)`;
+  }
+
+  [rRooms, rOcc, rRate].forEach(r => r.addEventListener('input', calcRevenue));
+  calcRevenue();
+
+  /* ── FAQ accordion ── */
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  /* ── Form submit ── */
+  document.getElementById('main-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Request sent — we\'ll be in touch within 24h!';
+    btn.style.background = 'var(--green)';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 5000);
+  });
+
+  /* ── Preview mock bar animation ── */
+  setInterval(() => {
+    document.querySelectorAll('.mock-bar').forEach(b => {
+      const h = 25 + Math.random() * 70;
+      b.style.height = h + '%';
+      b.classList.toggle('hi', h > 75);
+    });
+  }, 2200);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF – All Button Types v2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; padding: 24px; }
+  h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; }
+  .subtitle { color: #94a3b8; font-size: 0.85rem; margin-bottom: 28px; }
+
+  .type-row { margin-bottom: 40px; }
+  .type-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .type-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .badge-blog  { background: #1d4ed820; color: #60a5fa; border: 1px solid #1d4ed840; }
+  .badge-wifi  { background: #16504020; color: #34d399; border: 1px solid #16504040; }
+  .badge-link  { background: #6d28d920; color: #a78bfa; border: 1px solid #6d28d940; }
+  .badge-text  { background: #92400e20; color: #fbbf24; border: 1px solid #92400e40; }
+  .badge-group { background: #be185d20; color: #f472b6; border: 1px solid #be185d40; }
+  .badge-skip  { background: #1e293b; color: #475569; border: 1px solid #334155; text-decoration: line-through; }
+  .type-name { font-size: 0.95rem; font-weight: 600; color: #f1f5f9; }
+  .type-desc { font-size: 0.78rem; color: #64748b; }
+
+  .pages-row { display: flex; gap: 16px; align-items: flex-start; overflow-x: auto; padding-bottom: 8px; }
+  .page-wrap  { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+  .page-label { font-size: 0.68rem; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; max-width: 200px; text-align: center; }
+
+  .pdf-page {
+    width: 190px; height: 269px; border-radius: 6px; overflow: hidden; position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07);
+    flex-shrink: 0;
+    background: linear-gradient(155deg, #1a3558 0%, #0d2240 100%);
+    padding: 13px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  /* ── top bar ── */
+  .page-top-bar { display: flex; align-items: center; gap: 5px; }
+  .page-icon { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; }
+  .page-title { font-size: 0.78rem; font-weight: 700; color: #fff; }
+  .divider { height: 1px; background: rgba(255,255,255,0.1); }
+
+  /* ── breadcrumb (group continuation) ── */
+  .breadcrumb {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(244,114,182,0.12); border: 1px solid rgba(244,114,182,0.2);
+    border-radius: 3px; padding: 3px 6px;
+  }
+  .breadcrumb-parent { font-size: 0.5rem; color: #f472b6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .breadcrumb-sep { font-size: 0.5rem; color: rgba(244,114,182,0.45); }
+  .breadcrumb-child { font-size: 0.5rem; color: rgba(244,114,182,0.75); }
+  .continuation-bar {
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    background: rgba(255,255,255,0.05); border-radius: 3px; padding: 2px 6px;
+  }
+  .continuation-dots { font-size: 0.55rem; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
+  .continuation-label { font-size: 0.46rem; color: rgba(255,255,255,0.35); }
+
+  /* ── blog ── */
+  .blog-sec { display: flex; flex-direction: column; gap: 3px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .blog-sec:last-child { border-bottom: none; padding-bottom: 0; }
+  .blog-sec-title { font-size: 0.62rem; font-weight: 700; color: #e2e8f0; }
+  .imgs-row { display: flex; gap: 2px; }
+  .img-thumb { flex:1; height: 28px; border-radius: 2px; background: rgba(255,255,255,0.13); font-size: 0.38rem; color: rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; }
+  .blog-desc-text { font-size: 0.49rem; color: rgba(255,255,255,0.55); line-height: 1.3; }
+  .qr-row { display: flex; gap: 5px; align-items: center; margin-top: 2px; flex-wrap: wrap; }
+  .qr-mini { width: 18px; height: 18px; background: white; border-radius: 2px; flex-shrink: 0; }
+  .qr-label { font-size: 0.44rem; color: rgba(255,255,255,0.38); line-height: 1.3; }
+
+  /* ── wifi ── */
+  .wifi-field { display: flex; flex-direction: column; gap: 1px; }
+  .wifi-lbl { font-size: 0.48rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.07em; }
+  .wifi-val { font-size: 0.7rem; color: #e2e8f0; font-weight: 600; font-family: monospace; }
+  .wifi-qr-block { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .qr-med { width: 54px; height: 54px; background: white; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .qr-med-label { font-size: 0.52rem; color: rgba(255,255,255,0.5); line-height: 1.4; }
+
+  /* ── link ── */
+  .link-desc { font-size: 0.52rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
+  .link-qr-center { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 8px; }
+  .qr-large { width: 80px; height: 80px; background: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .link-scan-label { font-size: 0.55rem; color: rgba(255,255,255,0.45); text-align: center; }
+  .link-url-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 6px 8px; margin-top: 8px; }
+  .link-url-lbl { font-size: 0.46rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px; }
+  .link-url-val { font-size: 0.58rem; color: #93c5fd; word-break: break-all; line-height: 1.35; }
+
+  /* ── text ── */
+  .text-content { font-size: 0.56rem; color: rgba(255,255,255,0.75); line-height: 1.55; flex: 1; overflow: hidden; }
+  .text-content p { margin-bottom: 5px; }
+  .text-content strong { color: #e2e8f0; }
+
+  /* ── group index ── */
+  .group-item { display: flex; flex-direction: column; gap: 2px; padding: 5px 6px; background: rgba(255,255,255,0.05); border-radius: 4px; border-left: 2px solid rgba(244,114,182,0.4); margin-bottom: 4px; }
+  .group-item:last-child { margin-bottom: 0; }
+  .group-item-title { font-size: 0.62rem; font-weight: 700; color: #e2e8f0; }
+  .group-item-type { font-size: 0.44rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .group-item-preview { font-size: 0.48rem; color: rgba(255,255,255,0.5); line-height: 1.3; }
+
+  .arrow { color: #1e293b; font-size: 1.2rem; align-self: center; margin-top: 20px; flex-shrink: 0; }
+  .section-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 28px 0; }
+
+  .skip-row { display: flex; gap: 12px; align-items: center; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 8px; }
+  .skip-icon { font-size: 1.2rem; opacity: 0.3; }
+  .skip-text { font-size: 0.8rem; color: #475569; }
+  .skip-text strong { color: #64748b; }
+
+  .qr-svg { display: block; }
+</style>
+</head>
+<body>
+
+<h1>PDF Guide — Final Button Types</h1>
+<p class="subtitle">Order, housekeeping and maintenance are excluded. Group sub-pages show parent name as breadcrumb.</p>
+
+<!-- ===================== BLOG ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-blog">blog</span>
+    <span class="type-name">Blog / Activities / Info</span>
+    <span class="type-desc">4 sections per page, overflows onto next page with continuation header</span>
+  </div>
+  <div class="pages-row">
+    <div class="page-wrap">
+      <div class="page-label">Page 1 — first 4 sections</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🏄</div><div class="page-title">Activities</div></div>
+        <div class="divider"></div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">1. Brač Island Tour</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Full-day boat trip with snorkeling stops and local lunch.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Directions</div><div class="qr-mini"></div><div class="qr-label">Call</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">2. Blue Cave</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Natural sea cave on Biševo — electric blue glow below the surface.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Directions</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">3. Wine Tasting</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Local Dalmatian wines at a family vineyard 10 min away.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Call</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">4. Kayak Rental</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Half or full-day rentals from the hotel beach.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="page-wrap">
+      <div class="page-label">Page 2 — overflow, clearly marked</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🏄</div><div class="page-title">Activities</div></div>
+        <!-- Continuation indicator -->
+        <div class="continuation-bar">
+          <div class="continuation-dots">· · ·</div>
+          <div class="continuation-label">nastavak / continued</div>
+          <div class="continuation-dots">· · ·</div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">5. Jeep Safari</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Off-road tour through the island interior, half-day.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Directions</div><div class="qr-mini"></div><div class="qr-label">Call</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">6. Scuba Diving</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Beginner and advanced dives at 3 local sites.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Call to book</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">7. Sunset Cruise</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">2-hour evening boat ride with drinks included.</div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">8. Cooking Class</div>
+          <div class="imgs-row"><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Cook Dalmatian specialties with a local chef.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Directions</div><div class="qr-mini"></div><div class="qr-label">Call</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- ===================== WIFI ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-wifi">wifi</span>
+    <span class="type-name">WiFi</span>
+    <span class="type-desc">SSID + password + auto-connect QR</span>
+  </div>
+  <div class="pages-row">
+    <div class="page-wrap">
+      <div class="page-label">Single page</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">📶</div><div class="page-title">WiFi</div></div>
+        <div class="divider"></div>
+        <div class="wifi-field"><div class="wifi-lbl">Network (SSID)</div><div class="wifi-val">HotelAdriaticGuest</div></div>
+        <div class="wifi-field"><div class="wifi-lbl">Password</div><div class="wifi-val">welcome2024!</div></div>
+        <div class="wifi-field"><div class="wifi-lbl">Security</div><div class="wifi-val">WPA2</div></div>
+        <div class="wifi-qr-block">
+          <div class="qr-med">
+            <svg class="qr-svg" width="42" height="42" viewBox="0 0 7 7" fill="none">
+              <rect x="0" y="0" width="3" height="3" fill="#111"/><rect x="1" y="1" width="1" height="1" fill="white"/>
+              <rect x="4" y="0" width="3" height="3" fill="#111"/><rect x="5" y="1" width="1" height="1" fill="white"/>
+              <rect x="0" y="4" width="3" height="3" fill="#111"/><rect x="1" y="5" width="1" height="1" fill="white"/>
+              <rect x="4" y="3" width="1" height="1" fill="#111"/><rect x="3" y="4" width="2" height="1" fill="#111"/>
+              <rect x="5" y="5" width="2" height="1" fill="#111"/><rect x="3" y="6" width="1" height="1" fill="#111"/>
+            </svg>
+          </div>
+          <div class="qr-med-label">Scan with phone camera to connect automatically</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- ===================== LINK ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-link">link</span>
+    <span class="type-name">External Link</span>
+    <span class="type-desc">Large scan-to-open QR + URL printed below as fallback</span>
+  </div>
+  <div class="pages-row">
+    <div class="page-wrap">
+      <div class="page-label">Single page</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🔗</div><div class="page-title">Book a Spa Treatment</div></div>
+        <div class="divider"></div>
+        <div class="link-desc">Visit our online booking page to reserve your preferred treatment and timeslot.</div>
+        <div class="link-qr-center">
+          <div class="qr-large">
+            <svg class="qr-svg" width="68" height="68" viewBox="0 0 7 7" fill="none">
+              <rect x="0" y="0" width="3" height="3" fill="#111"/><rect x="1" y="1" width="1" height="1" fill="white"/>
+              <rect x="4" y="0" width="3" height="3" fill="#111"/><rect x="5" y="1" width="1" height="1" fill="white"/>
+              <rect x="0" y="4" width="3" height="3" fill="#111"/><rect x="1" y="5" width="1" height="1" fill="white"/>
+              <rect x="3" y="3" width="2" height="2" fill="#111"/><rect x="5" y="5" width="2" height="2" fill="#111"/>
+              <rect x="3" y="6" width="2" height="1" fill="#111"/>
+            </svg>
+          </div>
+          <div class="link-scan-label">Scan to open in browser</div>
+        </div>
+        <div class="link-url-box">
+          <div class="link-url-lbl">Or type manually</div>
+          <div class="link-url-val">hoteladriaticguest.com/spa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- ===================== TEXT ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-text">text</span>
+    <span class="type-name">Text / Info</span>
+    <span class="type-desc">Formatted text, same continuation pattern if it overflows</span>
+  </div>
+  <div class="pages-row">
+    <div class="page-wrap">
+      <div class="page-label">Single page</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">📋</div><div class="page-title">House Rules</div></div>
+        <div class="divider"></div>
+        <div class="text-content">
+          <p><strong>Check-in / Check-out</strong><br>Check-in from 14:00. Check-out by 11:00.</p>
+          <p><strong>Quiet Hours</strong><br>22:00 – 08:00. Please respect neighbours.</p>
+          <p><strong>Pets</strong><br>Allowed in designated rooms. Inform us in advance.</p>
+          <p><strong>Smoking</strong><br>Not permitted inside. Terrace areas only.</p>
+          <p><strong>Pool</strong><br>Open 08:00–20:00. Children under 12 with adult.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- ===================== GROUP ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-group">group</span>
+    <span class="type-name">Group</span>
+    <span class="type-desc">Index page listing sub-items → each sub-item as its own page with breadcrumb showing parent</span>
+  </div>
+  <div class="pages-row">
+
+    <!-- Index page -->
+    <div class="page-wrap">
+      <div class="page-label">Index page</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🗂️</div><div class="page-title">Hotel Services</div></div>
+        <div class="divider"></div>
+        <div style="font-size:0.48rem;color:rgba(255,255,255,0.3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Contents</div>
+        <div class="group-item">
+          <div class="group-item-title">🔗 Online Check-in</div>
+          <div class="group-item-type">Link</div>
+          <div class="group-item-preview">Scan QR to open online check-in form</div>
+        </div>
+        <div class="group-item">
+          <div class="group-item-title">📋 Pool Schedule</div>
+          <div class="group-item-type">Text</div>
+          <div class="group-item-preview">Opening times and pool rules</div>
+        </div>
+        <div class="group-item">
+          <div class="group-item-title">🏖 Beach Club</div>
+          <div class="group-item-type">Blog</div>
+          <div class="group-item-preview">Photos, menu, directions</div>
+        </div>
+        <div class="group-item">
+          <div class="group-item-title">📶 Pool WiFi</div>
+          <div class="group-item-type">WiFi</div>
+          <div class="group-item-preview">Separate network for pool area</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <!-- Sub-item 1: link type — breadcrumb shows parent -->
+    <div class="page-wrap">
+      <div class="page-label">Sub-item 1 — breadcrumb shows parent</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🗂️</div><div class="page-title">Hotel Services</div></div>
+        <!-- BREADCRUMB — makes it clear this belongs to the group -->
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent">Hotel Services</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-child">Online Check-in</span>
+        </div>
+        <div class="divider"></div>
+        <div class="link-desc">Complete your check-in online before arrival to skip the front desk queue.</div>
+        <div class="link-qr-center">
+          <div class="qr-large">
+            <svg class="qr-svg" width="68" height="68" viewBox="0 0 7 7" fill="none">
+              <rect x="0" y="0" width="3" height="3" fill="#111"/><rect x="1" y="1" width="1" height="1" fill="white"/>
+              <rect x="4" y="0" width="3" height="3" fill="#111"/><rect x="5" y="1" width="1" height="1" fill="white"/>
+              <rect x="0" y="4" width="3" height="3" fill="#111"/><rect x="1" y="5" width="1" height="1" fill="white"/>
+              <rect x="3" y="3" width="2" height="2" fill="#111"/>
+            </svg>
+          </div>
+          <div class="link-scan-label">Scan to open check-in form</div>
+        </div>
+        <div class="link-url-box">
+          <div class="link-url-lbl">Or type manually</div>
+          <div class="link-url-val">hoteladriaticguest.com/checkin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <!-- Sub-item 2: text type -->
+    <div class="page-wrap">
+      <div class="page-label">Sub-item 2 — text type</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🗂️</div><div class="page-title">Hotel Services</div></div>
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent">Hotel Services</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-child">Pool Schedule</span>
+        </div>
+        <div class="divider"></div>
+        <div class="text-content">
+          <p><strong>Opening Hours</strong><br>08:00 – 20:00 daily. Last entry 19:30.</p>
+          <p><strong>Rules</strong><br>No glass near pool. Children under 12 with adult. No running on deck.</p>
+          <p><strong>Towels</strong><br>Hotel towels at pool bar. 10€ deposit required.</p>
+          <p><strong>Loungers</strong><br>Free for guests. Reserved before 09:00 will be released by 10:00.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <!-- Sub-item 3: blog type inside group -->
+    <div class="page-wrap">
+      <div class="page-label">Sub-item 3 — blog type</div>
+      <div class="pdf-page">
+        <div class="page-top-bar"><div class="page-icon">🗂️</div><div class="page-title">Hotel Services</div></div>
+        <div class="breadcrumb">
+          <span class="breadcrumb-parent">Hotel Services</span>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-child">Beach Club</span>
+        </div>
+        <div class="divider"></div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">Beach Bar</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Cocktails, smoothies and snacks. Open 09:00–22:00. Live DJ on Fridays.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Directions</div></div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">Sun Loungers</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Free for hotel guests. 30 loungers available, first come first served.</div>
+        </div>
+        <div class="blog-sec">
+          <div class="blog-sec-title">Water Sports</div>
+          <div class="imgs-row"><div class="img-thumb">img</div><div class="img-thumb">img</div><div class="img-thumb">img</div></div>
+          <div class="blog-desc-text">Jet ski, pedalo, windsurfing. Book at the beach desk.</div>
+          <div class="qr-row"><div class="qr-mini"></div><div class="qr-label">Call</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-sep"></div>
+
+<!-- ===================== SKIPPED ===================== -->
+<div class="type-row">
+  <div class="type-header">
+    <span class="type-badge badge-skip">order</span>
+    <span class="type-badge badge-skip">housekeeping</span>
+    <span class="type-badge badge-skip">maintenance</span>
+    <span class="type-name" style="color:#475569">Skipped — not in PDF</span>
+  </div>
+  <div class="skip-row">
+    <div class="skip-icon">🛎️</div>
+    <div class="skip-text"><strong>Order / Room Service</strong> — requires internet, useless offline. Skipped entirely.</div>
+  </div>
+  <div class="skip-row">
+    <div class="skip-icon">🧹</div>
+    <div class="skip-text"><strong>Housekeeping</strong> — requires form submission. Skipped entirely.</div>
+  </div>
+  <div class="skip-row">
+    <div class="skip-icon">🔧</div>
+    <div class="skip-text"><strong>Maintenance</strong> — requires form submission. Skipped entirely.</div>
+  </div>
+</div>
+
+</body>
+</html>

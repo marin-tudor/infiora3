@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+body {
+  word-break: break-word;
+}
+
+svg.star-svg {
+  display: inline;
+}

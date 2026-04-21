@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Guide – Layout Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; padding: 24px; }
+  h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; color: #f8fafc; }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 28px; }
+
+  .pages-row {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    align-items: flex-start;
+  }
+
+  .page-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .page-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  /* A4 page at ~200px wide (aspect 1:1.414) */
+  .pdf-page {
+    width: 200px;
+    height: 283px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  /* ---- COVER PAGE ---- */
+  .page-cover {
+    background: linear-gradient(160deg, #1e3a5f 0%, #0f2d4a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+  }
+  .cover-logo {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+  .cover-hotel-name {
+    font-size: 0.85rem; font-weight: 700; color: #fff; text-align: center; letter-spacing: 0.03em;
+  }
+  .cover-qr {
+    width: 52px; height: 52px;
+    background: white;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 6px;
+  }
+  .qr-inner {
+    display: grid; grid-template-columns: repeat(7,1fr); grid-template-rows: repeat(7,1fr);
+    gap: 1px; width: 40px; height: 40px;
+  }
+  .qr-inner span {
+    background: #111;
+    border-radius: 0.5px;
+  }
+  .cover-address-label {
+    font-size: 0.55rem; color: rgba(255,255,255,0.55); text-align: center;
+  }
+
+  /* ---- WIFI PAGE ---- */
+  .page-wifi {
+    background: linear-gradient(160deg, #1e3a5f 0%, #0f2d4a 100%);
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .section-title-bar {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-icon {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+  }
+  .section-title { font-size: 0.8rem; font-weight: 700; color: #fff; }
+  .wifi-divider { height: 1px; background: rgba(255,255,255,0.12); }
+  .wifi-field { display: flex; flex-direction: column; gap: 2px; }
+  .wifi-field-label { font-size: 0.52rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; }
+  .wifi-field-value { font-size: 0.72rem; color: #e2e8f0; font-weight: 600; font-family: monospace; }
+  .wifi-qr-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .wifi-qr { width: 60px; height: 60px; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .wifi-qr-label { font-size: 0.58rem; color: rgba(255,255,255,0.55); line-height: 1.4; }
+
+  /* ---- BLOG / ACTIVITIES PAGE ---- */
+  .page-blog {
+    background: linear-gradient(160deg, #1e3a5f 0%, #0f2d4a 100%);
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .blog-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .blog-section:last-child { border-bottom: none; padding-bottom: 0; }
+  .blog-section-title { font-size: 0.65rem; font-weight: 700; color: #fff; }
+  .blog-images-row { display: flex; gap: 3px; }
+  .blog-img {
+    flex: 1; height: 30px; border-radius: 3px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.4rem; color: rgba(255,255,255,0.3);
+    overflow: hidden;
+  }
+  .blog-img img { width: 100%; height: 100%; object-fit: cover; }
+  .blog-desc { font-size: 0.52rem; color: rgba(255,255,255,0.6); line-height: 1.3; }
+  .blog-contact { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .blog-qr-tiny { width: 20px; height: 20px; background: white; border-radius: 2px; flex-shrink: 0; }
+  .blog-contact-label { font-size: 0.48rem; color: rgba(255,255,255,0.45); }
+
+  /* ---- SINGLE BLOG SECTION (big tour detail) ---- */
+  .page-tour {
+    background: linear-gradient(160deg, #1e3a5f 0%, #0f2d4a 100%);
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .tour-big-images {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
+    height: 80px;
+  }
+  .tour-big-img {
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .tour-big-img:first-child {
+    grid-row: 1 / 3;
+    grid-column: 1 / 2;
+  }
+  .tour-desc-text { font-size: 0.55rem; color: rgba(255,255,255,0.65); line-height: 1.4; }
+  .tour-contact-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+  .tour-qr { width: 36px; height: 36px; background: white; border-radius: 3px; flex-shrink: 0; }
+  .tour-contact-info { display: flex; flex-direction: column; gap: 2px; }
+  .tour-contact-label { font-size: 0.5rem; color: rgba(255,255,255,0.4); }
+  .tour-contact-value { font-size: 0.58rem; color: #e2e8f0; font-weight: 600; }
+
+  /* Arrow connector */
+  .arrow {
+    color: #334155;
+    font-size: 1.4rem;
+    align-self: center;
+    margin-top: 30px;
+  }
+
+  /* Detail section below pages */
+  .detail-area {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .detail-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .detail-card h3 { font-size: 0.85rem; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+  .detail-card ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .detail-card li { font-size: 0.78rem; color: #94a3b8; display: flex; gap: 7px; align-items: flex-start; }
+  .detail-card li::before { content: '→'; color: #3b82f6; flex-shrink: 0; font-size: 0.75rem; margin-top: 1px; }
+  .note {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #93c5fd;
+    line-height: 1.5;
+  }
+
+  /* QR mockup dots */
+  .qr-dot { background: #222; }
+</style>
+</head>
+<body>
+
+<h1>Offline PDF Guide — Page Layout Concept</h1>
+<p class="subtitle">Each button in the app becomes one page in the PDF. Scroll right to see the flow →</p>
+
+<div class="pages-row">
+
+  <!-- COVER PAGE -->
+  <div class="page-wrap">
+    <div class="page-label">Page 1 — Cover</div>
+    <div class="pdf-page page-cover">
+      <div class="cover-logo">🏨</div>
+      <div class="cover-hotel-name">Hotel Adriatic<br><span style="font-weight:400;font-size:0.7rem;opacity:0.7">Hvar, Croatia</span></div>
+      <div class="cover-qr">
+        <!-- simple QR-like pattern -->
+        <svg width="40" height="40" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="3" height="3" fill="#111"/>
+          <rect x="1" y="1" width="1" height="1" fill="white"/>
+          <rect x="4" y="0" width="3" height="3" fill="#111"/>
+          <rect x="5" y="1" width="1" height="1" fill="white"/>
+          <rect x="0" y="4" width="3" height="3" fill="#111"/>
+          <rect x="1" y="5" width="1" height="1" fill="white"/>
+          <rect x="4" y="3" width="1" height="1" fill="#111"/>
+          <rect x="3" y="4" width="1" height="1" fill="#111"/>
+          <rect x="5" y="4" width="2" height="1" fill="#111"/>
+          <rect x="4" y="5" width="1" height="1" fill="#111"/>
+          <rect x="6" y="5" width="1" height="2" fill="#111"/>
+          <rect x="3" y="6" width="2" height="1" fill="#111"/>
+          <rect x="3" y="3" width="1" height="1" fill="#111"/>
+        </svg>
+      </div>
+      <div class="cover-address-label">Scan to open in Google Maps</div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- WIFI PAGE -->
+  <div class="page-wrap">
+    <div class="page-label">Page 2 — WiFi Button</div>
+    <div class="pdf-page page-wifi">
+      <div class="section-title-bar">
+        <div class="section-icon">📶</div>
+        <div class="section-title">WiFi</div>
+      </div>
+      <div class="wifi-divider"></div>
+      <div class="wifi-field">
+        <div class="wifi-field-label">Network Name (SSID)</div>
+        <div class="wifi-field-value">HotelAdriaticGuest</div>
+      </div>
+      <div class="wifi-field">
+        <div class="wifi-field-label">Password</div>
+        <div class="wifi-field-value">welcome2024!</div>
+      </div>
+      <div class="wifi-field">
+        <div class="wifi-field-label">Security</div>
+        <div class="wifi-field-value">WPA2</div>
+      </div>
+      <div class="wifi-qr-row">
+        <div class="wifi-qr">
+          <svg width="48" height="48" viewBox="0 0 7 7" fill="none">
+            <rect x="0" y="0" width="3" height="3" fill="#111"/>
+            <rect x="1" y="1" width="1" height="1" fill="white"/>
+            <rect x="4" y="0" width="3" height="3" fill="#111"/>
+            <rect x="5" y="1" width="1" height="1" fill="white"/>
+            <rect x="0" y="4" width="3" height="3" fill="#111"/>
+            <rect x="1" y="5" width="1" height="1" fill="white"/>
+            <rect x="4" y="3" width="1" height="1" fill="#111"/>
+            <rect x="3" y="4" width="2" height="1" fill="#111"/>
+            <rect x="5" y="5" width="2" height="1" fill="#111"/>
+            <rect x="3" y="6" width="1" height="1" fill="#111"/>
+          </svg>
+        </div>
+        <div class="wifi-qr-label">Scan with your camera to<br>connect automatically</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- ACTIVITIES PAGE (multi-section, 4 per page) -->
+  <div class="page-wrap">
+    <div class="page-label">Page 3 — Activities (overview)</div>
+    <div class="pdf-page page-blog">
+      <div class="section-title-bar" style="margin-bottom:4px">
+        <div class="section-icon" style="width:18px;height:18px;font-size:0.6rem">🏄</div>
+        <div class="section-title" style="font-size:0.72rem">Activities</div>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="blog-section">
+        <div class="blog-section-title">1. Brač Island Tour</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#2563eb33,#1d4ed833)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#7c3aed33,#5b21b633)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#0891b233,#0e749133)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#16a34a33,#15803d33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#dc262633,#b91c1c33)">📸</div>
+        </div>
+        <div class="blog-desc">Full-day boat trip around Brač island with snorkeling stops and local lunch included.</div>
+        <div class="blog-contact">
+          <div class="blog-qr-tiny"></div>
+          <div class="blog-contact-label">Scan for directions / call</div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="blog-section">
+        <div class="blog-section-title">2. Blue Cave</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#0ea5e933,#0369a133)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#6366f133,#4f46e533)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#0891b233,#0e749133)">📸</div>
+        </div>
+        <div class="blog-desc">Natural sea cave on Biševo island — electric blue glow from below the surface.</div>
+        <div class="blog-contact">
+          <div class="blog-qr-tiny"></div>
+          <div class="blog-contact-label">Scan for directions / call</div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="blog-section">
+        <div class="blog-section-title">3. Wine Tasting</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#92400e33,#78350f33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#dc262633,#b91c1c33)">📸</div>
+        </div>
+        <div class="blog-desc">Local Dalmatian wines at a family vineyard 10 min from the hotel.</div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="blog-section">
+        <div class="blog-section-title">4. Kayak Rental</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#16a34a33,#15803d33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#0891b233,#0e749133)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#2563eb33,#1d4ed833)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#d97706,#b4540033)">📸</div>
+        </div>
+        <div class="blog-desc">Half-day or full-day kayak rentals from the hotel beach.</div>
+        <div class="blog-contact">
+          <div class="blog-qr-tiny"></div>
+          <div class="blog-contact-label">Scan to call for booking</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">→</div>
+
+  <!-- RESTAURANT PAGE (another button) -->
+  <div class="page-wrap">
+    <div class="page-label">Page 4 — Restaurant Button</div>
+    <div class="pdf-page page-blog">
+      <div class="section-title-bar" style="margin-bottom:4px">
+        <div class="section-icon" style="width:18px;height:18px;font-size:0.6rem">🍽️</div>
+        <div class="section-title" style="font-size:0.72rem">Restaurants</div>
+      </div>
+      <div class="blog-section">
+        <div class="blog-section-title">1. Konoba Marta</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#dc262633,#b91c1c33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#92400e33,#78350f33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#16a34a33,#15803d33)">📸</div>
+        </div>
+        <div class="blog-desc">Traditional Dalmatian food, fresh fish, family-owned. Open daily 12–23h.</div>
+        <div class="blog-contact">
+          <div class="blog-qr-tiny"></div>
+          <div class="blog-contact-label">Scan for map / call</div>
+        </div>
+      </div>
+      <div class="blog-section">
+        <div class="blog-section-title">2. Pizza Bar Split</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#d97706,#b4540033)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#dc262633,#b91c1c33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#92400e33,#78350f33)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#7c3aed33,#5b21b633)">📸</div>
+        </div>
+        <div class="blog-desc">Best wood-fired pizza in the old town, great for families.</div>
+        <div class="blog-contact">
+          <div class="blog-qr-tiny"></div>
+          <div class="blog-contact-label">Scan for map / call</div>
+        </div>
+      </div>
+      <div class="blog-section">
+        <div class="blog-section-title">3. Beachside Café</div>
+        <div class="blog-images-row">
+          <div class="blog-img" style="background:linear-gradient(135deg,#0ea5e933,#0369a133)">📸</div>
+          <div class="blog-img" style="background:linear-gradient(135deg,#2563eb33,#1d4ed833)">📸</div>
+        </div>
+        <div class="blog-desc">Smoothies, coffee, sandwiches. Right on the beach, 5 min walk.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end pages-row -->
+
+<div class="detail-area">
+  <div class="detail-card">
+    <h3>Per-page rules</h3>
+    <ul>
+      <li>Cover page: logo + hotel name + address QR (if address is set)</li>
+      <li>WiFi page: SSID + password + auto-connect QR code</li>
+      <li>Blog/activities: up to 4 sections per page, each with max 5 photos</li>
+      <li>Each link button = its own page (never mixed)</li>
+      <li>Section with phone/address gets a scannable QR code</li>
+      <li>Background color matches the app's chosen color scheme</li>
+    </ul>
+  </div>
+  <div class="detail-card">
+    <h3>Translation</h3>
+    <ul>
+      <li>PDF uses the same translated data already loaded in-app</li>
+      <li>No extra API calls — translation dictionary is cached in memory</li>
+      <li>Language shown in PDF footer (e.g. "Guide in English")</li>
+      <li>Button label for download also translated ("Download offline guide")</li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">
+  💡 <strong>Question for you:</strong> For blog sections that have many sections (e.g. 8 activities), should overflow continue onto a second page for the same button, or should we cap at 4 and indicate "see full guide online"?
+</div>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "8000:8000"
+    volumes:
+      - staticfiles:/app/staticfiles
+      - ./logs:/var/log/infiora
+    environment:
+      - DJANGO_ENVIRONMENT=prod
+      - DB_HOST=db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python src/manage.py migrate &&
+        python src/manage.py collectstatic --noinput &&
+        gunicorn --chdir src --bind 0.0.0.0:8000 --workers 3 --worker-class gevent core.wsgi:application
+      "
+    restart: unless-stopped
+
+  celery:
+    build:
+      context: .
+      target: prod
+    volumes:
+      - ./logs:/var/log/infiora
+    environment:
+      - DJANGO_ENVIRONMENT=prod
+      - DB_HOST=db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "cd src && celery -A core worker -l info"
+    restart: unless-stopped
+
+  celery-beat:
+    build:
+      context: .
+      target: prod
+    volumes:
+      - ./logs:/var/log/infiora
+    environment:
+      - DJANGO_ENVIRONMENT=prod
+      - DB_HOST=db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: sh -c "cd src && celery -A core beat -l info"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  staticfiles:

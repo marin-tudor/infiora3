@@ -1,0 +1,8 @@
+# Prod requirements
+-r base.txt
+
+# Monitoring and error tracking
+sentry-sdk[django]>=1.32.0
+
+# Production server optimizations
+gevent>=23.7.0

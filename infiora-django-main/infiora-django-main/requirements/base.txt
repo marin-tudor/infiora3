@@ -1,0 +1,38 @@
+# Core Django and DRF
+Django>=4.2.0,<5.0
+djangorestframework>=3.14.0
+django-cors-headers>=4.0.0
+djangorestframework-simplejwt>=5.2.0
+
+# Environment and configuration
+python-decouple>=3.8
+django-environ>=0.11.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# Caching and background tasks
+redis>=4.5.0
+django-redis>=5.3.0
+celery>=5.3.0
+
+# Server
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# File handling and S3
+Pillow>=10.0.0
+boto3>=1.28.0
+botocore>=1.31.0
+django-storages>=1.14.0
+
+# Security
+django-ratelimit>=4.1.0
+cryptography>=41.0.0
+
+# API documentation
+drf-spectacular>=0.26.0
+django-filter>=23.2
+
+# Health monitoring
+django-health-check>=3.17.0

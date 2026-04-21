@@ -1,0 +1,78 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create deployment package
+        run: |
+          mkdir deployment
+          cp -r . deployment/ 2>/dev/null || true
+          cd deployment
+          rm -rf .git node_modules __pycache__ .pytest_cache *.pyc *.pyo .DS_Store
+          tar -czf ../app.tar.gz .
+          cd ..
+          rm -rf deployment
+
+      - name: Deploy to server
+        run: |
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa app.tar.gz ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/
+          
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Install make if not present
+            if ! command -v make &> /dev/null; then
+              sudo apt-get update
+              sudo apt-get install -y make
+            fi
+            
+            # Setup directories
+            sudo mkdir -p /opt/infiora-backend
+            sudo chown $USER:$USER /opt/infiora-backend
+            cd /opt/infiora-backend
+            
+            # Backup .env
+            cp .env /tmp/.env.backup
+            
+            # Stop services
+            make prod-down 2>/dev/null || docker compose -f docker-compose.prod.yml down 2>/dev/null || true
+            
+            # Extract new code
+            tar -xzf /tmp/app.tar.gz
+            rm /tmp/app.tar.gz
+            
+            # Restore .env
+            mv /tmp/.env.backup .env
+            
+            # Deploy
+            make prod-deploy
+          EOF
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /opt/infiora-backend
+            docker compose -f docker-compose.prod.yml ps
+            echo "Testing application on port 8000..."
+            curl -f http://localhost:8000/api/v1/health/ || echo "Health check endpoint not available yet"
+          EOF
+
+
