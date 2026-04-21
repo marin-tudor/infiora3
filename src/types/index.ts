@@ -47,6 +47,14 @@ export interface IHotel {
   image: string
   cover?: string
   isActive: boolean
+  settings?: {
+    offlineGuideEnabled?: boolean;
+  };
+  features?: {
+    ordersEnabled?: boolean;
+    maintenanceEnabled?: boolean;
+    housekeepingEnabled?: boolean;
+  };
   map?: IHotelMapSettings
   mapPoints?: IMapPoint[]
 }
@@ -168,6 +176,11 @@ export interface IRoom {
     color?: string
     direction?: string
     type?: string
+    image?: string
+    imageOpacity?: number
+    backgroundFit?: string
+    backgroundPosition?: string
+    tileSize?: number
   }
   font?: {
     color?: string
@@ -183,6 +196,8 @@ export interface IRoom {
   newsletter?: INewsletter
   feedback?: IFeedback
   survey?: ISurvey
+  housekeeping?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string; icon?: string }[] }
+  maintenance?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string }[] }
 }
 
 export interface IGroup {
@@ -194,7 +209,14 @@ export interface IGroup {
     color?: string
     direction?: string
     type?: string
+    image?: string
+    imageOpacity?: number
+    backgroundFit?: string
+    backgroundPosition?: string
+    tileSize?: number
   }
+  housekeeping?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string; icon?: string }[] }
+  maintenance?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string }[] }
   font?: {
     color?: string
     family?: string
@@ -288,11 +310,11 @@ export interface IActivity {
 
 export interface IInsights {
   overTime: Record<
-    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'returningViews' | 'bounceRate' | 'engagedViews',
+    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'bounceRate' | 'engagedViews',
     Record<string, number>
   >
   change: Record<
-    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'returningViews' | 'bounceRate' | 'engagedViews',
+    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'bounceRate' | 'engagedViews',
     number
   >
   keyMetrics: {
@@ -303,7 +325,6 @@ export interface IInsights {
     liveViews: number
     taps: number
     uniqueViews: number
-    returningViews: number
     timeSpent: number
     bounceRate: number
   }
@@ -313,7 +334,6 @@ export interface IInsights {
     taps: number
     topPerformingLink: string
     uniqueViews: number
-    returningViews: number
     timeSpent: number
     bounceRate: string
   })[]
@@ -326,7 +346,6 @@ export interface IInsights {
     taps: number
     topPerformingLink: string
     uniqueViews: number
-    returningViews: number
     timeSpent: number
     bounceRate: string
   }
@@ -446,12 +465,14 @@ export interface IOrderSettings {
     card: boolean
     online: boolean
   }
+
   // Venue mode
   venueType?: 'hotel' | 'restaurant'
   requireCode?: boolean
   requireLocation?: boolean
   locationLabel?: string
   tablePin?: string
+  kioskMode?: boolean
 }
 
 export interface ISurveyAnswerItem {
