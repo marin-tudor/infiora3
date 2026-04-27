@@ -29,6 +29,7 @@ import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
 
 import { useAuthUser } from '@/hooks/useAuthUser'
 import { useUnfinishedOrdersCount } from '@/hooks/useUnfinishedOrdersCount'
+import { useGetHotelQuery } from '@/redux/api/hotelApi'
 import { useGetHousekeepingPendingCountQuery } from '@/redux/api/housekeepingApi'
 import { useGetMaintenancePendingCountQuery } from '@/redux/api/maintenanceApi'
 
@@ -64,8 +65,8 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const router = useRouter()
 
   const hotelId = (authUser as any)?.hotel?.id
-
-  const hotelFeatures = (authUser as any)?.hotel?.features
+  const { data: liveHotel } = useGetHotelQuery(hotelId!, { skip: !hotelId })
+  const hotelFeatures = ((liveHotel as any) ?? (authUser as any)?.hotel)?.features
 
   const { data: housekeepingPending } = useGetHousekeepingPendingCountQuery(hotelId, {
     skip: !hotelId || hotelFeatures?.housekeepingEnabled === false,
@@ -77,7 +78,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
     pollingInterval: 30000
   })
 
-  const { count: unfinishedOrdersCount } = useUnfinishedOrdersCount(hotelId)
+  const { count: unfinishedOrdersCount } = useUnfinishedOrdersCount(hotelId, {
+    skip: hotelFeatures?.ordersEnabled === false
+  })
 
   // Vars
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
@@ -97,6 +100,46 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
       Swal.fire({
         icon: 'warning',
         title: dictionary.inActiveHotelMessage
+      })
+
+      return
+    }
+
+    if (path.endsWith('/orders') && hotelFeatures?.ordersEnabled === false) {
+      Swal.fire({
+        icon: 'info',
+        title: dictionary.orderingDisabledTitle,
+        text: dictionary.featureDisabledDescription
+      })
+
+      return
+    }
+
+    if (path.endsWith('/housekeeping') && hotelFeatures?.housekeepingEnabled === false) {
+      Swal.fire({
+        icon: 'info',
+        title: dictionary.housekeepingDisabledTitle,
+        text: dictionary.featureDisabledDescription
+      })
+
+      return
+    }
+
+    if (path.endsWith('/maintenance') && hotelFeatures?.maintenanceEnabled === false) {
+      Swal.fire({
+        icon: 'info',
+        title: dictionary.maintenanceDisabledTitle,
+        text: dictionary.featureDisabledDescription
+      })
+
+      return
+    }
+
+    if (path.includes('/staff') && hotelFeatures?.staffRbacEnabled === false) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Staff RBAC is disabled',
+        text: dictionary.featureDisabledDescription
       })
 
       return
@@ -140,6 +183,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         <MenuItem icon={<i className='ri-shopping-bag-3-line' />} onClick={() => handleMenuClick(`/${locale}/orders`)}>
           <MenuLabelWithCount label={dictionary.orders} count={unfinishedOrdersCount} />
         </MenuItem>
+        {hotelFeatures?.ordersEnabled !== false && (
+          <MenuItem icon={<i className='ri-time-line' />} onClick={() => handleMenuClick(`/${locale}/orders/scheduled`)}>
+            Scheduled Orders
+          </MenuItem>
+        )}
         <MenuItem icon={<i className='ri-group-line' />} onClick={() => handleMenuClick(`/${locale}/subscribers`)}>
           {dictionary.subscribers}
         </MenuItem>
@@ -147,14 +195,19 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           {dictionary.feedbacks}
         </MenuItem>
         <MenuItem icon={<i className='ri-service-line' />} onClick={() => handleMenuClick(`/${locale}/housekeeping`)}>
-          <MenuLabelWithCount label='Housekeeping' count={housekeepingPending?.count} />
+          <MenuLabelWithCount label={dictionary.housekeeping || 'Housekeeping'} count={housekeepingPending?.count} />
         </MenuItem>
         <MenuItem icon={<i className='ri-tools-line' />} onClick={() => handleMenuClick(`/${locale}/maintenance`)}>
-          <MenuLabelWithCount label='Maintenance' count={maintenancePending?.count} />
+          <MenuLabelWithCount label={dictionary.maintenance || 'Maintenance'} count={maintenancePending?.count} />
         </MenuItem>
         <MenuItem icon={<i className='ri-line-chart-line' />} onClick={() => handleMenuClick(`/${locale}/insights`)}>
           {dictionary.analytics}
         </MenuItem>
+        {hotelFeatures?.staffRbacEnabled && (
+          <MenuItem icon={<i className='ri-tablet-line' />} onClick={() => handleMenuClick(`/${locale}/staff`)}>
+            Orders Setup
+          </MenuItem>
+        )}
         <MenuItem
           icon={<i className='ri-hotel-line' />}
           onClick={() => window.open('https://dash.eprijava.hr', '_blank')}
