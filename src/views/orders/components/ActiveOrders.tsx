@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 
-import { Box, Button, CircularProgress, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { endOfToday, formatISO, isSameDay, parseISO, startOfToday } from 'date-fns'
 
 import RangePicker from '@/components/common/RangePicker'
 import type { IGuestOrder } from '@/types'
 import { useGetOrdersQuery } from '@/redux/api/ordersApi'
+import { useGetNotificationGroupsQuery } from '@/redux/api/staffApi'
+import { useOrdersSSE } from '@/hooks/useOrdersSSE'
+import { useDictionary } from '@/contexts/DictionaryContext'
 
 import OrderCard from './OrderCard'
 
@@ -50,8 +53,14 @@ function exportToCSV(orders: IGuestOrder[], currency: string) {
 }
 
 export default function ActiveOrders({ hotelId, currency }: { hotelId: string; currency?: string }) {
+  const dictionary: any = useDictionary()
+  const t = dictionary.pages?.activeOrders || {}
   const [statusFilter, setStatusFilter] = useState('')
+  const [selectedGroupId, setSelectedGroupId] = useState('')
   const [range, setRange] = useState<{ startDate?: string; endDate?: string }>({})
+
+  const escalatedIds = useOrdersSSE(hotelId)
+  const { data: groupsData } = useGetNotificationGroupsQuery(hotelId)
 
   const startDate = range.startDate || formatISO(startOfToday())
   const endDate = range.endDate || formatISO(endOfToday())
@@ -59,7 +68,7 @@ export default function ActiveOrders({ hotelId, currency }: { hotelId: string; c
   const todayStart = startOfToday()
 
   const { data, isLoading } = useGetOrdersQuery(
-    { hotelId, status: statusFilter || undefined, limit: 100, startDate, endDate },
+    { hotelId, status: statusFilter || undefined, limit: 100, startDate, endDate, groupId: selectedGroupId || undefined },
     {}
   )
 
@@ -84,21 +93,41 @@ export default function ActiveOrders({ hotelId, currency }: { hotelId: string; c
     ...carryOrders.filter(o => !mainOrders.find(m => m.id === o.id)),
   ].sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime())
 
+  const groups: { id: string; name: string }[] = (groupsData as any) ?? []
+
   return (
     <Stack gap={2}>
       <Stack direction='row' alignItems='center' justifyContent='space-between' flexWrap='wrap' gap={2}>
-        <ToggleButtonGroup
-          value={statusFilter}
-          exclusive
-          onChange={(_, v) => v !== null && setStatusFilter(v)}
-          size='small'
-        >
-          {STATUS_FILTERS.map(f => (
-            <ToggleButton key={f.value} value={f.value}>
-              {f.label}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+        <Stack direction='row' alignItems='center' gap={2} flexWrap='wrap'>
+          <ToggleButtonGroup
+            value={statusFilter}
+            exclusive
+            onChange={(_, v) => v !== null && setStatusFilter(v)}
+            size='small'
+          >
+            {STATUS_FILTERS.map(f => (
+              <ToggleButton key={f.value} value={f.value}>
+                {f.label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+
+          {groups.length > 0 && (
+            <FormControl size='small' sx={{ minWidth: 160 }}>
+              <InputLabel>Group</InputLabel>
+              <Select
+                value={selectedGroupId}
+                label='Group'
+                onChange={e => setSelectedGroupId(e.target.value)}
+              >
+                <MenuItem value=''>All groups</MenuItem>
+                {groups.map(g => (
+                  <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </Stack>
 
         <Stack direction='row' gap={1} alignItems='center'>
           {isLoading && <CircularProgress size={18} />}
@@ -109,11 +138,12 @@ export default function ActiveOrders({ hotelId, currency }: { hotelId: string; c
             onClick={() => exportToCSV(allOrders, currency || 'EUR')}
             disabled={allOrders.length === 0}
           >
-            Export
+            {dictionary.export}
           </Button>
           <RangePicker range={range} setRange={setRange} />
         </Stack>
       </Stack>
+
 
       {isLoading ? (
         <Box textAlign='center' py={6}>
@@ -121,18 +151,18 @@ export default function ActiveOrders({ hotelId, currency }: { hotelId: string; c
         </Box>
       ) : allOrders.length === 0 ? (
         <Box textAlign='center' py={8}>
-          <Typography fontSize={40} mb={1}>Order list</Typography>
-          <Typography color='text.secondary'>No orders found</Typography>
+          <Typography fontSize={40} mb={1}>{t.orderList || 'Order list'}</Typography>
+          <Typography color='text.secondary'>{t.noOrdersFound || 'No orders found'}</Typography>
         </Box>
       ) : (
         <Stack gap={1.5}>
           {carryOrders.length > 0 && (
             <Typography variant='caption' color='warning.main' fontWeight={600}>
-              {carryOrders.length} unfinished order{carryOrders.length > 1 ? 's' : ''} carried over from previous days
+              {carryOrders.length} {t.unfinishedCarryPrefix || 'unfinished order'}{carryOrders.length > 1 ? t.unfinishedCarryPlural || 's' : ''} {t.unfinishedCarrySuffix || 'carried over from previous days'}
             </Typography>
           )}
           {allOrders.map(order => (
-            <OrderCard key={order.id} order={order} currency={currency} />
+            <OrderCard key={order.id} order={order} currency={currency} escalated={escalatedIds.has(order.id)} />
           ))}
         </Stack>
       )}
