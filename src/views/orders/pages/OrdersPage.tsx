@@ -16,6 +16,7 @@ import ActiveOrders from '../components/ActiveOrders'
 import MenuManagement from '../components/MenuManagement'
 import ReservationCodes from '../components/ReservationCodes'
 import OrderSettings from '../components/OrderSettings'
+import ScheduledOrdersPage from './ScheduledOrdersPage'
 
 export default function OrdersPage() {
   const [tab, setTab] = useState(0)
@@ -65,6 +66,7 @@ export default function OrdersPage() {
             iconPosition='start'
           />
           <Tab label={t.menuTab || 'Menu'} icon={<i className='ri-restaurant-line' />} iconPosition='start' />
+          <Tab label={t.scheduledTab || 'Scheduled'} icon={<i className='ri-time-line' />} iconPosition='start' />
           <Tab label={t.codesTab || 'Codes'} icon={<i className='ri-key-2-line' />} iconPosition='start' />
           <Tab label={dictionary.settings} icon={<i className='ri-settings-3-line' />} iconPosition='start' />
         </Tabs>
@@ -74,8 +76,9 @@ export default function OrdersPage() {
         {tab === 0 && <OrdersDashboard hotelId={hotelId} />}
         {tab === 1 && <ActiveOrders hotelId={hotelId} currency={currency} />}
         {tab === 2 && <MenuManagement hotelId={hotelId} currency={currency} />}
-        {tab === 3 && <ReservationCodes hotelId={hotelId} />}
-        {tab === 4 && <OrderSettings hotelId={hotelId} />}
+        {tab === 3 && <ScheduledOrdersPage />}
+        {tab === 4 && <ReservationCodes hotelId={hotelId} />}
+        {tab === 5 && <OrderSettings hotelId={hotelId} />}
       </Box>
     </Stack>
   )
