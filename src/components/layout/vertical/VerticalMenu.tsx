@@ -188,6 +188,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             Scheduled Orders
           </MenuItem>
         )}
+        {hotelFeatures?.bookableServicesEnabled && (
+          <MenuItem icon={<i className='ri-calendar-check-line' />} onClick={() => handleMenuClick(`/${locale}/bookings`)}>
+            Bookings
+          </MenuItem>
+        )}
         <MenuItem icon={<i className='ri-group-line' />} onClick={() => handleMenuClick(`/${locale}/subscribers`)}>
           {dictionary.subscribers}
         </MenuItem>
@@ -202,6 +207,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         </MenuItem>
         <MenuItem icon={<i className='ri-line-chart-line' />} onClick={() => handleMenuClick(`/${locale}/insights`)}>
           {dictionary.analytics}
+        </MenuItem>
+        <MenuItem icon={<i className='ri-bar-chart-box-line' />} onClick={() => handleMenuClick(`/${locale}/analytics`)}>
+          Revenue Analytics
         </MenuItem>
         {hotelFeatures?.staffRbacEnabled && (
           <MenuItem icon={<i className='ri-tablet-line' />} onClick={() => handleMenuClick(`/${locale}/staff`)}>
