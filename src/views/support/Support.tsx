@@ -23,6 +23,7 @@ type FormData = yup.InferType<typeof schema>
 
 const Support = () => {
   const dictionary = useDictionary()
+  const t: any = dictionary.pages?.support || {}
   const emailDialog = useDialog()
   const [createTicket, { isLoading }] = useCreateTicketMutation()
 
@@ -36,7 +37,7 @@ const Support = () => {
   const onSubmit = async (data: FormData) => {
     try {
       await createTicket({ ...data, subject: 'Feature Request', category: 'feature' }).unwrap()
-      toast.success('Your suggestion has been sent. Thank you!')
+      toast.success(t.suggestionSent || 'Your suggestion has been sent. Thank you!')
       reset()
     } catch (error: any) {
       toast.error(error?.data?.message || error.message)
@@ -64,7 +65,7 @@ const Support = () => {
                     {dictionary.pages.support.averageResponseTime}
                   </Typography>
                 </Stack>
-                <Button variant='contained' size='small' onClick={emailDialog.open}>
+                <Button variant='contained' size='small' onClick={() => emailDialog.open()}>
                   {dictionary.sendEmail}
                 </Button>
               </Stack>
@@ -78,7 +79,7 @@ const Support = () => {
             <CardHeader
               avatar={<Lightbulb color='warning' />}
               title={dictionary.pages.support.requestFeature}
-              subheader='Share your ideas and help us improve the platform'
+              subheader={t.shareIdeas || 'Share your ideas and help us improve the platform'}
             />
             <CardContent>
               <form noValidate onSubmit={handleSubmit(onSubmit)}>

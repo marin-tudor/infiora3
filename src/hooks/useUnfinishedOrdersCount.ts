@@ -9,17 +9,17 @@ export function useUnfinishedOrdersCount(hotelId?: string, options?: { skip?: bo
 
   const awaiting = useGetOrdersQuery(
     { hotelId: hotelId!, status: UNFINISHED_ORDER_STATUSES[0], limit: 1 },
-    { skip: shouldSkip }
+    { skip: shouldSkip, pollingInterval: 10000 }
   )
 
   const processing = useGetOrdersQuery(
     { hotelId: hotelId!, status: UNFINISHED_ORDER_STATUSES[1], limit: 1 },
-    { skip: shouldSkip }
+    { skip: shouldSkip, pollingInterval: 10000 }
   )
 
   const onTheWay = useGetOrdersQuery(
     { hotelId: hotelId!, status: UNFINISHED_ORDER_STATUSES[2], limit: 1 },
-    { skip: shouldSkip }
+    { skip: shouldSkip, pollingInterval: 10000 }
   )
 
   return {

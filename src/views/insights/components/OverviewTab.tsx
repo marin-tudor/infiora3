@@ -20,6 +20,7 @@ import AppReactApexCharts from '@/libs/styles/AppReactApexCharts'
 import type { IInsights, IFeedbackSubmission } from '@/types'
 import { formatTime } from '@/utils/miscUtils'
 import { useGetHotelFeedbacksQuery } from '@/redux/api/roomApi'
+import { useDictionary } from '@/contexts/DictionaryContext'
 
 function KpiCard({ label, value, change, color, sub }: {
   label: string; value: string | number; change?: number; color?: string; sub?: string
@@ -63,6 +64,8 @@ export default function OverviewTab({
   startDate?: string
   endDate?: string
 }) {
+  const dictionary: any = useDictionary()
+  const t = dictionary.pages?.insightsUi || {}
   const theme = useTheme()
   const km = insights.keyMetrics
   const ch = insights.change
@@ -80,8 +83,8 @@ export default function OverviewTab({
   const chartDividerColor = resolveCssVarColor(theme.palette.divider)
 
   const trendLegendItems = [
-    { label: 'Views', color: '#3b82f6' },
-    { label: 'Taps', color: '#f59e0b' }
+    { label: dictionary.views, color: '#3b82f6' },
+    { label: dictionary.taps, color: '#f59e0b' }
   ]
 
   const { data: fbData } = useGetHotelFeedbacksQuery(
@@ -89,19 +92,23 @@ export default function OverviewTab({
     { skip: !hotelId }
   )
 
+  const getFeedbackRoomKey = (room: IFeedbackSubmission['room']) =>
+    typeof room === 'string' ? room : room?.id
+
   const feedbackByRoom = useMemo(() => {
     const map: Record<string, { count: number; total: number }> = {}
 
     ;(fbData?.results || []).forEach((f: IFeedbackSubmission) => {
-      if (!f.room || !f.rating) return
-      const e = map[f.room] ?? { count: 0, total: 0 }
+      const roomKey = getFeedbackRoomKey(f.room)
+      if (!roomKey || !f.rating) return
+      const e = map[roomKey] ?? { count: 0, total: 0 }
 
       e.count++
       e.total += f.rating
-      map[f.room] = e
+      map[roomKey] = e
     })
-    
-return map
+
+    return map
   }, [fbData])
 
   const globalAvgRating = useMemo(() => {
@@ -109,7 +116,7 @@ return map
 
     if (!withRating.length) return null
 
-return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ?? 0), 0) / withRating.length
+    return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ?? 0), 0) / withRating.length
   }, [fbData])
 
   const guideDownloads = useMemo(
@@ -161,17 +168,17 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
       {/* KPI Cards */}
       <Grid container spacing={2}>
         <Grid item xs={6} sm={4} md={3}>
-          <KpiCard label='Total Views' value={km.views ?? 0} change={ch?.views} />
+          <KpiCard label={t.totalViews || 'Total Views'} value={km.views ?? 0} change={ch?.views} />
         </Grid>
         <Grid item xs={6} sm={4} md={3}>
-          <KpiCard label='Live Views' value={km.liveViews ?? 0} color='success.main' sub='Currently active' />
+          <KpiCard label={dictionary.liveViews} value={km.liveViews ?? 0} color='success.main' sub={t.currentlyActive || 'Currently active'} />
         </Grid>
         <Grid item xs={6} sm={4} md={3}>
-          <KpiCard label='Button Taps' value={km.taps ?? 0} change={ch?.taps} color='primary.main' />
+          <KpiCard label={t.buttonTaps || 'Button Taps'} value={km.taps ?? 0} change={ch?.taps} color='primary.main' />
         </Grid>
         <Grid item xs={6} sm={4} md={3}>
           <KpiCard
-            label='Avg Time Spent'
+            label={t.avgTimeSpent || 'Avg Time Spent'}
             value={formatTime(km.timeSpent || 0) || '0s'}
             change={ch?.timeSpent}
           />
@@ -202,18 +209,18 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
         </Grid>
         <Grid item xs={6} sm={4} md={3}>
           <KpiCard
-            label='Guide Downloads'
+            label={t.guideDownloads || 'Guide Downloads'}
             value={guideDownloads}
             color='info.main'
-            sub='Offline PDF downloaded'
+            sub={t.offlinePdfDownloaded || 'Offline PDF downloaded'}
           />
         </Grid>
         <Grid item xs={6} sm={4} md={3}>
           <KpiCard
-            label='Avg Guest Rating'
+            label={t.avgGuestRating || 'Avg Guest Rating'}
             value={globalAvgRating != null ? `${globalAvgRating.toFixed(1)} ★` : 'N/A'}
             color={globalAvgRating != null ? (globalAvgRating >= 4 ? 'success.main' : globalAvgRating >= 3 ? 'warning.main' : 'error.main') : undefined}
-            sub={fbData?.results?.length ? `${fbData.results.length} reviews` : 'No reviews yet'}
+            sub={fbData?.results?.length ? `${fbData.results.length} ${t.reviews || 'reviews'}` : (t.noReviewsYet || 'No reviews yet')}
           />
         </Grid>
       </Grid>
@@ -222,7 +229,7 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <Card variant='outlined'>
-            <CardHeader title='Views &amp; Taps Trend' titleTypographyProps={{ variant: 'h6' }} />
+            <CardHeader title={t.viewsAndTapsTrend || 'Views & Taps Trend'} titleTypographyProps={{ variant: 'h6' }} />
             <CardContent sx={{ pt: 0 }}>
               <ResponsiveContainer width='100%' height={260}>
                 <LineChart data={trendChartData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
@@ -248,8 +255,8 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
                       backgroundColor: resolveCssVarColor(theme.palette.background.paper)
                     }}
                   />
-                  <Line type='monotone' dataKey='views' name='Views' stroke='#3b82f6' strokeWidth={2} dot={false} />
-                  <Line type='monotone' dataKey='taps' name='Taps' stroke='#f59e0b' strokeWidth={2} dot={false} />
+                  <Line type='monotone' dataKey='views' name={dictionary.views} stroke='#3b82f6' strokeWidth={2} dot={false} />
+                  <Line type='monotone' dataKey='taps' name={dictionary.taps} stroke='#f59e0b' strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
               <Stack direction='row' justifyContent='center' gap={2} flexWrap='wrap' sx={{ pt: 2 }}>
@@ -276,7 +283,7 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
         <Grid item xs={12} sm={6} md={3}>
           <Card variant='outlined' sx={{ height: '100%' }}>
             <CardHeader
-              title='Device Usage'
+              title={dictionary.pages.insights?.devices?.title || 'Device Usage'}
               titleTypographyProps={{ variant: 'body1', fontWeight: 600 }}
             />
             <CardContent sx={{ pt: 0 }}>
@@ -290,7 +297,7 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
                 />
               ) : (
                 <Typography variant='body2' color='text.secondary' textAlign='center' py={6}>
-                  No device data
+                  {t.noDeviceData || 'No device data'}
                 </Typography>
               )}
             </CardContent>
@@ -299,7 +306,7 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
         <Grid item xs={12} sm={6} md={3}>
           <Card variant='outlined' sx={{ height: '100%' }}>
             <CardHeader
-              title='Traffic by Language'
+              title={t.trafficByLanguage || 'Traffic by Language'}
               titleTypographyProps={{ variant: 'body1', fontWeight: 600 }}
             />
             <CardContent sx={{ pt: 0 }}>
@@ -313,7 +320,7 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
                 />
               ) : (
                 <Typography variant='body2' color='text.secondary' textAlign='center' py={6}>
-                  No language data
+                  {t.noLanguageData || 'No language data'}
                 </Typography>
               )}
             </CardContent>
@@ -323,17 +330,17 @@ return withRating.reduce((s: number, f: IFeedbackSubmission) => s + (f.rating ??
 
       {/* Room Performance Summary */}
       <Card variant='outlined'>
-        <CardHeader title='Room Performance Breakdown' titleTypographyProps={{ variant: 'h6' }} />
+        <CardHeader title={t.roomPerformanceBreakdown || 'Room Performance Breakdown'} titleTypographyProps={{ variant: 'h6' }} />
         <Table size='small'>
           <TableHead>
             <TableRow sx={{ bgcolor: 'action.hover' }}>
               <TableCell sx={{ fontWeight: 600 }}>Room #</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Group</TableCell>
-              <TableCell align='right' sx={{ fontWeight: 600 }}>Views</TableCell>
-              <TableCell align='right' sx={{ fontWeight: 600 }}>Bounce Rate</TableCell>
-              <TableCell align='right' sx={{ fontWeight: 600 }}>Time Spent</TableCell>
-              <TableCell align='right' sx={{ fontWeight: 600 }}>Taps</TableCell>
-              <TableCell align='right' sx={{ fontWeight: 600 }}>Rating</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>{dictionary.group}</TableCell>
+              <TableCell align='right' sx={{ fontWeight: 600 }}>{dictionary.views}</TableCell>
+              <TableCell align='right' sx={{ fontWeight: 600 }}>{dictionary.bounceRate}</TableCell>
+              <TableCell align='right' sx={{ fontWeight: 600 }}>{dictionary.timeSpent}</TableCell>
+              <TableCell align='right' sx={{ fontWeight: 600 }}>{dictionary.taps}</TableCell>
+              <TableCell align='right' sx={{ fontWeight: 600 }}>{t.rating || 'Rating'}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -375,7 +382,7 @@ return (
               <TableRow>
                 <TableCell colSpan={7} align='center'>
                   <Typography variant='body2' color='text.secondary' py={3}>
-                    No room data yet for this period
+                    {t.noRoomDataForPeriod || 'No room data yet for this period'}
                   </Typography>
                 </TableCell>
               </TableRow>

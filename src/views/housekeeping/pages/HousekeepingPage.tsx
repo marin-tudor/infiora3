@@ -26,7 +26,9 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 
 import Loader from '@/components/common/Loader'
 import FeatureLocked from '@/components/common/FeatureLocked'
+import { useDictionary } from '@/contexts/DictionaryContext'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import { useGetHotelQuery } from '@/redux/api/hotelApi'
 import {
   useGetHousekeepingRequestsQuery,
   useGetHousekeepingPendingCountQuery,
@@ -41,33 +43,37 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'info' | 'success' |
   cancelled: 'error',
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  '': 'All',
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  done: 'Done',
-  cancelled: 'Cancelled',
-}
-
 const reservationCodeColor = (status?: string): 'default' | 'success' | 'warning' =>
   status === 'matched' ? 'success' : status === 'unmatched' ? 'warning' : 'default'
 
 const TYPE_ICONS: Record<string, string> = {
-  cleaning: '🧹',
-  towels: '🛁',
-  pillows: '🛏',
-  amenities: '🧴',
-  do_not_disturb: '🔕',
-  extra_bed: '🛋',
-  other: '💬',
+  cleaning: 'đź§ą',
+  towels: 'đź›',
+  pillows: 'đź›Ź',
+  amenities: 'đź§´',
+  do_not_disturb: 'đź”•',
+  extra_bed: 'đź›‹',
+  other: 'đź’¬',
 }
 
 export default function HousekeepingPage() {
+  const dictionary: any = useDictionary()
+  const t = dictionary.pages?.housekeeping || {}
   const authUser = useAuthUser()
   const hotelId = (authUser as any)?.hotel?.id
+  const { data: liveHotel } = useGetHotelQuery(hotelId!, { skip: !hotelId })
   const [statusFilter, setStatusFilter] = useState('pending')
 
-  const isFeatureLocked = (authUser as any)?.hotel?.features?.housekeepingEnabled === false
+  const hotelFeatures = ((liveHotel as any) ?? (authUser as any)?.hotel)?.features
+  const isFeatureLocked = hotelFeatures?.housekeepingEnabled === false
+
+  const statusLabels: Record<string, string> = {
+    '': t.statusAll || 'All',
+    pending: t.statusPending || 'Pending',
+    in_progress: t.statusInProgress || 'In Progress',
+    done: t.statusDone || 'Done',
+    cancelled: t.statusCancelled || 'Cancelled',
+  }
 
   const { data, isLoading } = useGetHousekeepingRequestsQuery(
     { hotelId, status: statusFilter || undefined, limit: 50 },
@@ -105,7 +111,7 @@ export default function HousekeepingPage() {
       <Stack direction='row' justifyContent='space-between' alignItems='center' mb={3}>
         <Badge badgeContent={unsolvedCount || undefined} color='error'>
           <Typography variant='h5' fontWeight={700} sx={{ pr: unsolvedCount ? 1 : 0 }}>
-            Housekeeping Requests
+            {t.title || 'Housekeeping Requests'}
           </Typography>
         </Badge>
         <Select
@@ -114,18 +120,18 @@ export default function HousekeepingPage() {
           onChange={e => setStatusFilter(e.target.value)}
           sx={{ minWidth: 150 }}
           displayEmpty
-          renderValue={value => STATUS_LABELS[String(value)] ?? 'All'}
+          renderValue={value => statusLabels[String(value)] ?? (t.statusAll || 'All')}
         >
-          <MenuItem value=''>All</MenuItem>
+          <MenuItem value=''>{t.statusAll || 'All'}</MenuItem>
           <MenuItem value='pending'>
             <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%' }}>
-              <span>Pending</span>
+              <span>{t.statusPending || 'Pending'}</span>
               {pendingOnlyCount > 0 && <Chip label={pendingOnlyCount} color='error' size='small' />}
             </Stack>
           </MenuItem>
-          <MenuItem value='in_progress'>In Progress</MenuItem>
-          <MenuItem value='done'>Done</MenuItem>
-          <MenuItem value='cancelled'>Cancelled</MenuItem>
+          <MenuItem value='in_progress'>{t.statusInProgress || 'In Progress'}</MenuItem>
+          <MenuItem value='done'>{t.statusDone || 'Done'}</MenuItem>
+          <MenuItem value='cancelled'>{t.statusCancelled || 'Cancelled'}</MenuItem>
         </Select>
       </Stack>
 
@@ -134,20 +140,20 @@ export default function HousekeepingPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Room</TableCell>
-                <TableCell>Request</TableCell>
-                <TableCell>Note</TableCell>
-                <TableCell>Proof</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Time</TableCell>
-                <TableCell align='right'>Actions</TableCell>
+                <TableCell>{t.colRoom || 'Room'}</TableCell>
+                <TableCell>{t.colRequest || 'Request'}</TableCell>
+                <TableCell>{t.colNote || 'Note'}</TableCell>
+                <TableCell>{t.colProof || 'Proof'}</TableCell>
+                <TableCell>{t.colStatus || 'Status'}</TableCell>
+                <TableCell>{t.colTime || 'Time'}</TableCell>
+                <TableCell align='right'>{t.colActions || 'Actions'}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {requests.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align='center' sx={{ py: 4, color: 'text.secondary' }}>
-                    No requests found
+                    {t.empty || 'No requests found'}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -157,13 +163,13 @@ export default function HousekeepingPage() {
                       <Typography fontWeight={600}>{req.guestRoomNumber || req.roomNumber || req.room}</Typography>
                       {req.guestRoomNumber && req.roomNumber && (
                         <Typography variant='caption' color='text.secondary'>
-                          QR room {req.roomNumber}
+                          {(t.qrRoomPrefix || 'QR room')} {req.roomNumber}
                         </Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       <Stack direction='row' alignItems='center' gap={1}>
-                        <span>{TYPE_ICONS[req.type] ?? '📋'}</span>
+                        <span>{TYPE_ICONS[req.type] ?? 'đź“‹'}</span>
                         <Typography variant='body2' sx={{ textTransform: 'capitalize' }}>
                           {req.typeLabel || req.type.replace('_', ' ')}
                         </Typography>
@@ -171,24 +177,24 @@ export default function HousekeepingPage() {
                     </TableCell>
                     <TableCell>
                       <Typography variant='body2' color='text.secondary' noWrap sx={{ maxWidth: 200 }}>
-                        {req.note || '—'}
+                        {req.note || 'â€”'}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       {req.reservationCode ? (
                         <Chip
-                          label={`${req.reservationCode} ${req.reservationCodeStatus === 'matched' ? '✓' : '!'}`}
+                          label={`${req.reservationCode} ${req.reservationCodeStatus === 'matched' ? 'âś“' : '!'}`}
                           color={reservationCodeColor(req.reservationCodeStatus)}
                           size='small'
                           variant='outlined'
                         />
                       ) : (
-                        <Typography variant='caption' color='text.secondary'>â€”</Typography>
+                        <Typography variant='caption' color='text.secondary'>Ă˘â‚¬â€ť</Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={req.status.replace('_', ' ')}
+                        label={statusLabels[req.status] || req.status.replace('_', ' ')}
                         color={STATUS_COLORS[req.status]}
                         size='small'
                         sx={{ textTransform: 'capitalize' }}
@@ -204,7 +210,7 @@ export default function HousekeepingPage() {
                     <TableCell align='right'>
                       <Stack direction='row' justifyContent='flex-end' gap={0.5}>
                         {req.status === 'pending' && (
-                          <Tooltip title='Mark In Progress'>
+                          <Tooltip title={t.actionMarkInProgress || 'Mark In Progress'}>
                             <IconButton size='small' color='info' onClick={() => handleStatus(req.id, 'in_progress')}>
                               <HourglassEmptyIcon fontSize='small' />
                             </IconButton>
@@ -212,12 +218,12 @@ export default function HousekeepingPage() {
                         )}
                         {(req.status === 'pending' || req.status === 'in_progress') && (
                           <>
-                            <Tooltip title='Mark Done'>
+                            <Tooltip title={t.actionMarkDone || 'Mark Done'}>
                               <IconButton size='small' color='success' onClick={() => handleStatus(req.id, 'done')}>
                                 <CheckCircleOutlineIcon fontSize='small' />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title='Cancel'>
+                            <Tooltip title={t.actionCancel || 'Cancel'}>
                               <IconButton size='small' color='error' onClick={() => handleStatus(req.id, 'cancelled')}>
                                 <CancelOutlinedIcon fontSize='small' />
                               </IconButton>

@@ -40,8 +40,21 @@ const EditHotelPage = ({ hotel }: { hotel: IHotel }) => {
   const [cover, setCover] = useState(hotel.cover)
   const [map, setMap] = useState(hotel.map)
   const [mapPoints, setMapPoints] = useState(hotel.mapPoints || [])
+
   const [offlineGuideEnabled, setOfflineGuideEnabled] = useState(
     hotel.settings?.offlineGuideEnabled !== false
+  )
+
+  const [staffRbacEnabled, setStaffRbacEnabled] = useState(
+    hotel.features?.staffRbacEnabled === true
+  )
+
+  const [smartDispatchingEnabled, setSmartDispatchingEnabled] = useState(
+    hotel.features?.smartDispatchingEnabled === true
+  )
+
+  const [bookableServicesEnabled, setBookableServicesEnabled] = useState(
+    hotel.features?.bookableServicesEnabled === true
   )
 
   const [updateHotel, { isLoading }] = useUpdateHotelMutation()
@@ -67,7 +80,22 @@ const EditHotelPage = ({ hotel }: { hotel: IHotel }) => {
     try {
       const updatedHotel = await updateHotel({
         id: hotel.id,
-        hotel: { ...data, image, cover, map, mapPoints, settings: { offlineGuideEnabled } }
+        hotel: {
+          ...data,
+          image,
+          cover,
+          map,
+          mapPoints,
+          settings: { offlineGuideEnabled },
+          features: {
+            ordersEnabled: hotel.features?.ordersEnabled ?? true,
+            maintenanceEnabled: hotel.features?.maintenanceEnabled ?? true,
+            housekeepingEnabled: hotel.features?.housekeepingEnabled ?? true,
+            staffRbacEnabled,
+            smartDispatchingEnabled,
+            bookableServicesEnabled
+          }
+        }
       }).unwrap()
 
       await update({ hotel: updatedHotel })
@@ -81,6 +109,10 @@ const EditHotelPage = ({ hotel }: { hotel: IHotel }) => {
     reset({ name: hotel.name || '', description: hotel.description || '' })
     setMap(hotel.map)
     setMapPoints(hotel.mapPoints || [])
+    setOfflineGuideEnabled(hotel.settings?.offlineGuideEnabled !== false)
+    setStaffRbacEnabled(hotel.features?.staffRbacEnabled === true)
+    setSmartDispatchingEnabled(hotel.features?.smartDispatchingEnabled === true)
+    setBookableServicesEnabled(hotel.features?.bookableServicesEnabled === true)
   }
 
   return (
@@ -117,20 +149,50 @@ const EditHotelPage = ({ hotel }: { hotel: IHotel }) => {
               />
               <MapSettingsSection map={map} mapPoints={mapPoints} onMapChange={setMap} onMapPointsChange={setMapPoints} />
             </Stack>
-              <Stack>
-                <Typography variant='subtitle2' fontWeight={600} mb={1}>
-                  Guest App Settings
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={offlineGuideEnabled}
-                      onChange={(e) => setOfflineGuideEnabled(e.target.checked)}
-                    />
-                  }
-                  label='Show offline guide download button'
-                />
-              </Stack>
+            <Stack gap={2}>
+              <Typography variant='subtitle2' fontWeight={600} mb={1}>
+                Guest App Settings
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={offlineGuideEnabled}
+                    onChange={(e) => setOfflineGuideEnabled(e.target.checked)}
+                  />
+                }
+                label='Show offline guide download button'
+              />
+              <Typography variant='subtitle2' fontWeight={600} mb={1}>
+                Wave 1 Features
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={staffRbacEnabled}
+                    onChange={(e) => setStaffRbacEnabled(e.target.checked)}
+                  />
+                }
+                label='Enable Staff RBAC'
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={smartDispatchingEnabled}
+                    onChange={(e) => setSmartDispatchingEnabled(e.target.checked)}
+                  />
+                }
+                label='Enable Smart Dispatching'
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={bookableServicesEnabled}
+                    onChange={(e) => setBookableServicesEnabled(e.target.checked)}
+                  />
+                }
+                label='Enable Bookable Services'
+              />
+            </Stack>
             <Stack direction='row' gap={2} sx={{ ml: 'auto' }}>
               <Button variant='outlined' color='secondary' onClick={handleCancel}>
                 {dictionary.cancel}

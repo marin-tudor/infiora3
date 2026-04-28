@@ -54,6 +54,9 @@ export interface IHotel {
     ordersEnabled?: boolean;
     maintenanceEnabled?: boolean;
     housekeepingEnabled?: boolean;
+    staffRbacEnabled?: boolean;
+    smartDispatchingEnabled?: boolean;
+    bookableServicesEnabled?: boolean;
   };
   map?: IHotelMapSettings
   mapPoints?: IMapPoint[]
@@ -266,11 +269,12 @@ export interface IItem {
 }
 export interface ISection {
   id: string
+  clientId?: string
   title: string
   description?: string
   url?: string
   urlButtonText?: string
-  links?: { url: string; urlButtonText: string }[]
+  links?: { clientId?: string; url: string; urlButtonText: string }[]
   phone?: string
   address?: string
   images?: string[]
@@ -419,6 +423,68 @@ export interface IGuestOrder {
   rating?: number
   ratingComment?: string
   createdAt: string
+}
+
+export type StaffPermission =
+  | 'orders:view'
+  | 'orders:accept'
+  | 'orders:complete'
+  | 'orders:cancel'
+  | 'bookings:view'
+  | 'bookings:confirm'
+  | 'bookings:cancel'
+  | 'housekeeping:view'
+  | 'housekeeping:manage'
+  | 'maintenance:view'
+  | 'maintenance:manage'
+  | 'catalog:view'
+  | 'catalog:manage'
+  | 'staff:view'
+  | 'staff:manage'
+  | 'analytics:view'
+  | 'settings:manage'
+
+export interface IStaffRole {
+  id: string
+  hotelId?: string | null
+  name: string
+  permissions: StaffPermission[]
+  visibleModules: string[]
+  isTemplate?: boolean
+}
+
+export interface INotificationGroup {
+  id: string
+  hotelId?: string
+  name: string
+  emailAddresses: string[]
+  sseEnabled: boolean
+}
+
+export interface IStaffMember {
+  id: string
+  hotelId?: string
+  name: string
+  roleId: string | IStaffRole
+  groupIds: string[] | INotificationGroup[]
+  isActive: boolean
+}
+
+export interface IDispatchRuleConditions {
+  categoryIds: string[]
+  itemIds: string[]
+  eventTypes: ('order' | 'booking' | 'housekeeping' | 'maintenance')[]
+}
+
+export interface IDispatchRule {
+  id: string
+  hotelId?: string
+  name: string
+  priority: number
+  conditions: IDispatchRuleConditions
+  targetGroupId: string | INotificationGroup
+  escalationSeconds: number
+  active: boolean
 }
 
 export interface IOrderAnalytics {

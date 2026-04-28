@@ -29,7 +29,9 @@ import ImageIcon from '@mui/icons-material/Image'
 
 import Loader from '@/components/common/Loader'
 import FeatureLocked from '@/components/common/FeatureLocked'
+import { useDictionary } from '@/contexts/DictionaryContext'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import { useGetHotelQuery } from '@/redux/api/hotelApi'
 import {
   useGetMaintenanceIssuesQuery,
   useGetMaintenancePendingCountQuery,
@@ -44,34 +46,38 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'info' | 'success' |
   cancelled: 'error',
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  '': 'All',
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  done: 'Done',
-  cancelled: 'Cancelled',
-}
-
 const reservationCodeColor = (status?: string): 'default' | 'success' | 'warning' =>
   status === 'matched' ? 'success' : status === 'unmatched' ? 'warning' : 'default'
 
 const TYPE_ICONS: Record<string, string> = {
-  ac: '❄️',
-  plumbing: '🚿',
-  electrical: '⚡',
-  tv: '📺',
-  wifi: '📶',
-  furniture: '🪑',
-  other: '🔧',
+  ac: 'âť„ď¸Ź',
+  plumbing: 'đźšż',
+  electrical: 'âšˇ',
+  tv: 'đź“ş',
+  wifi: 'đź“¶',
+  furniture: 'đźŞ‘',
+  other: 'đź”§',
 }
 
 export default function MaintenancePage() {
+  const dictionary: any = useDictionary()
+  const t = dictionary.pages?.maintenance || {}
   const authUser = useAuthUser()
   const hotelId = (authUser as any)?.hotel?.id
+  const { data: liveHotel } = useGetHotelQuery(hotelId!, { skip: !hotelId })
   const [statusFilter, setStatusFilter] = useState('pending')
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
 
-  const isFeatureLocked = (authUser as any)?.hotel?.features?.maintenanceEnabled === false
+  const hotelFeatures = ((liveHotel as any) ?? (authUser as any)?.hotel)?.features
+  const isFeatureLocked = hotelFeatures?.maintenanceEnabled === false
+
+  const statusLabels: Record<string, string> = {
+    '': t.statusAll || 'All',
+    pending: t.statusPending || 'Pending',
+    in_progress: t.statusInProgress || 'In Progress',
+    done: t.statusDone || 'Done',
+    cancelled: t.statusCancelled || 'Cancelled',
+  }
 
   const { data, isLoading } = useGetMaintenanceIssuesQuery(
     { hotelId, status: statusFilter || undefined, limit: 50 },
@@ -109,7 +115,7 @@ export default function MaintenancePage() {
       <Stack direction='row' justifyContent='space-between' alignItems='center' mb={3}>
         <Badge badgeContent={unsolvedCount || undefined} color='error'>
           <Typography variant='h5' fontWeight={700} sx={{ pr: unsolvedCount ? 1 : 0 }}>
-            Maintenance Issues
+            {t.title || 'Maintenance Issues'}
           </Typography>
         </Badge>
         <Select
@@ -118,18 +124,18 @@ export default function MaintenancePage() {
           onChange={e => setStatusFilter(e.target.value)}
           sx={{ minWidth: 150 }}
           displayEmpty
-          renderValue={value => STATUS_LABELS[String(value)] ?? 'All'}
+          renderValue={value => statusLabels[String(value)] ?? (t.statusAll || 'All')}
         >
-          <MenuItem value=''>All</MenuItem>
+          <MenuItem value=''>{t.statusAll || 'All'}</MenuItem>
           <MenuItem value='pending'>
             <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%' }}>
-              <span>Pending</span>
+              <span>{t.statusPending || 'Pending'}</span>
               {pendingOnlyCount > 0 && <Chip label={pendingOnlyCount} color='error' size='small' />}
             </Stack>
           </MenuItem>
-          <MenuItem value='in_progress'>In Progress</MenuItem>
-          <MenuItem value='done'>Done</MenuItem>
-          <MenuItem value='cancelled'>Cancelled</MenuItem>
+          <MenuItem value='in_progress'>{t.statusInProgress || 'In Progress'}</MenuItem>
+          <MenuItem value='done'>{t.statusDone || 'Done'}</MenuItem>
+          <MenuItem value='cancelled'>{t.statusCancelled || 'Cancelled'}</MenuItem>
         </Select>
       </Stack>
 
@@ -138,21 +144,21 @@ export default function MaintenancePage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Room</TableCell>
-                <TableCell>Issue</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Proof</TableCell>
-                <TableCell>Photo</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Time</TableCell>
-                <TableCell align='right'>Actions</TableCell>
+                <TableCell>{t.colRoom || 'Room'}</TableCell>
+                <TableCell>{t.colIssue || 'Issue'}</TableCell>
+                <TableCell>{t.colDescription || 'Description'}</TableCell>
+                <TableCell>{t.colProof || 'Proof'}</TableCell>
+                <TableCell>{t.colPhoto || 'Photo'}</TableCell>
+                <TableCell>{t.colStatus || 'Status'}</TableCell>
+                <TableCell>{t.colTime || 'Time'}</TableCell>
+                <TableCell align='right'>{t.colActions || 'Actions'}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {issues.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} align='center' sx={{ py: 4, color: 'text.secondary' }}>
-                    No issues found
+                    {t.empty || 'No issues found'}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -162,13 +168,13 @@ export default function MaintenancePage() {
                       <Typography fontWeight={600}>{issue.guestRoomNumber || issue.roomNumber || issue.room}</Typography>
                       {issue.guestRoomNumber && issue.roomNumber && (
                         <Typography variant='caption' color='text.secondary'>
-                          QR room {issue.roomNumber}
+                          {(t.qrRoomPrefix || 'QR room')} {issue.roomNumber}
                         </Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       <Stack direction='row' alignItems='center' gap={1}>
-                        <span>{TYPE_ICONS[issue.type] ?? '🔧'}</span>
+                        <span>{TYPE_ICONS[issue.type] ?? 'đź”§'}</span>
                         <Typography variant='body2' sx={{ textTransform: 'capitalize' }}>
                           {issue.typeLabel || issue.type.replace('_', ' ')}
                         </Typography>
@@ -182,29 +188,29 @@ export default function MaintenancePage() {
                     <TableCell>
                       {issue.reservationCode ? (
                         <Chip
-                          label={`${issue.reservationCode} ${issue.reservationCodeStatus === 'matched' ? '✓' : '!'}`}
+                          label={`${issue.reservationCode} ${issue.reservationCodeStatus === 'matched' ? 'âś“' : '!'}`}
                           color={reservationCodeColor(issue.reservationCodeStatus)}
                           size='small'
                           variant='outlined'
                         />
                       ) : (
-                        <Typography variant='caption' color='text.secondary'>â€”</Typography>
+                        <Typography variant='caption' color='text.secondary'>Ă˘â‚¬â€ť</Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       {issue.photo ? (
-                        <Tooltip title='View photo'>
+                        <Tooltip title={t.actionViewPhoto || 'View photo'}>
                           <IconButton size='small' onClick={() => setPhotoUrl(issue.photo!)}>
                             <ImageIcon fontSize='small' color='primary' />
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        <Typography variant='caption' color='text.secondary'>—</Typography>
+                        <Typography variant='caption' color='text.secondary'>â€”</Typography>
                       )}
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={issue.status.replace('_', ' ')}
+                        label={statusLabels[issue.status] || issue.status.replace('_', ' ')}
                         color={STATUS_COLORS[issue.status]}
                         size='small'
                         sx={{ textTransform: 'capitalize' }}
@@ -220,7 +226,7 @@ export default function MaintenancePage() {
                     <TableCell align='right'>
                       <Stack direction='row' justifyContent='flex-end' gap={0.5}>
                         {issue.status === 'pending' && (
-                          <Tooltip title='Mark In Progress'>
+                          <Tooltip title={t.actionMarkInProgress || 'Mark In Progress'}>
                             <IconButton size='small' color='info' onClick={() => handleStatus(issue.id, 'in_progress')}>
                               <HourglassEmptyIcon fontSize='small' />
                             </IconButton>
@@ -228,12 +234,12 @@ export default function MaintenancePage() {
                         )}
                         {(issue.status === 'pending' || issue.status === 'in_progress') && (
                           <>
-                            <Tooltip title='Mark Done'>
+                            <Tooltip title={t.actionMarkDone || 'Mark Done'}>
                               <IconButton size='small' color='success' onClick={() => handleStatus(issue.id, 'done')}>
                                 <CheckCircleOutlineIcon fontSize='small' />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title='Cancel'>
+                            <Tooltip title={t.actionCancel || 'Cancel'}>
                               <IconButton size='small' color='error' onClick={() => handleStatus(issue.id, 'cancelled')}>
                                 <CancelOutlinedIcon fontSize='small' />
                               </IconButton>
@@ -253,7 +259,7 @@ export default function MaintenancePage() {
       <Dialog open={!!photoUrl} onClose={() => setPhotoUrl(null)} maxWidth='md'>
         <DialogContent sx={{ p: 1 }}>
           {photoUrl && (
-            <img src={photoUrl} alt='Maintenance photo' style={{ maxWidth: '100%', display: 'block' }} />
+            <img src={photoUrl} alt={t.photoAlt || 'Maintenance photo'} style={{ maxWidth: '100%', display: 'block' }} />
           )}
         </DialogContent>
       </Dialog>

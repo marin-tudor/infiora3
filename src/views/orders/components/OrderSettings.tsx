@@ -10,9 +10,12 @@ import { toast } from 'react-toastify'
 
 import { useGetOrderSettingsQuery, useUpdateOrderSettingsMutation } from '@/redux/api/ordersApi'
 import Loader from '@/components/common/Loader'
+import { useDictionary } from '@/contexts/DictionaryContext'
 
 
 export default function OrderSettings({ hotelId }: { hotelId: string }) {
+  const dictionary: any = useDictionary()
+  const t = dictionary.pages?.orderSettings || {}
   const { data: settings, isLoading } = useGetOrderSettingsQuery(hotelId)
   const [updateSettings, { isLoading: saving }] = useUpdateOrderSettingsMutation()
 
@@ -34,6 +37,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
   const [requireLocation, setRequireLocation] = useState(true)
   const [locationLabel, setLocationLabel] = useState('Room number')
   const [tablePin, setTablePin] = useState('')
+  const [kioskMode, setKioskMode] = useState(false)
 
   useEffect(() => {
     if (settings) {
@@ -58,6 +62,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       setRequireLocation(settings.requireLocation ?? true)
       setLocationLabel(settings.locationLabel || 'Room number')
       setTablePin(settings.tablePin || '')
+      setKioskMode(settings.kioskMode ?? false)
     }
   }, [settings])
 
@@ -87,10 +92,11 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         requireLocation,
         locationLabel,
         tablePin: venueType === 'restaurant' ? tablePin : '',
+        kioskMode,
       } as any).unwrap()
-      toast.success('Settings saved')
+      toast.success(t.settingsSaved || 'Settings saved')
     } catch {
-      toast.error('Failed to save settings')
+      toast.error(t.saveFailed || 'Failed to save settings')
     }
   }
 
@@ -101,15 +107,15 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* General */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={2}>General</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={2}>{t.general || 'General'}</Typography>
           <Stack gap={2}>
             <FormControlLabel
               control={<Switch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}
-              label='Enable ordering system'
+              label={t.enableOrderingSystem || 'Enable ordering system'}
             />
             <Stack direction='row' gap={2} alignItems='flex-start'>
               <Stack gap={0.5} flex={1}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>Available from</Typography>
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.availableFrom || 'Available from'}</Typography>
                 <TextField
                   type='time' value={availableFrom}
                   onChange={e => setAvailableFrom(e.target.value)}
@@ -117,7 +123,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                 />
               </Stack>
               <Stack gap={0.5} flex={1}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>Available to</Typography>
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.availableTo || 'Available to'}</Typography>
                 <TextField
                   type='time' value={availableTo}
                   onChange={e => setAvailableTo(e.target.value)}
@@ -125,7 +131,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                 />
               </Stack>
               <Stack gap={0.5} sx={{ maxWidth: 110 }}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>Currency</Typography>
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.currency || 'Currency'}</Typography>
                 <TextField
                   value={currencySymbol}
                   onChange={e => setCurrencySymbol(e.target.value)}
@@ -141,7 +147,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Payment Methods */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>Payment Methods</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.paymentMethods || 'Payment Methods'}</Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             Enable only the payment methods available at your property
           </Typography>
@@ -182,7 +188,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Status Labels */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>Status Labels</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.statusLabels || 'Status Labels'}</Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             Customize status names shown to guests
           </Typography>
@@ -206,7 +212,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Email Notifications */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>Email Notifications</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.emailNotifications || 'Email Notifications'}</Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             These addresses receive a notification for every new order
           </Typography>
@@ -234,7 +240,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
 
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='h6' gutterBottom>Venue</Typography>
+          <Typography variant='h6' gutterBottom>{t.venue || 'Venue'}</Typography>
 
           <Stack gap={2}>
             <Box>
@@ -247,7 +253,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                     size='small'
                     onClick={() => {
                       if (type === venueType) return
+
                       setVenueType(type)
+
                       if (type === 'hotel') {
                         setRequireCode(true)
                         setRequireLocation(true)
@@ -278,13 +286,15 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
               label={venueType === 'hotel' ? 'Require room number' : 'Require table number'}
             />
 
-            <TextField
-              label='Location field label'
-              value={locationLabel}
-              onChange={e => setLocationLabel(e.target.value)}
-              size='small'
-              helperText='Shown to guest at checkout (e.g. "Room number", "Table number")'
-            />
+            <Stack gap={0.5}>
+              <Typography variant='caption' color='text.secondary' fontWeight={600}>Location field label</Typography>
+              <TextField
+                value={locationLabel}
+                onChange={e => setLocationLabel(e.target.value)}
+                size='small'
+                helperText='Shown to guest at checkout (e.g. "Room number", "Table number")'
+              />
+            </Stack>
 
             {venueType === 'restaurant' && requireCode && (
               <Box>
@@ -330,9 +340,28 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         </CardContent>
       </Card>
 
+      {/* Kiosk Mode */}
+      <Card variant='outlined'>
+        <CardContent>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.kioskMode || 'Kiosk Mode'}</Typography>
+          <Typography variant='caption' color='text.secondary' mb={2} display='block'>
+            Hide the back button on the guest ordering page. Use this when tablets are mounted as dedicated ordering kiosks so guests cannot navigate away.
+          </Typography>
+          <FormControlLabel
+            control={<Switch checked={kioskMode} onChange={e => setKioskMode(e.target.checked)} />}
+            label={
+              <Box>
+                <Typography variant='body2' fontWeight={600}>Enable kiosk mode</Typography>
+                <Typography variant='caption' color='text.secondary'>Back button is hidden from guests</Typography>
+              </Box>
+            }
+          />
+        </CardContent>
+      </Card>
+
       <Box>
         <Button variant='contained' onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Settings'}
+          {saving ? (t.saving || 'Saving...') : (t.saveSettings || 'Save Settings')}
         </Button>
       </Box>
     </Stack>
