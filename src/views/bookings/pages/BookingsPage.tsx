@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -28,6 +28,7 @@ import Switch from '@mui/material/Switch'
 
 import FeatureLocked from '@/components/common/FeatureLocked'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import BlackoutDatesPanel from '@/views/bookings/components/BlackoutDatesPanel'
 import ResourceCalendar from '@/views/bookings/components/ResourceCalendar'
 import ResourcesTab from '@/views/bookings/components/ResourcesTab'
 import { useGetHotelQuery } from '@/redux/api/hotelApi'
@@ -64,6 +65,8 @@ export default function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [escalatedIds, setEscalatedIds] = useState<Set<string>>(new Set())
   const [resourceView, setResourceView] = useState(false)
+  const [blackoutDates, setBlackoutDates] = useState<Set<string>>(new Set())
+  const [showBlackoutPanel, setShowBlackoutPanel] = useState(false)
 
   // SSE — listen for escalation alerts
   useEffect(() => {
@@ -75,6 +78,18 @@ export default function BookingsPage() {
     })
     return () => evtSource.close()
   }, [hotelId])
+
+  const fetchBlackouts = useCallback(async () => {
+    if (!hotelId) return
+    const API = process.env.NEXT_PUBLIC_API_URL ?? ''
+    try {
+      const data = await fetch(`${API}/v1/hotels/${hotelId}/bookings/blackout`).then(r => r.json())
+      const dates = new Set<string>((data as any[]).map((b: any) => b.date))
+      setBlackoutDates(dates)
+    } catch {}
+  }, [hotelId])
+
+  useEffect(() => { fetchBlackouts() }, [fetchBlackouts])
 
   const { data: bookingsData, isLoading, refetch: refetchBookings } = useGetBookingsQuery(
     { hotelId, status: statusFilter || undefined, date: selectedDate, limit: 50 },
@@ -179,13 +194,37 @@ export default function BookingsPage() {
         <Card>
           <CardContent>
             <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2} flexWrap='wrap' gap={1}>
-              <Typography variant='subtitle1'>Time Slots — {selectedDate}</Typography>
-              <FormControlLabel
-                control={<Switch checked={resourceView} onChange={e => setResourceView(e.target.checked)} size='small' />}
-                label='Resource timeline'
-                sx={{ mb: 0 }}
-              />
+              <Stack direction='row' alignItems='center' gap={1}>
+                <Typography variant='subtitle1'>Time Slots — {selectedDate}</Typography>
+                {blackoutDates.has(selectedDate) && (
+                  <Chip label='Blocked' size='small' color='error' />
+                )}
+              </Stack>
+              <Stack direction='row' alignItems='center' gap={1} flexWrap='wrap'>
+                <Button
+                  size='small'
+                  variant={showBlackoutPanel ? 'contained' : 'outlined'}
+                  color='warning'
+                  startIcon={<i className='ri-calendar-close-line' />}
+                  onClick={() => setShowBlackoutPanel(v => !v)}
+                >
+                  Blackout Dates
+                </Button>
+                <FormControlLabel
+                  control={<Switch checked={resourceView} onChange={e => setResourceView(e.target.checked)} size='small' />}
+                  label='Resource timeline'
+                  sx={{ mb: 0 }}
+                />
+              </Stack>
             </Stack>
+
+            {showBlackoutPanel && hotelId && (
+              <BlackoutDatesPanel
+                hotelId={hotelId}
+                selectedDate={selectedDate}
+                onBlackoutsChange={fetchBlackouts}
+              />
+            )}
 
             {resourceView ? (
               hotelId && (
