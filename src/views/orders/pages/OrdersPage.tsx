@@ -15,7 +15,6 @@ import OrdersDashboard from '../components/OrdersDashboard'
 import ActiveOrders from '../components/ActiveOrders'
 import MenuManagement from '../components/MenuManagement'
 import ReservationCodes from '../components/ReservationCodes'
-import OrderSettings from '../components/OrderSettings'
 import ScheduledOrdersPage from './ScheduledOrdersPage'
 
 export default function OrdersPage() {
@@ -68,7 +67,6 @@ export default function OrdersPage() {
           <Tab label={t.menuTab || 'Menu'} icon={<i className='ri-restaurant-line' />} iconPosition='start' />
           <Tab label={t.scheduledTab || 'Scheduled'} icon={<i className='ri-time-line' />} iconPosition='start' />
           <Tab label={t.codesTab || 'Codes'} icon={<i className='ri-key-2-line' />} iconPosition='start' />
-          <Tab label={dictionary.settings} icon={<i className='ri-settings-3-line' />} iconPosition='start' />
         </Tabs>
       </Box>
 
@@ -78,7 +76,6 @@ export default function OrdersPage() {
         {tab === 2 && <MenuManagement hotelId={hotelId} currency={currency} />}
         {tab === 3 && <ScheduledOrdersPage />}
         {tab === 4 && <ReservationCodes hotelId={hotelId} />}
-        {tab === 5 && <OrderSettings hotelId={hotelId} />}
       </Box>
     </Stack>
   )
