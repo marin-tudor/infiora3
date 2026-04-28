@@ -29,9 +29,11 @@ import Switch from '@mui/material/Switch'
 import FeatureLocked from '@/components/common/FeatureLocked'
 import { useAuthUser } from '@/hooks/useAuthUser'
 import BlackoutDatesPanel from '@/views/bookings/components/BlackoutDatesPanel'
+import ItemAvailabilityCalendar from '@/views/bookings/components/ItemAvailabilityCalendar'
 import ResourceCalendar from '@/views/bookings/components/ResourceCalendar'
 import ResourcesTab from '@/views/bookings/components/ResourcesTab'
 import { useGetHotelQuery } from '@/redux/api/hotelApi'
+import { useGetCatalogItemsQuery } from '@/redux/api/ordersApi'
 import {
   useGetBookingsQuery,
   useGetTimeSlotsQuery,
@@ -39,6 +41,7 @@ import {
   useCancelBookingMutation,
   useBlockSlotMutation,
   useUnblockSlotMutation,
+  useGenerateSlotsMutation,
   type IBooking,
   type ITimeSlot,
 } from '@/redux/api/bookingApi'
@@ -67,6 +70,20 @@ export default function BookingsPage() {
   const [resourceView, setResourceView] = useState(false)
   const [blackoutDates, setBlackoutDates] = useState<Set<string>>(new Set())
   const [showBlackoutPanel, setShowBlackoutPanel] = useState(false)
+  const [calendarItemId, setCalendarItemId] = useState('')
+  const [weekStart, setWeekStart] = useState(() => {
+    const d = new Date()
+    const day = d.getDay()
+    // shift to Monday
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1))
+    return d.toISOString().slice(0, 10)
+  })
+
+  const shiftWeek = (n: number) => {
+    const d = new Date(weekStart)
+    d.setDate(d.getDate() + n * 7)
+    setWeekStart(d.toISOString().slice(0, 10))
+  }
 
   // SSE — listen for escalation alerts
   useEffect(() => {
@@ -109,6 +126,15 @@ export default function BookingsPage() {
   const [cancelBooking] = useCancelBookingMutation()
   const [blockSlot] = useBlockSlotMutation()
   const [unblockSlot] = useUnblockSlotMutation()
+  const [generateSlots, { isLoading: isGenerating }] = useGenerateSlotsMutation()
+
+  const { data: allItems } = useGetCatalogItemsQuery({ hotelId }, { skip: !hotelId || isFeatureLocked })
+  const bookableItems = ((allItems as any) ?? []).filter((i: any) => i.type === 'bookable')
+
+  const handleGenerateSlots = async () => {
+    await generateSlots({ hotelId })
+    refetchSlots()
+  }
 
   const handleConfirm = async (bookingId: string) => {
     await updateBooking({ hotelId, bookingId, body: { status: 'confirmed' } as any })
@@ -191,18 +217,59 @@ export default function BookingsPage() {
         )}
       </Stack>}
 
-      {/* CALENDAR VIEW — time slots grid or resource timeline */}
+      {/* CALENDAR VIEW — per-item week grid or resource timeline */}
       {view === 'calendar' && (
         <Card>
           <CardContent>
+            {/* Toolbar row */}
             <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2} flexWrap='wrap' gap={1}>
-              <Stack direction='row' alignItems='center' gap={1}>
-                <Typography variant='subtitle1'>Time Slots — {selectedDate}</Typography>
-                {blackoutDates.has(selectedDate) && (
-                  <Chip label='Blocked' size='small' color='error' />
+              <Stack direction='row' alignItems='center' gap={1} flexWrap='wrap'>
+                <Select
+                  size='small'
+                  displayEmpty
+                  value={calendarItemId}
+                  onChange={e => setCalendarItemId(e.target.value)}
+                  sx={{ minWidth: 200 }}
+                >
+                  <MenuItem value=''>All services (day view)</MenuItem>
+                  {bookableItems.map((item: any) => (
+                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                  ))}
+                </Select>
+                {calendarItemId && (
+                  <Stack direction='row' alignItems='center' gap={0.5}>
+                    <Tooltip title='Previous week'>
+                      <IconButton size='small' onClick={() => shiftWeek(-1)}><i className='ri-arrow-left-s-line' /></IconButton>
+                    </Tooltip>
+                    <Typography variant='body2' sx={{ minWidth: 130, textAlign: 'center' }}>
+                      {new Date(weekStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                      {' – '}
+                      {new Date(new Date(weekStart).setDate(new Date(weekStart).getDate() + 6)).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </Typography>
+                    <Tooltip title='Next week'>
+                      <IconButton size='small' onClick={() => shiftWeek(1)}><i className='ri-arrow-right-s-line' /></IconButton>
+                    </Tooltip>
+                  </Stack>
+                )}
+                {!calendarItemId && (
+                  <Stack direction='row' alignItems='center' gap={1}>
+                    <Typography variant='body2' color='text.secondary'>Date:</Typography>
+                    {blackoutDates.has(selectedDate) && <Chip label='Blocked' size='small' color='error' />}
+                  </Stack>
                 )}
               </Stack>
+
               <Stack direction='row' alignItems='center' gap={1} flexWrap='wrap'>
+                <Button
+                  size='small'
+                  variant='outlined'
+                  color='primary'
+                  startIcon={isGenerating ? <CircularProgress size={14} /> : <i className='ri-refresh-line' />}
+                  onClick={handleGenerateSlots}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? 'Generating…' : 'Generate Slots'}
+                </Button>
                 <Button
                   size='small'
                   variant={showBlackoutPanel ? 'contained' : 'outlined'}
@@ -212,11 +279,13 @@ export default function BookingsPage() {
                 >
                   Blackout Dates
                 </Button>
-                <FormControlLabel
-                  control={<Switch checked={resourceView} onChange={e => setResourceView(e.target.checked)} size='small' />}
-                  label='Resource timeline'
-                  sx={{ mb: 0 }}
-                />
+                {!calendarItemId && (
+                  <FormControlLabel
+                    control={<Switch checked={resourceView} onChange={e => setResourceView(e.target.checked)} size='small' />}
+                    label='Resource timeline'
+                    sx={{ mb: 0 }}
+                  />
+                )}
               </Stack>
             </Stack>
 
@@ -228,14 +297,21 @@ export default function BookingsPage() {
               />
             )}
 
-            {resourceView ? (
+            {/* Per-item week calendar */}
+            {calendarItemId ? (
+              hotelId && (
+                <ItemAvailabilityCalendar hotelId={hotelId} itemId={calendarItemId} weekStart={weekStart} />
+              )
+            ) : resourceView ? (
               hotelId && (
                 <ResourceCalendar hotelId={hotelId} selectedDate={selectedDate} slots={slots} />
               )
             ) : (
               <>
                 {slots.length === 0 && (
-                  <Typography color='text.secondary'>No slots generated for this date. Check that bookable items have a weekly schedule configured.</Typography>
+                  <Alert severity='info' sx={{ mb: 2 }}>
+                    No slots for {selectedDate}. Select a service above to see its week view, or click "Generate Slots" to create them.
+                  </Alert>
                 )}
                 <Stack spacing={1}>
                   {slots.map((slot: ITimeSlot) => {

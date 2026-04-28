@@ -92,6 +92,12 @@ export const bookingApi = createApi({
       },
       invalidatesTags: [{ type: 'TimeSlot', id: 'LIST' }],
     }),
+    generateSlots: builder.mutation<{ message: string }, { hotelId: string }>({
+      query({ hotelId }) {
+        return { url: `/v1/hotels/${hotelId}/timeslots/generate`, method: 'POST', credentials: 'include' }
+      },
+      invalidatesTags: [{ type: 'TimeSlot', id: 'LIST' }],
+    }),
   }),
 })
 
@@ -102,4 +108,5 @@ export const {
   useCancelBookingMutation,
   useBlockSlotMutation,
   useUnblockSlotMutation,
+  useGenerateSlotsMutation,
 } = bookingApi as any
