@@ -387,6 +387,32 @@ export interface ICatalogItem {
   available: boolean
   sortOrder: number
   createdAt: string
+  type?: 'instant' | 'bookable'
+  bookingConfig?: {
+    bookableCategory?: string
+    bookingModel?: string
+    totalInventory?: number
+    capacityPerUnit?: number
+    minPersons?: number
+    duration?: number
+    bufferMinutes?: number
+    startInterval?: number
+    advanceMinHours?: number
+    advanceMaxDays?: number
+    confirmationType?: string
+    pricePerPerson?: boolean
+    cancellationPolicy?: string
+    cancellationPolicyHours?: number
+    addons?: { _id: string; name: string; price: number; description: string }[]
+    simpleAvailability?: { enabled: boolean; from: string; to: string }
+    weeklySchedule?: Record<string, { from: string; to: string }[]>
+    // legacy fields
+    slotType?: string
+    maxPersons?: number
+    cancelPolicyHours?: number
+    requiresApproval?: boolean
+    resourceIds?: string[]
+  }
 }
 
 export type OrderStatus =
