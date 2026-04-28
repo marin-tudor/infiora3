@@ -23,6 +23,7 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? ''
 
 interface Resource {
   _id: string
+  id?: string
   name: string
   type: string
   identifier?: string
@@ -54,6 +55,8 @@ interface PopoverState {
 }
 
 const itemName = (item: any) => (typeof item === 'string' ? item : item?.name ?? '—')
+
+const resourceId = (r: Resource) => r._id ?? r.id ?? ''
 
 export default function ResourceCalendar({ hotelId, selectedDate, slots }: Props) {
   const [resources, setResources] = useState<Resource[]>([])
@@ -127,7 +130,7 @@ export default function ResourceCalendar({ hotelId, selectedDate, slots }: Props
     const booking = bookings.find(
       b =>
         b.startTime === startTime &&
-        (b.assignedResourceId === resource._id || b.assignedResourceId === (resource as any).id)
+        b.assignedResourceId === resourceId(resource)
     )
 
     if (booking) return { kind: 'booked' as const, booking, slot }
@@ -266,8 +269,7 @@ export default function ResourceCalendar({ hotelId, selectedDate, slots }: Props
 
                 // booked
                 const b = cell.booking
-                const alreadyAssigned =
-                  b.assignedResourceId === resource._id || b.assignedResourceId === (resource as any).id
+                const alreadyAssigned = b.assignedResourceId === resourceId(resource)
 
                 return (
                   <Tooltip
@@ -276,7 +278,7 @@ export default function ResourceCalendar({ hotelId, selectedDate, slots }: Props
                   >
                     <TableCell
                       align='center'
-                      onClick={e => setPopover({ anchor: e.currentTarget, booking: b, resourceId: resource._id })}
+                      onClick={e => setPopover({ anchor: e.currentTarget, booking: b, resourceId: resourceId(resource) })}
                       sx={{
                         bgcolor: 'primary.light',
                         color: 'primary.contrastText',
@@ -315,8 +317,7 @@ export default function ResourceCalendar({ hotelId, selectedDate, slots }: Props
               Start: {new Date(popover.booking.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Typography>
             <Typography variant='body2'>Status: {popover.booking.status}</Typography>
-            {(popover.booking.assignedResourceId !== popover.resourceId &&
-              popover.booking.assignedResourceId !== (resources.find(r => r._id === popover.resourceId) as any)?.id) && (
+            {popover.booking.assignedResourceId !== popover.resourceId && (
               <Button
                 size='small'
                 variant='contained'
