@@ -23,8 +23,12 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch'
+
 import FeatureLocked from '@/components/common/FeatureLocked'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import ResourceCalendar from '@/views/bookings/components/ResourceCalendar'
 import ResourcesTab from '@/views/bookings/components/ResourcesTab'
 import { useGetHotelQuery } from '@/redux/api/hotelApi'
 import {
@@ -59,6 +63,7 @@ export default function BookingsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10))
   const [statusFilter, setStatusFilter] = useState('')
   const [escalatedIds, setEscalatedIds] = useState<Set<string>>(new Set())
+  const [resourceView, setResourceView] = useState(false)
 
   // SSE — listen for escalation alerts
   useEffect(() => {
@@ -169,64 +174,80 @@ export default function BookingsPage() {
         )}
       </Stack>}
 
-      {/* CALENDAR VIEW — time slots grid */}
+      {/* CALENDAR VIEW — time slots grid or resource timeline */}
       {view === 'calendar' && (
         <Card>
           <CardContent>
-            <Typography variant='subtitle1' mb={2}>Time Slots — {selectedDate}</Typography>
-            {slots.length === 0 && (
-              <Typography color='text.secondary'>No slots generated for this date. Check that bookable items have a weekly schedule configured.</Typography>
-            )}
-            <Stack spacing={1}>
-              {slots.map((slot: ITimeSlot) => {
-                const startStr = new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                const endStr = new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                const available = !slot.isBlocked && slot.bookedPersons < slot.maxPersons
-                return (
-                  <Stack
-                    key={slot.id}
-                    direction='row'
-                    alignItems='center'
-                    spacing={2}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 1,
-                      bgcolor: slot.isBlocked
-                        ? 'action.disabledBackground'
-                        : available
-                        ? 'success.light'
-                        : 'warning.light',
-                    }}
-                  >
-                    <Typography sx={{ minWidth: 110 }}>{startStr}–{endStr}</Typography>
-                    <Typography sx={{ flex: 1 }}>{itemName(slot.itemId)}</Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      {slot.bookedPersons}/{slot.maxPersons}
-                    </Typography>
-                    <Chip
-                      label={slot.isBlocked ? 'Blocked' : available ? 'Available' : 'Full'}
-                      color={slot.isBlocked ? 'default' : available ? 'success' : 'warning'}
-                      size='small'
-                    />
-                    {slot.isBlocked ? (
-                      <Tooltip title='Unblock slot'>
-                        <IconButton size='small' onClick={() => handleUnblock(slot.id)}>
-                          <i className='ri-lock-unlock-line' />
-                        </IconButton>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip title={slot.bookedPersons > 0 ? 'Cannot block — active bookings exist' : 'Block slot'}>
-                        <span>
-                          <IconButton size='small' onClick={() => handleBlock(slot.id)} disabled={slot.bookedPersons > 0}>
-                            <i className='ri-lock-line' />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                )
-              })}
+            <Stack direction='row' alignItems='center' justifyContent='space-between' mb={2} flexWrap='wrap' gap={1}>
+              <Typography variant='subtitle1'>Time Slots — {selectedDate}</Typography>
+              <FormControlLabel
+                control={<Switch checked={resourceView} onChange={e => setResourceView(e.target.checked)} size='small' />}
+                label='Resource timeline'
+                sx={{ mb: 0 }}
+              />
             </Stack>
+
+            {resourceView ? (
+              hotelId && (
+                <ResourceCalendar hotelId={hotelId} selectedDate={selectedDate} slots={slots} />
+              )
+            ) : (
+              <>
+                {slots.length === 0 && (
+                  <Typography color='text.secondary'>No slots generated for this date. Check that bookable items have a weekly schedule configured.</Typography>
+                )}
+                <Stack spacing={1}>
+                  {slots.map((slot: ITimeSlot) => {
+                    const startStr = new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    const endStr = new Date(slot.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    const available = !slot.isBlocked && slot.bookedPersons < slot.maxPersons
+                    return (
+                      <Stack
+                        key={slot.id}
+                        direction='row'
+                        alignItems='center'
+                        spacing={2}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 1,
+                          bgcolor: slot.isBlocked
+                            ? 'action.disabledBackground'
+                            : available
+                            ? 'success.light'
+                            : 'warning.light',
+                        }}
+                      >
+                        <Typography sx={{ minWidth: 110 }}>{startStr}–{endStr}</Typography>
+                        <Typography sx={{ flex: 1 }}>{itemName(slot.itemId)}</Typography>
+                        <Typography variant='body2' color='text.secondary'>
+                          {slot.bookedPersons}/{slot.maxPersons}
+                        </Typography>
+                        <Chip
+                          label={slot.isBlocked ? 'Blocked' : available ? 'Available' : 'Full'}
+                          color={slot.isBlocked ? 'default' : available ? 'success' : 'warning'}
+                          size='small'
+                        />
+                        {slot.isBlocked ? (
+                          <Tooltip title='Unblock slot'>
+                            <IconButton size='small' onClick={() => handleUnblock(slot.id)}>
+                              <i className='ri-lock-unlock-line' />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title={slot.bookedPersons > 0 ? 'Cannot block — active bookings exist' : 'Block slot'}>
+                            <span>
+                              <IconButton size='small' onClick={() => handleBlock(slot.id)} disabled={slot.bookedPersons > 0}>
+                                <i className='ri-lock-line' />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        )}
+                      </Stack>
+                    )
+                  })}
+                </Stack>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
