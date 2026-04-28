@@ -82,8 +82,10 @@ export default function BookingsPage() {
   const fetchBlackouts = useCallback(async () => {
     if (!hotelId) return
     const API = process.env.NEXT_PUBLIC_API_URL ?? ''
+    const now = new Date()
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
     try {
-      const data = await fetch(`${API}/v1/hotels/${hotelId}/bookings/blackout`).then(r => r.json())
+      const data = await fetch(`${API}/v1/hotels/${hotelId}/bookings/blackout?from=${monthStart}`).then(r => r.json())
       const dates = new Set<string>((data as any[]).map((b: any) => b.date))
       setBlackoutDates(dates)
     } catch {}
