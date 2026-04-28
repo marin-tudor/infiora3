@@ -25,6 +25,7 @@ import Typography from '@mui/material/Typography'
 
 import FeatureLocked from '@/components/common/FeatureLocked'
 import { useAuthUser } from '@/hooks/useAuthUser'
+import ResourcesTab from '@/views/bookings/components/ResourcesTab'
 import { useGetHotelQuery } from '@/redux/api/hotelApi'
 import {
   useGetBookingsQuery,
@@ -54,7 +55,7 @@ export default function BookingsPage() {
   const hotelFeatures = ((liveHotel as any) ?? (authUser as any)?.hotel)?.features
   const isFeatureLocked = hotelFeatures?.bookableServicesEnabled === false
 
-  const [view, setView] = useState<'list' | 'calendar'>('list')
+  const [view, setView] = useState<'list' | 'calendar' | 'resources'>('list')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10))
   const [statusFilter, setStatusFilter] = useState('')
   const [escalatedIds, setEscalatedIds] = useState<Set<string>>(new Set())
@@ -131,11 +132,17 @@ export default function BookingsPage() {
           <Button variant={view === 'calendar' ? 'contained' : 'outlined'} onClick={() => setView('calendar')}>
             Calendar
           </Button>
+          <Button variant={view === 'resources' ? 'contained' : 'outlined'} onClick={() => setView('resources')}>
+            Resources
+          </Button>
         </ButtonGroup>
       </Stack>
 
-      {/* Date + status filters */}
-      <Stack direction='row' spacing={2} mb={2} flexWrap='wrap'>
+      {/* RESOURCES VIEW */}
+      {view === 'resources' && hotelId && <ResourcesTab hotelId={hotelId} />}
+
+      {/* Date + status filters — only shown for list/calendar views */}
+      {view !== 'resources' && <Stack direction='row' spacing={2} mb={2} flexWrap='wrap'>
         <TextField
           type='date'
           size='small'
@@ -160,7 +167,7 @@ export default function BookingsPage() {
             <MenuItem value='no_show'>No Show</MenuItem>
           </Select>
         )}
-      </Stack>
+      </Stack>}
 
       {/* CALENDAR VIEW — time slots grid */}
       {view === 'calendar' && (
