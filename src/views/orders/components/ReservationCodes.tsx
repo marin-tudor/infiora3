@@ -2,8 +2,24 @@
 import { useState } from 'react'
 
 import {
-  Stack, Typography, Button, Card, Box, IconButton, Chip,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField
+  Stack,
+  Typography,
+  Button,
+  Card,
+  Box,
+  IconButton,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Switch,
+  FormControlLabel,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material'
 
 import { toast } from 'react-toastify'
@@ -14,14 +30,13 @@ import {
   useGetReservationCodesQuery,
   useCreateReservationCodeMutation,
   useUpdateReservationCodeMutation,
-  useDeleteReservationCodeMutation
+  useDeleteReservationCodeMutation,
+  useGetICalSourcesQuery
 } from '@/redux/api/ordersApi'
 import Loader from '@/components/common/Loader'
 import { useDictionary } from '@/contexts/DictionaryContext'
 
-
 import type { IReservationCode } from '@/types'
-
 
 interface CodeDialogProps {
   open: boolean
@@ -53,8 +68,8 @@ function CodeDialog({ open, onClose, hotelId, code }: CodeDialogProps) {
   const handleSave = async () => {
     if (!guestName || !codeVal || !checkIn || !checkOut) {
       toast.error(t.fillAllFields || 'Please fill all fields')
-      
-return
+
+      return
     }
 
     try {
@@ -81,9 +96,8 @@ return
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth
-      TransitionProps={{ onEnter: () => reset() }}>
-      <DialogTitle>{code ? (t.editCode || 'Edit Code') : (t.newReservationCode || 'New Reservation Code')}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth TransitionProps={{ onEnter: () => reset() }}>
+      <DialogTitle>{code ? t.editCode || 'Edit Code' : t.newReservationCode || 'New Reservation Code'}</DialogTitle>
       <DialogContent>
         <Stack gap={2} mt={1}>
           <Stack gap={0.75}>
@@ -116,31 +130,23 @@ return
               <Typography variant='caption' color='text.secondary' fontWeight={600}>
                 {t.checkIn || 'Check-in'}
               </Typography>
-              <TextField
-                type='date'
-                value={checkIn}
-                onChange={e => setCheckIn(e.target.value)}
-                fullWidth
-              />
+              <TextField type='date' value={checkIn} onChange={e => setCheckIn(e.target.value)} fullWidth />
             </Stack>
             <Stack gap={0.75} flex={1}>
               <Typography variant='caption' color='text.secondary' fontWeight={600}>
                 {t.checkOut || 'Check-out'}
               </Typography>
-              <TextField
-                type='date'
-                value={checkOut}
-                onChange={e => setCheckOut(e.target.value)}
-                fullWidth
-              />
+              <TextField type='date' value={checkOut} onChange={e => setCheckOut(e.target.value)} fullWidth />
             </Stack>
           </Stack>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>{dictionary.cancel}</Button>
+        <Button onClick={onClose} disabled={loading}>
+          {dictionary.cancel}
+        </Button>
         <Button variant='contained' onClick={handleSave} disabled={loading}>
-          {loading ? (t.saving || 'Saving...') : dictionary.save}
+          {loading ? t.saving || 'Saving...' : dictionary.save}
         </Button>
       </DialogActions>
     </Dialog>
@@ -153,10 +159,32 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editCode, setEditCode] = useState<IReservationCode | null>(null)
 
-  const { data, isLoading } = useGetReservationCodesQuery(hotelId)
+  const [showExpired, setShowExpired] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'current' | 'upcoming'>('all')
+  const [sourceFilter, setSourceFilter] = useState('all')
+
+  const { data, isLoading } = useGetReservationCodesQuery({
+    hotelId,
+    showExpired,
+    status: statusFilter,
+    source: sourceFilter,
+  })
+
+  // Fetch all codes (including expired) to show "hiding N" hint
+  const { data: allData } = useGetReservationCodesQuery(
+    { hotelId, showExpired: true, status: statusFilter, source: sourceFilter },
+    { skip: showExpired }
+  )
+
+  // iCal sources for source filter visibility
+  const { data: icalSources = [] } = useGetICalSourcesQuery(hotelId)
+  const hasICalSources = (icalSources as any[]).length > 0
+
+  const hiddenCount = showExpired ? 0 : ((allData as any[])?.length || 0) - ((data as any[])?.length || 0)
+
   const [deleteCode] = useDeleteReservationCodeMutation()
 
-  const codesList: IReservationCode[] = Array.isArray(data) ? data : (data as any)?.results || []
+  const codesList: IReservationCode[] = Array.isArray(data) ? data : []
 
   const handleDelete = async (code: IReservationCode) => {
     if (!confirm(`Delete code "${code.code}" for ${code.guestName}?`)) return
@@ -171,14 +199,23 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
 
   const isExpired = (checkOut: string) => new Date(checkOut) < new Date()
 
-  const openNew = () => { setEditCode(null); setDialogOpen(true) }
-  const openEdit = (c: IReservationCode) => { setEditCode(c); setDialogOpen(true) }
+  const openNew = () => {
+    setEditCode(null)
+    setDialogOpen(true)
+  }
+
+  const openEdit = (c: IReservationCode) => {
+    setEditCode(c)
+    setDialogOpen(true)
+  }
 
   return (
     <Stack gap={2}>
       <Stack direction='row' alignItems='center' justifyContent='space-between'>
         <Box>
-          <Typography variant='subtitle1' fontWeight={700}>{t.title || 'Reservation Codes'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700}>
+            {t.title || 'Reservation Codes'}
+          </Typography>
           <Typography variant='caption' color='text.secondary'>
             {t.subtitle || 'Guests enter their code when ordering. Valid between check-in and check-out dates.'}
           </Typography>
@@ -188,11 +225,70 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
         </Button>
       </Stack>
 
-      {isLoading ? <Loader /> : (
+      {/* Filter toolbar */}
+      <Stack direction='row' spacing={2} alignItems='center' flexWrap='wrap'>
+        <FormControlLabel
+          control={<Switch checked={showExpired} onChange={e => setShowExpired(e.target.checked)} size='small' />}
+          label={<Typography variant='body2'>Show expired</Typography>}
+        />
+
+        <FormControl size='small' sx={{ minWidth: 140 }}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={statusFilter}
+            label='Status'
+            onChange={e => setStatusFilter(e.target.value as typeof statusFilter)}
+          >
+            <MenuItem value='all'>All active</MenuItem>
+            <MenuItem value='current'>Currently active</MenuItem>
+            <MenuItem value='upcoming'>Upcoming</MenuItem>
+          </Select>
+        </FormControl>
+
+        {hasICalSources && (
+          <FormControl size='small' sx={{ minWidth: 140 }}>
+            <InputLabel>Source</InputLabel>
+            <Select value={sourceFilter} label='Source' onChange={e => setSourceFilter(e.target.value)}>
+              <MenuItem value='all'>All sources</MenuItem>
+              <MenuItem value='manual'>Manual</MenuItem>
+              {(icalSources as any[]).map((s: any) => (
+                <MenuItem key={s.id} value={s.platform}>{s.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+
+        {!showExpired && hiddenCount > 0 && (
+          <Typography variant='caption' color='text.secondary'>
+            Hiding {hiddenCount} expired {hiddenCount === 1 ? 'code' : 'codes'}
+          </Typography>
+        )}
+      </Stack>
+
+      {isLoading ? (
+        <Loader />
+      ) : (
         <Card variant='outlined'>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '130px 1fr 180px 90px 80px', px: 2, py: 1.5, bgcolor: 'grey.50', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '130px 1fr 180px 90px 80px',
+              px: 2,
+              py: 1.5,
+              bgcolor: 'grey.50',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
             {['Code', 'Guest', 'Stay', 'Status', ''].map(h => (
-              <Typography key={h} variant='caption' color='text.secondary' fontWeight={600} textTransform='uppercase' letterSpacing={0.5}>
+              <Typography
+                key={h}
+                variant='caption'
+                color='text.secondary'
+                fontWeight={600}
+                textTransform='uppercase'
+                letterSpacing={0.5}
+              >
                 {h}
               </Typography>
             ))}
@@ -200,7 +296,9 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
 
           {codesList.length === 0 ? (
             <Box textAlign='center' py={6}>
-              <Typography fontSize={36} mb={1}>🔑</Typography>
+              <Typography fontSize={36} mb={1}>
+                🔑
+              </Typography>
               <Typography color='text.secondary'>No codes yet — add your first reservation code</Typography>
             </Box>
           ) : (
@@ -208,14 +306,23 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
               <Box
                 key={code.id}
                 sx={{
-                  display: 'grid', gridTemplateColumns: '130px 1fr 180px 90px 80px',
-                  px: 2, py: 1.5, alignItems: 'center',
+                  display: 'grid',
+                  gridTemplateColumns: '130px 1fr 180px 90px 80px',
+                  px: 2,
+                  py: 1.5,
+                  alignItems: 'center',
                   borderBottom: idx < codesList.length - 1 ? '1px solid' : 'none',
                   borderColor: 'divider',
                   opacity: isExpired(code.checkOut) ? 0.5 : 1
                 }}
               >
-                <Typography variant='body2' fontWeight={700} fontFamily='monospace' letterSpacing={1} color='primary.main'>
+                <Typography
+                  variant='body2'
+                  fontWeight={700}
+                  fontFamily='monospace'
+                  letterSpacing={1}
+                  color='primary.main'
+                >
                   {code.code}
                 </Typography>
                 <Typography variant='body2'>{code.guestName}</Typography>
@@ -223,7 +330,7 @@ export default function ReservationCodes({ hotelId }: { hotelId: string }) {
                   {format(new Date(code.checkIn), 'dd.MM.yyyy')} → {format(new Date(code.checkOut), 'dd.MM.yyyy')}
                 </Typography>
                 <Chip
-                  label={isExpired(code.checkOut) ? (t.expired || 'Expired') : dictionary.active}
+                  label={isExpired(code.checkOut) ? t.expired || 'Expired' : dictionary.active}
                   size='small'
                   color={isExpired(code.checkOut) ? 'default' : 'success'}
                 />
