@@ -556,6 +556,9 @@ export interface IGuestOrder {
   completedAt?: string
   rating?: number
   ratingComment?: string
+  discountCode?: string
+  discountAmount?: number
+  originalTotal?: number
   createdAt: string
 }
 
@@ -654,6 +657,25 @@ export interface IReservationCode {
 }
 
 export type ICalPlatform = 'booking' | 'airbnb' | 'vrbo' | 'agoda' | 'tripadvisor' | 'custom'
+
+export type DiscountType = 'percentage' | 'fixed'
+
+export interface IDiscountCode {
+  id: string
+  hotelId: string
+  code: string
+  description?: string
+  discountType: DiscountType
+  discountValue: number
+  applicableCategories: string[]
+  validFrom?: string
+  validTo?: string
+  maxUses?: number
+  usedCount: number
+  minOrderAmount?: number
+  isActive: boolean
+  createdAt: string
+}
 
 export interface IICalSource {
   id: string

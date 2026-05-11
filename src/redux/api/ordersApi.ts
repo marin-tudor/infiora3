@@ -11,13 +11,14 @@ import type {
   IReservationCode,
   IICalSource,
   ICalPlatform,
-  GenericResultResponse
+  GenericResultResponse,
+  IDiscountCode
 } from '@/types'
 
 export const ordersApi = createApi({
   reducerPath: 'ordersApi',
   baseQuery: customFetchBase,
-  tagTypes: ['Orders', 'Categories', 'Items', 'Settings', 'Codes', 'ICalSources'],
+  tagTypes: ['Orders', 'Categories', 'Items', 'Settings', 'Codes', 'ICalSources', 'DiscountCodes'],
   endpoints: builder => ({
     // Orders
     getOrders: builder.query<
@@ -220,6 +221,24 @@ export const ordersApi = createApi({
       invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
     }),
 
+    // Discount codes
+    getDiscountCodes: builder.query<IDiscountCode[], string>({
+      query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/discount-codes` }),
+      providesTags: [{ type: 'DiscountCodes', id: 'LIST' }]
+    }),
+    createDiscountCode: builder.mutation<IDiscountCode, { hotelId: string } & Omit<IDiscountCode, 'id' | 'hotelId' | 'usedCount' | 'createdAt'>>({
+      query: ({ hotelId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/discount-codes`, method: 'POST', body }),
+      invalidatesTags: [{ type: 'DiscountCodes', id: 'LIST' }]
+    }),
+    updateDiscountCode: builder.mutation<IDiscountCode, { hotelId: string; codeId: string } & Partial<IDiscountCode>>({
+      query: ({ hotelId, codeId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/discount-codes/${codeId}`, method: 'PATCH', body }),
+      invalidatesTags: [{ type: 'DiscountCodes', id: 'LIST' }]
+    }),
+    deleteDiscountCode: builder.mutation<void, { hotelId: string; codeId: string }>({
+      query: ({ hotelId, codeId }) => ({ url: `/v1/orders/hotels/${hotelId}/discount-codes/${codeId}`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'DiscountCodes', id: 'LIST' }]
+    }),
+
     // Settings
     getOrderSettings: builder.query<IOrderSettings, string>({
       query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/settings` }),
@@ -260,5 +279,9 @@ export const {
   useSyncICalSourceMutation,
   useSyncAllICalSourcesMutation,
   useGetOrderSettingsQuery,
-  useUpdateOrderSettingsMutation
+  useUpdateOrderSettingsMutation,
+  useGetDiscountCodesQuery,
+  useCreateDiscountCodeMutation,
+  useUpdateDiscountCodeMutation,
+  useDeleteDiscountCodeMutation
 } = ordersApi as any
