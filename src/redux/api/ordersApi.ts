@@ -9,24 +9,39 @@ import type {
   IOrderAnalytics,
   IOrderSettings,
   IReservationCode,
+  IICalSource,
+  ICalPlatform,
   GenericResultResponse
 } from '@/types'
 
 export const ordersApi = createApi({
   reducerPath: 'ordersApi',
   baseQuery: customFetchBase,
-  tagTypes: ['Orders', 'Categories', 'Items', 'Settings'],
+  tagTypes: ['Orders', 'Categories', 'Items', 'Settings', 'Codes', 'ICalSources'],
   endpoints: builder => ({
     // Orders
     getOrders: builder.query<
       GenericResultResponse<IGuestOrder>,
-      { hotelId: string; status?: string; page?: number; limit?: number; startDate?: string; endDate?: string; groupId?: string; scheduled?: boolean }
+      {
+        hotelId: string
+        status?: string
+        page?: number
+        limit?: number
+        startDate?: string
+        endDate?: string
+        groupId?: string
+        scheduled?: boolean
+      }
     >({
       query: ({ hotelId, ...params }) => ({ url: `/v1/orders/hotels/${hotelId}`, params }),
       providesTags: [{ type: 'Orders', id: 'LIST' }]
     }),
     acceptOrder: builder.mutation<IGuestOrder, { orderId: string; eta?: number; message?: string }>({
-      query: ({ orderId, ...body }) => ({ url: `/v1/orders/${encodeURIComponent(orderId)}/accept`, method: 'POST', body }),
+      query: ({ orderId, ...body }) => ({
+        url: `/v1/orders/${encodeURIComponent(orderId)}/accept`,
+        method: 'POST',
+        body
+      }),
       invalidatesTags: [{ type: 'Orders', id: 'LIST' }]
     }),
     advanceOrder: builder.mutation<IGuestOrder, string>({
@@ -34,7 +49,11 @@ export const ordersApi = createApi({
       invalidatesTags: [{ type: 'Orders', id: 'LIST' }]
     }),
     cancelOrder: builder.mutation<IGuestOrder, { orderId: string; reason?: string }>({
-      query: ({ orderId, ...body }) => ({ url: `/v1/orders/${encodeURIComponent(orderId)}/cancel`, method: 'POST', body }),
+      query: ({ orderId, ...body }) => ({
+        url: `/v1/orders/${encodeURIComponent(orderId)}/cancel`,
+        method: 'POST',
+        body
+      }),
       invalidatesTags: [{ type: 'Orders', id: 'LIST' }]
     }),
 
@@ -42,8 +61,17 @@ export const ordersApi = createApi({
     getOrderAnalytics: builder.query<IOrderAnalytics, { hotelId: string; startDate?: string; endDate?: string }>({
       query: ({ hotelId, ...params }) => ({ url: `/v1/orders/hotels/${hotelId}/analytics`, params })
     }),
-    getOrderVisitAnalytics: builder.query<{ totalVisits: number; converted: number; notConverted: number; conversionRate: number }, { hotelId: string; startDate?: string; endDate?: string }>({
+    getOrderVisitAnalytics: builder.query<
+      { totalVisits: number; converted: number; notConverted: number; conversionRate: number },
+      { hotelId: string; startDate?: string; endDate?: string }
+    >({
       query: ({ hotelId, ...params }) => ({ url: `/v1/orders/hotels/${hotelId}/visit-analytics`, params })
+    }),
+    trackCheckinUsage: builder.mutation<{ tracked: boolean; activityId: string }, { hotelId: string }>({
+      query: ({ hotelId }) => ({
+        url: `/v1/orders/hotels/${hotelId}/checkin-usage`,
+        method: 'POST'
+      })
     }),
 
     // Categories
@@ -51,16 +79,37 @@ export const ordersApi = createApi({
       query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/categories` }),
       providesTags: [{ type: 'Categories', id: 'LIST' }]
     }),
-    createCategory: builder.mutation<IOrderCategory, { hotelId: string; name: string; icon: string; sortOrder?: number; parentId?: string | null }>({
+    createCategory: builder.mutation<
+      IOrderCategory,
+      { hotelId: string; name: string; icon: string; sortOrder?: number; parentId?: string | null }
+    >({
       query: ({ hotelId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/categories`, method: 'POST', body }),
       invalidatesTags: [{ type: 'Categories', id: 'LIST' }]
     }),
-    updateCategory: builder.mutation<IOrderCategory, { hotelId: string; categoryId: string; name?: string; icon?: string; active?: boolean; sortOrder?: number; parentId?: string | null }>({
-      query: ({ hotelId, categoryId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/categories/${categoryId}`, method: 'PATCH', body }),
+    updateCategory: builder.mutation<
+      IOrderCategory,
+      {
+        hotelId: string
+        categoryId: string
+        name?: string
+        icon?: string
+        active?: boolean
+        sortOrder?: number
+        parentId?: string | null
+      }
+    >({
+      query: ({ hotelId, categoryId, ...body }) => ({
+        url: `/v1/orders/hotels/${hotelId}/categories/${categoryId}`,
+        method: 'PATCH',
+        body
+      }),
       invalidatesTags: [{ type: 'Categories', id: 'LIST' }]
     }),
     deleteCategory: builder.mutation<void, { hotelId: string; categoryId: string }>({
-      query: ({ hotelId, categoryId }) => ({ url: `/v1/orders/hotels/${hotelId}/categories/${categoryId}`, method: 'DELETE' }),
+      query: ({ hotelId, categoryId }) => ({
+        url: `/v1/orders/hotels/${hotelId}/categories/${categoryId}`,
+        method: 'DELETE'
+      }),
       invalidatesTags: [{ type: 'Categories', id: 'LIST' }]
     }),
 
@@ -74,7 +123,11 @@ export const ordersApi = createApi({
       invalidatesTags: [{ type: 'Items', id: 'LIST' }]
     }),
     updateCatalogItem: builder.mutation<ICatalogItem, { hotelId: string; itemId: string } & Partial<ICatalogItem>>({
-      query: ({ hotelId, itemId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/items/${itemId}`, method: 'PATCH', body }),
+      query: ({ hotelId, itemId, ...body }) => ({
+        url: `/v1/orders/hotels/${hotelId}/items/${itemId}`,
+        method: 'PATCH',
+        body
+      }),
       invalidatesTags: [{ type: 'Items', id: 'LIST' }]
     }),
     toggleCatalogItem: builder.mutation<ICatalogItem, { hotelId: string; itemId: string }>({
@@ -87,21 +140,84 @@ export const ordersApi = createApi({
     }),
 
     // Reservation Codes
-    getReservationCodes: builder.query<IReservationCode[], string>({
-      query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/codes` }),
-      providesTags: [{ type: 'Orders', id: 'CODES' }]
+    getReservationCodes: builder.query<
+      IReservationCode[],
+      { hotelId: string; showExpired?: boolean; status?: 'all' | 'current' | 'upcoming'; source?: string }
+    >({
+      query: ({ hotelId, ...params }) => ({ url: `/v1/orders/hotels/${hotelId}/codes`, params }),
+      providesTags: [{ type: 'Codes', id: 'LIST' }]
     }),
-    createReservationCode: builder.mutation<IReservationCode, { hotelId: string; roomId: string; roomNumber: string; code: string; guestName: string; checkIn: string; checkOut: string }>({
+    createReservationCode: builder.mutation<
+      IReservationCode,
+      {
+        hotelId: string
+        roomId: string
+        roomNumber: string
+        code: string
+        guestName: string
+        checkIn: string
+        checkOut: string
+      }
+    >({
       query: ({ hotelId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/codes`, method: 'POST', body }),
-      invalidatesTags: [{ type: 'Orders', id: 'CODES' }]
+      invalidatesTags: [{ type: 'Codes', id: 'LIST' }]
     }),
-    updateReservationCode: builder.mutation<IReservationCode, { hotelId: string; codeId: string } & Partial<IReservationCode>>({
-      query: ({ hotelId, codeId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/codes/${codeId}`, method: 'PATCH', body }),
-      invalidatesTags: [{ type: 'Orders', id: 'CODES' }]
+    updateReservationCode: builder.mutation<
+      IReservationCode,
+      { hotelId: string; codeId: string } & Partial<IReservationCode>
+    >({
+      query: ({ hotelId, codeId, ...body }) => ({
+        url: `/v1/orders/hotels/${hotelId}/codes/${codeId}`,
+        method: 'PATCH',
+        body
+      }),
+      invalidatesTags: [{ type: 'Codes', id: 'LIST' }]
     }),
     deleteReservationCode: builder.mutation<void, { hotelId: string; codeId: string }>({
       query: ({ hotelId, codeId }) => ({ url: `/v1/orders/hotels/${hotelId}/codes/${codeId}`, method: 'DELETE' }),
-      invalidatesTags: [{ type: 'Orders', id: 'CODES' }]
+      invalidatesTags: [{ type: 'Codes', id: 'LIST' }]
+    }),
+
+    // iCal Sources
+    getICalSources: builder.query<IICalSource[], string>({
+      query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/ical-sources` }),
+      providesTags: [{ type: 'ICalSources', id: 'LIST' }]
+    }),
+    createICalSource: builder.mutation<
+      IICalSource,
+      { hotelId: string; platform: ICalPlatform; label: string; url: string; enabled: boolean }
+    >({
+      query: ({ hotelId, ...body }) => ({ url: `/v1/orders/hotels/${hotelId}/ical-sources`, method: 'POST', body }),
+      invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
+    }),
+    updateICalSource: builder.mutation<
+      IICalSource,
+      { hotelId: string; sourceId: string } & Partial<{ label: string; url: string; enabled: boolean; platform: ICalPlatform }>
+    >({
+      query: ({ hotelId, sourceId, ...body }) => ({
+        url: `/v1/orders/hotels/${hotelId}/ical-sources/${sourceId}`,
+        method: 'PATCH',
+        body
+      }),
+      invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
+    }),
+    deleteICalSource: builder.mutation<void, { hotelId: string; sourceId: string }>({
+      query: ({ hotelId, sourceId }) => ({
+        url: `/v1/orders/hotels/${hotelId}/ical-sources/${sourceId}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
+    }),
+    syncICalSource: builder.mutation<{ synced: number; errors: number }, { hotelId: string; sourceId: string }>({
+      query: ({ hotelId, sourceId }) => ({
+        url: `/v1/orders/hotels/${hotelId}/ical-sources/${sourceId}/sync`,
+        method: 'POST'
+      }),
+      invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
+    }),
+    syncAllICalSources: builder.mutation<{ synced: number; sources: number; errors: number }, string>({
+      query: hotelId => ({ url: `/v1/orders/hotels/${hotelId}/ical-sources/sync-all`, method: 'POST' }),
+      invalidatesTags: [{ type: 'ICalSources', id: 'LIST' }]
     }),
 
     // Settings
@@ -127,6 +243,7 @@ export const {
   useAdvanceOrderMutation,
   useCancelOrderMutation,
   useGetOrderAnalyticsQuery,
+  useTrackCheckinUsageMutation,
   useGetCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
@@ -136,6 +253,12 @@ export const {
   useUpdateCatalogItemMutation,
   useToggleCatalogItemMutation,
   useDeleteCatalogItemMutation,
+  useGetICalSourcesQuery,
+  useCreateICalSourceMutation,
+  useUpdateICalSourceMutation,
+  useDeleteICalSourceMutation,
+  useSyncICalSourceMutation,
+  useSyncAllICalSourcesMutation,
   useGetOrderSettingsQuery,
   useUpdateOrderSettingsMutation
 } = ordersApi as any

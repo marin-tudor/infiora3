@@ -48,18 +48,93 @@ export interface IHotel {
   cover?: string
   isActive: boolean
   settings?: {
-    offlineGuideEnabled?: boolean;
-  };
+    offlineGuideEnabled?: boolean
+    translationSourceLanguage?: string
+    premium?: IHotelPremiumModules
+    security?: IHotelSecuritySettings
+  }
   features?: {
-    ordersEnabled?: boolean;
-    maintenanceEnabled?: boolean;
-    housekeepingEnabled?: boolean;
-    staffRbacEnabled?: boolean;
-    smartDispatchingEnabled?: boolean;
-    bookableServicesEnabled?: boolean;
-  };
+    ordersEnabled?: boolean
+    maintenanceEnabled?: boolean
+    housekeepingEnabled?: boolean
+    staffRbacEnabled?: boolean
+    smartDispatchingEnabled?: boolean
+    bookableServicesEnabled?: boolean
+  }
+  bookings?: {
+    emails?: string[]
+  }
   map?: IHotelMapSettings
   mapPoints?: IMapPoint[]
+}
+
+export interface IHotelPremiumModules {
+  analytics?: boolean
+  automation?: boolean
+  upsells?: boolean
+  multilingualContent?: boolean
+  auditLogs?: boolean
+  integrations?: boolean
+}
+
+export interface IHotelSecuritySettings {
+  trustedDomains?: string[]
+  deviceTokenVersion?: number
+  pinSessionHours?: number
+  allowSharedDevices?: boolean
+  requireStrongPin?: boolean
+  auditLogRetentionDays?: number
+  recentAuditLogs?: IHotelAuditLog[]
+}
+
+export interface IHotelAuditLog {
+  id: string
+  actorType: 'user' | 'staff' | 'system' | 'guest'
+  actorId?: string | null
+  action: string
+  targetType: string
+  targetId?: string | null
+  summary: string
+  createdAt: string
+}
+
+export interface ITranslationCacheReview {
+  totals: { scope: string; status: string; count: number }[]
+  pendingOldest: { scope: string; language: string; createdAt: string } | null
+  recentFailures: { scope: string; language: string; error?: string; updatedAt: string }[]
+}
+
+export interface IHotelOperationsOverview {
+  summary: {
+    activeOrders: number
+    upcomingBookings: number
+    openMaintenance: number
+    openHousekeeping: number
+    guestSatisfaction: number | null
+  }
+  serviceLevels: {
+    avgOrderAcceptanceMinutes: number | null
+    orderSlaBreaches: number
+    maintenanceResolutionMinutes: number | null
+    housekeepingResolutionMinutes: number | null
+  }
+  bookings: {
+    confirmedRevenue: number
+    activeUpcoming: number
+  }
+  staffing: {
+    totalDispatchRules: number
+    activeDispatchRules: number
+    avgEscalationSeconds: number | null
+  }
+  issueBreakdown: {
+    maintenance: { label: string; count: number }[]
+    housekeeping: { label: string; count: number }[]
+  }
+  premiumModules: IHotelPremiumModules
+  coreFeatures: IHotel['features']
+  recentAuditLogs: IHotelAuditLog[]
+  translationCacheReview: ITranslationCacheReview
 }
 
 export type MapMarkerIcon =
@@ -199,8 +274,28 @@ export interface IRoom {
   newsletter?: INewsletter
   feedback?: IFeedback
   survey?: ISurvey
-  housekeeping?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string; icon?: string }[] }
-  maintenance?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string }[] }
+  housekeeping?: {
+    isActive?: boolean
+    mainButtonText?: string
+    icon?: string
+    emails?: string[]
+    askRoomNumber?: boolean
+    roomNumberLabel?: string
+    askReservationCode?: boolean
+    reservationCodeLabel?: string
+    options?: { key?: string; label?: string; icon?: string }[]
+  }
+  maintenance?: {
+    isActive?: boolean
+    mainButtonText?: string
+    icon?: string
+    emails?: string[]
+    askRoomNumber?: boolean
+    roomNumberLabel?: string
+    askReservationCode?: boolean
+    reservationCodeLabel?: string
+    options?: { key?: string; label?: string }[]
+  }
 }
 
 export interface IGroup {
@@ -218,8 +313,28 @@ export interface IGroup {
     backgroundPosition?: string
     tileSize?: number
   }
-  housekeeping?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string; icon?: string }[] }
-  maintenance?: { isActive?: boolean; mainButtonText?: string; icon?: string; emails?: string[]; askRoomNumber?: boolean; roomNumberLabel?: string; askReservationCode?: boolean; reservationCodeLabel?: string; options?: { key?: string; label?: string }[] }
+  housekeeping?: {
+    isActive?: boolean
+    mainButtonText?: string
+    icon?: string
+    emails?: string[]
+    askRoomNumber?: boolean
+    roomNumberLabel?: string
+    askReservationCode?: boolean
+    reservationCodeLabel?: string
+    options?: { key?: string; label?: string; icon?: string }[]
+  }
+  maintenance?: {
+    isActive?: boolean
+    mainButtonText?: string
+    icon?: string
+    emails?: string[]
+    askRoomNumber?: boolean
+    roomNumberLabel?: string
+    askReservationCode?: boolean
+    reservationCodeLabel?: string
+    options?: { key?: string; label?: string }[]
+  }
   font?: {
     color?: string
     family?: string
@@ -317,10 +432,7 @@ export interface IInsights {
     'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'bounceRate' | 'engagedViews',
     Record<string, number>
   >
-  change: Record<
-    'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'bounceRate' | 'engagedViews',
-    number
-  >
+  change: Record<'taps' | 'views' | 'liveViews' | 'uniqueViews' | 'timeSpent' | 'bounceRate' | 'engagedViews', number>
   keyMetrics: {
     topPerforming: { room: string; link: string }
     viewsByLanguages: Record<string, number>
@@ -406,6 +518,7 @@ export interface ICatalogItem {
     addons?: { _id: string; name: string; price: number; description: string }[]
     simpleAvailability?: { enabled: boolean; from: string; to: string }
     weeklySchedule?: Record<string, { from: string; to: string }[]>
+
     // legacy fields
     slotType?: string
     maxPersons?: number
@@ -415,12 +528,7 @@ export interface ICatalogItem {
   }
 }
 
-export type OrderStatus =
-  | 'Awaiting confirmation'
-  | 'Processing'
-  | 'On the way'
-  | 'Completed'
-  | 'Cancelled'
+export type OrderStatus = 'Awaiting confirmation' | 'Processing' | 'On the way' | 'Completed' | 'Cancelled'
 
 export interface IGuestOrderItem {
   itemId: string
@@ -533,13 +641,30 @@ export interface IOrderAnalytics {
 export interface IReservationCode {
   id: string
   hotelId: string
-  roomId: string
-  roomNumber: string
+  roomId?: string
+  roomNumber?: string
   code: string
-  guestName: string
+  guestName?: string
   checkIn: string
   checkOut: string
   active: boolean
+  source?: 'manual' | 'booking' | 'airbnb' | 'vrbo' | 'agoda' | 'tripadvisor' | 'custom'
+  externalUid?: string
+  createdAt: string
+}
+
+export type ICalPlatform = 'booking' | 'airbnb' | 'vrbo' | 'agoda' | 'tripadvisor' | 'custom'
+
+export interface IICalSource {
+  id: string
+  hotelId: string
+  platform: ICalPlatform
+  label: string
+  url: string
+  enabled: boolean
+  lastSyncAt: string | null
+  lastSyncStatus: 'success' | 'error' | null
+  lastSyncError: string | null
   createdAt: string
 }
 
@@ -565,6 +690,10 @@ export interface IOrderSettings {
   locationLabel?: string
   tablePin?: string
   kioskMode?: boolean
+}
+
+export interface IBookingSettings {
+  emails?: string[]
 }
 
 export interface ISurveyAnswerItem {
