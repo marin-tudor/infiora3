@@ -2,8 +2,17 @@
 import { useEffect, useState } from 'react'
 
 import {
-  Stack, Typography, Card, CardContent, TextField, Button,
-  Switch, FormControlLabel, Chip, Box, Divider
+  Stack,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Switch,
+  FormControlLabel,
+  Chip,
+  Box,
+  Divider
 } from '@mui/material'
 
 import { toast } from 'react-toastify'
@@ -11,7 +20,7 @@ import { toast } from 'react-toastify'
 import { useGetOrderSettingsQuery, useUpdateOrderSettingsMutation } from '@/redux/api/ordersApi'
 import Loader from '@/components/common/Loader'
 import { useDictionary } from '@/contexts/DictionaryContext'
-
+import ICalSources from './ICalSources'
 
 export default function OrderSettings({ hotelId }: { hotelId: string }) {
   const dictionary: any = useDictionary()
@@ -92,7 +101,7 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
         requireLocation,
         locationLabel,
         tablePin: venueType === 'restaurant' ? tablePin : '',
-        kioskMode,
+        kioskMode
       } as any).unwrap()
       toast.success(t.settingsSaved || 'Settings saved')
     } catch {
@@ -107,7 +116,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* General */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={2}>{t.general || 'General'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={2}>
+            {t.general || 'General'}
+          </Typography>
           <Stack gap={2}>
             <FormControlLabel
               control={<Switch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}
@@ -115,31 +126,39 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
             />
             <Stack direction='row' gap={2} alignItems='flex-start'>
               <Stack gap={0.5} flex={1}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.availableFrom || 'Available from'}</Typography>
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                  {t.availableFrom || 'Available from'}
+                </Typography>
                 <TextField
-                  type='time' value={availableFrom}
+                  type='time'
+                  value={availableFrom}
                   onChange={e => setAvailableFrom(e.target.value)}
-                  size='small' fullWidth
+                  size='small'
+                  fullWidth
                 />
               </Stack>
               <Stack gap={0.5} flex={1}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.availableTo || 'Available to'}</Typography>
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                  {t.availableTo || 'Available to'}
+                </Typography>
                 <TextField
-                  type='time' value={availableTo}
+                  type='time'
+                  value={availableTo}
                   onChange={e => setAvailableTo(e.target.value)}
-                  size='small' fullWidth
+                  size='small'
+                  fullWidth
                 />
               </Stack>
               <Stack gap={0.5} sx={{ maxWidth: 110 }}>
-                <Typography variant='caption' color='text.secondary' fontWeight={600}>{t.currency || 'Currency'}</Typography>
-                <TextField
-                  value={currencySymbol}
-                  onChange={e => setCurrencySymbol(e.target.value)}
-                  size='small'
-                />
+                <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                  {t.currency || 'Currency'}
+                </Typography>
+                <TextField value={currencySymbol} onChange={e => setCurrencySymbol(e.target.value)} size='small' />
               </Stack>
             </Stack>
-            <Typography variant='caption' color='text.secondary'>Set 00:00–00:00 for always available</Typography>
+            <Typography variant='caption' color='text.secondary'>
+              Set 00:00–00:00 for always available
+            </Typography>
           </Stack>
         </CardContent>
       </Card>
@@ -147,7 +166,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Payment Methods */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.paymentMethods || 'Payment Methods'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>
+            {t.paymentMethods || 'Payment Methods'}
+          </Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             Enable only the payment methods available at your property
           </Typography>
@@ -156,8 +177,12 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
               control={<Switch checked={paymentCash} onChange={e => setPaymentCash(e.target.checked)} />}
               label={
                 <Box>
-                  <Typography variant='body2' fontWeight={600}>Cash</Typography>
-                  <Typography variant='caption' color='text.secondary'>Guest pays in cash on delivery</Typography>
+                  <Typography variant='body2' fontWeight={600}>
+                    Cash
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    Guest pays in cash on delivery
+                  </Typography>
                 </Box>
               }
             />
@@ -166,8 +191,12 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
               control={<Switch checked={paymentCard} onChange={e => setPaymentCard(e.target.checked)} />}
               label={
                 <Box>
-                  <Typography variant='body2' fontWeight={600}>Card / POS</Typography>
-                  <Typography variant='caption' color='text.secondary'>Guest pays by card on a POS terminal</Typography>
+                  <Typography variant='body2' fontWeight={600}>
+                    Card / POS
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    Guest pays by card on a POS terminal
+                  </Typography>
                 </Box>
               }
             />
@@ -176,8 +205,12 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
               control={<Switch checked={paymentOnline} onChange={e => setPaymentOnline(e.target.checked)} />}
               label={
                 <Box>
-                  <Typography variant='body2' fontWeight={600}>Pay at the end</Typography>
-                  <Typography variant='caption' color='text.secondary'>Guest pays at checkout or before leaving</Typography>
+                  <Typography variant='body2' fontWeight={600}>
+                    Pay at hotel
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    Guest pays at checkout or before leaving
+                  </Typography>
                 </Box>
               }
             />
@@ -188,22 +221,45 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Status Labels */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.statusLabels || 'Status Labels'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>
+            {t.statusLabels || 'Status Labels'}
+          </Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             Customize status names shown to guests
           </Typography>
           <Stack gap={2}>
             <Stack gap={0.5}>
-              <Typography variant='caption' color='text.secondary' fontWeight={600}>Processing label</Typography>
-              <TextField value={processingLabel} onChange={e => setProcessingLabel(e.target.value)} fullWidth size='small' />
+              <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                Processing label
+              </Typography>
+              <TextField
+                value={processingLabel}
+                onChange={e => setProcessingLabel(e.target.value)}
+                fullWidth
+                size='small'
+              />
             </Stack>
             <Stack gap={0.5}>
-              <Typography variant='caption' color='text.secondary' fontWeight={600}>On the way label</Typography>
-              <TextField value={onTheWayLabel} onChange={e => setOnTheWayLabel(e.target.value)} fullWidth size='small' />
+              <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                On the way label
+              </Typography>
+              <TextField
+                value={onTheWayLabel}
+                onChange={e => setOnTheWayLabel(e.target.value)}
+                fullWidth
+                size='small'
+              />
             </Stack>
             <Stack gap={0.5}>
-              <Typography variant='caption' color='text.secondary' fontWeight={600}>Completed label</Typography>
-              <TextField value={completedLabel} onChange={e => setCompletedLabel(e.target.value)} fullWidth size='small' />
+              <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                Completed label
+              </Typography>
+              <TextField
+                value={completedLabel}
+                onChange={e => setCompletedLabel(e.target.value)}
+                fullWidth
+                size='small'
+              />
             </Stack>
           </Stack>
         </CardContent>
@@ -212,7 +268,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Email Notifications */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.emailNotifications || 'Email Notifications'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>
+            {t.emailNotifications || 'Email Notifications'}
+          </Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
             These addresses receive a notification for every new order
           </Typography>
@@ -222,15 +280,24 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
                 value={emailInput}
                 onChange={e => setEmailInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddEmail()}
-                type='email' fullWidth size='small'
+                type='email'
+                fullWidth
+                size='small'
                 placeholder='email@example.com'
               />
-              <Button variant='outlined' onClick={handleAddEmail} disabled={!emailInput.trim()}>Add</Button>
+              <Button variant='outlined' onClick={handleAddEmail} disabled={!emailInput.trim()}>
+                Add
+              </Button>
             </Stack>
             {emails.length > 0 && (
               <Stack direction='row' gap={1} flexWrap='wrap'>
                 {emails.map(email => (
-                  <Chip key={email} label={email} onDelete={() => setEmails(emails.filter(e => e !== email))} size='small' />
+                  <Chip
+                    key={email}
+                    label={email}
+                    onDelete={() => setEmails(emails.filter(e => e !== email))}
+                    size='small'
+                  />
                 ))}
               </Stack>
             )}
@@ -240,11 +307,15 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
 
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='h6' gutterBottom>{t.venue || 'Venue'}</Typography>
+          <Typography variant='h6' gutterBottom>
+            {t.venue || 'Venue'}
+          </Typography>
 
           <Stack gap={2}>
             <Box>
-              <Typography variant='body2' color='text.secondary' gutterBottom>Venue type</Typography>
+              <Typography variant='body2' color='text.secondary' gutterBottom>
+                Venue type
+              </Typography>
               <Stack direction='row' gap={1}>
                 {(['hotel', 'restaurant'] as const).map(type => (
                   <Button
@@ -287,7 +358,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
             />
 
             <Stack gap={0.5}>
-              <Typography variant='caption' color='text.secondary' fontWeight={600}>Location field label</Typography>
+              <Typography variant='caption' color='text.secondary' fontWeight={600}>
+                Location field label
+              </Typography>
               <TextField
                 value={locationLabel}
                 onChange={e => setLocationLabel(e.target.value)}
@@ -298,7 +371,9 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
 
             {venueType === 'restaurant' && requireCode && (
               <Box>
-                <Typography variant='body2' color='text.secondary' gutterBottom>Table PIN</Typography>
+                <Typography variant='body2' color='text.secondary' gutterBottom>
+                  Table PIN
+                </Typography>
                 <Stack direction='row' gap={1} alignItems='center'>
                   <TextField
                     value={tablePin}
@@ -343,25 +418,40 @@ export default function OrderSettings({ hotelId }: { hotelId: string }) {
       {/* Kiosk Mode */}
       <Card variant='outlined'>
         <CardContent>
-          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>{t.kioskMode || 'Kiosk Mode'}</Typography>
+          <Typography variant='subtitle1' fontWeight={700} mb={0.5}>
+            {t.kioskMode || 'Kiosk Mode'}
+          </Typography>
           <Typography variant='caption' color='text.secondary' mb={2} display='block'>
-            Hide the back button on the guest ordering page. Use this when tablets are mounted as dedicated ordering kiosks so guests cannot navigate away.
+            Hide the back button on the guest ordering page. Use this when tablets are mounted as dedicated ordering
+            kiosks so guests cannot navigate away.
           </Typography>
           <FormControlLabel
             control={<Switch checked={kioskMode} onChange={e => setKioskMode(e.target.checked)} />}
             label={
               <Box>
-                <Typography variant='body2' fontWeight={600}>Enable kiosk mode</Typography>
-                <Typography variant='caption' color='text.secondary'>Back button is hidden from guests</Typography>
+                <Typography variant='body2' fontWeight={600}>
+                  Enable kiosk mode
+                </Typography>
+                <Typography variant='caption' color='text.secondary'>
+                  Back button is hidden from guests
+                </Typography>
               </Box>
             }
           />
         </CardContent>
       </Card>
 
+      {/* iCal Sync */}
+      <Box>
+        <Typography variant='subtitle1' fontWeight={700} mb={2}>
+          iCal Sync
+        </Typography>
+        <ICalSources hotelId={hotelId} />
+      </Box>
+
       <Box>
         <Button variant='contained' onClick={handleSave} disabled={saving}>
-          {saving ? (t.saving || 'Saving...') : (t.saveSettings || 'Save Settings')}
+          {saving ? t.saving || 'Saving...' : t.saveSettings || 'Save Settings'}
         </Button>
       </Box>
     </Stack>
