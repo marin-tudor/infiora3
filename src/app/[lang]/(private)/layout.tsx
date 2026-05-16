@@ -27,16 +27,19 @@ import { i18n } from '@configs/i18n'
 import { getDictionary } from '@/utils/getDictionary'
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
 
-const Layout = async ({ children, params }: ChildrenType & { params: { lang: Locale } }) => {
+const Layout = async ({ children, params }: ChildrenType & { params: Promise<{ lang: string }> }) => {
+  const { lang } = await params
+  const locale = lang as Locale
+
   // Vars
-  const direction = i18n.langDirection[params.lang]
-  const dictionary = await getDictionary(params.lang)
-  const mode = getMode()
-  const systemMode = getSystemMode()
+  const direction = i18n.langDirection[locale]
+  const dictionary = await getDictionary(locale)
+  const mode = await getMode()
+  const systemMode = await getSystemMode()
 
   return (
     <Providers direction={direction}>
-      <AuthGuard locale={params.lang}>
+      <AuthGuard locale={locale}>
         <LayoutWrapper
           systemMode={systemMode}
           verticalLayout={

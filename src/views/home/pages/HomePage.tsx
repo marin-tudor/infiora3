@@ -46,7 +46,7 @@ const HomePage = () => {
     {
       hotelId: hotelId!,
       startDate: searchParams.startDate ? new Date(searchParams.startDate).toISOString() : start.toISOString(),
-      endDate: searchParams.endDate ? new Date(searchParams.endDate).toISOString() : end.toISOString(),
+      endDate: searchParams.endDate ? new Date(searchParams.endDate).toISOString() : end.toISOString()
     },
     { skip: !hotelId }
   )
@@ -164,37 +164,75 @@ const HomePage = () => {
             {orderAnalytics && (
               <Grid item xs={12}>
                 <Stack gap={2}>
-                  <Typography variant='h6' fontWeight={700}>Orders</Typography>
+                  <Typography variant='h6' fontWeight={700}>
+                    Orders
+                  </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={6} sm={3}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='caption' color='text.secondary' textTransform='uppercase' letterSpacing={0.5}>Total Orders</Typography>
-                          <Typography variant='h4' fontWeight={700} mt={0.5}>{orderAnalytics.totalOrders}</Typography>
+                          <Typography
+                            variant='caption'
+                            color='text.secondary'
+                            textTransform='uppercase'
+                            letterSpacing={0.5}
+                          >
+                            Total Orders
+                          </Typography>
+                          <Typography variant='h4' fontWeight={700} mt={0.5}>
+                            {orderAnalytics.totalOrders}
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Grid>
                     <Grid item xs={6} sm={3}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='caption' color='text.secondary' textTransform='uppercase' letterSpacing={0.5}>Revenue</Typography>
-                          <Typography variant='h4' fontWeight={700} color='primary.main' mt={0.5}>{orderAnalytics.totalRevenue?.toFixed(2)} €</Typography>
+                          <Typography
+                            variant='caption'
+                            color='text.secondary'
+                            textTransform='uppercase'
+                            letterSpacing={0.5}
+                          >
+                            Revenue
+                          </Typography>
+                          <Typography variant='h4' fontWeight={700} color='primary.main' mt={0.5}>
+                            {orderAnalytics.totalRevenue?.toFixed(2)} €
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Grid>
                     <Grid item xs={6} sm={3}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='caption' color='text.secondary' textTransform='uppercase' letterSpacing={0.5}>Avg Order</Typography>
-                          <Typography variant='h4' fontWeight={700} mt={0.5}>{orderAnalytics.avgOrderValue?.toFixed(2)} €</Typography>
+                          <Typography
+                            variant='caption'
+                            color='text.secondary'
+                            textTransform='uppercase'
+                            letterSpacing={0.5}
+                          >
+                            Avg Order
+                          </Typography>
+                          <Typography variant='h4' fontWeight={700} mt={0.5}>
+                            {orderAnalytics.avgOrderValue?.toFixed(2)} €
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Grid>
                     <Grid item xs={6} sm={3}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='caption' color='text.secondary' textTransform='uppercase' letterSpacing={0.5}>Avg Rating</Typography>
-                          <Typography variant='h4' fontWeight={700} mt={0.5}>{orderAnalytics.avgRating ? `${orderAnalytics.avgRating.toFixed(1)} ★` : 'N/A'}</Typography>
+                          <Typography
+                            variant='caption'
+                            color='text.secondary'
+                            textTransform='uppercase'
+                            letterSpacing={0.5}
+                          >
+                            Avg Rating
+                          </Typography>
+                          <Typography variant='h4' fontWeight={700} mt={0.5}>
+                            {orderAnalytics.avgRating ? `${orderAnalytics.avgRating.toFixed(1)} ★` : 'N/A'}
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Grid>
@@ -204,24 +242,45 @@ const HomePage = () => {
                     <Grid item xs={12} sm={6}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='subtitle2' fontWeight={700} mb={2}>Top Items</Typography>
+                          <Typography variant='subtitle2' fontWeight={700} mb={2}>
+                            Top Items
+                          </Typography>
                           {orderAnalytics.topItems?.length ? (
                             <Stack gap={1}>
                               {orderAnalytics.topItems.slice(0, 5).map((item: any, i: number) => (
                                 <Stack key={i} direction='row' alignItems='center' justifyContent='space-between'>
                                   <Stack direction='row' alignItems='center' gap={1}>
-                                    <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'primary.lighter', color: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{i + 1}</Box>
+                                    <Box
+                                      sx={{
+                                        width: 22,
+                                        height: 22,
+                                        borderRadius: '50%',
+                                        bgcolor: 'primary.lighter',
+                                        color: 'primary.main',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: 10,
+                                        fontWeight: 700
+                                      }}
+                                    >
+                                      {i + 1}
+                                    </Box>
                                     <Typography variant='body2'>{item.name}</Typography>
                                   </Stack>
                                   <Stack direction='row' gap={1} alignItems='center'>
                                     <Chip label={`×${item.count}`} size='small' />
-                                    <Typography variant='body2' color='text.secondary'>{item.revenue?.toFixed(2)} €</Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                      {item.revenue?.toFixed(2)} €
+                                    </Typography>
                                   </Stack>
                                 </Stack>
                               ))}
                             </Stack>
                           ) : (
-                            <Typography variant='body2' color='text.secondary'>No orders yet</Typography>
+                            <Typography variant='body2' color='text.secondary'>
+                              No orders yet
+                            </Typography>
                           )}
                         </CardContent>
                       </Card>
@@ -229,24 +288,45 @@ const HomePage = () => {
                     <Grid item xs={12} sm={6}>
                       <Card variant='outlined'>
                         <CardContent>
-                          <Typography variant='subtitle2' fontWeight={700} mb={2}>Top Rooms by Orders</Typography>
+                          <Typography variant='subtitle2' fontWeight={700} mb={2}>
+                            Top Rooms by Orders
+                          </Typography>
                           {orderAnalytics.topRooms?.length ? (
                             <Stack gap={1}>
                               {orderAnalytics.topRooms.slice(0, 5).map((room: any, i: number) => (
                                 <Stack key={i} direction='row' alignItems='center' justifyContent='space-between'>
                                   <Stack direction='row' alignItems='center' gap={1}>
-                                    <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'success.lighter', color: 'success.main', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{i + 1}</Box>
+                                    <Box
+                                      sx={{
+                                        width: 22,
+                                        height: 22,
+                                        borderRadius: '50%',
+                                        bgcolor: 'success.lighter',
+                                        color: 'success.main',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: 10,
+                                        fontWeight: 700
+                                      }}
+                                    >
+                                      {i + 1}
+                                    </Box>
                                     <Typography variant='body2'>Room {room.roomNumber}</Typography>
                                   </Stack>
                                   <Stack direction='row' gap={1} alignItems='center'>
                                     <Chip label={`${room.count} orders`} size='small' />
-                                    <Typography variant='body2' color='text.secondary'>{room.revenue?.toFixed(2)} €</Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                      {room.revenue?.toFixed(2)} €
+                                    </Typography>
                                   </Stack>
                                 </Stack>
                               ))}
                             </Stack>
                           ) : (
-                            <Typography variant='body2' color='text.secondary'>No orders yet</Typography>
+                            <Typography variant='body2' color='text.secondary'>
+                              No orders yet
+                            </Typography>
                           )}
                         </CardContent>
                       </Card>

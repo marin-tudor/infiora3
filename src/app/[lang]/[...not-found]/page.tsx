@@ -12,11 +12,14 @@ import { i18n } from '@configs/i18n'
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
 
-const NotFoundPage = ({ params }: { params: { lang: Locale } }) => {
-  // Vars
-  const direction = i18n.langDirection[params.lang]
+const NotFoundPage = async ({ params }: { params: Promise<{ lang: string }> }) => {
+  const { lang } = await params
+  const locale = lang as Locale
 
-  const systemMode = getSystemMode()
+  // Vars
+  const direction = i18n.langDirection[locale]
+
+  const systemMode = await getSystemMode()
 
   return (
     <Providers direction={direction}>

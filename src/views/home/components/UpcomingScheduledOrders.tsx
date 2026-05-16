@@ -14,9 +14,11 @@ export default function UpcomingScheduledOrders({ hotelId }: { hotelId: string }
         .get(`/api/v1/orders/hotels/${hotelId}`, { params: { scheduled: true } })
         .then(r => {
           const all = r.data.results ?? r.data
+
           const sorted = [...all].sort(
             (a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime()
           )
+
           setOrders(sorted.slice(0, 5))
         })
         .catch(() => {})
@@ -45,13 +47,7 @@ export default function UpcomingScheduledOrders({ hotelId }: { hotelId: string }
             const isToday = scheduled.toDateString() === new Date().toDateString()
 
             return (
-              <Stack
-                key={order._id}
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                py={0.5}
-              >
+              <Stack key={order._id} direction='row' justifyContent='space-between' alignItems='center' py={0.5}>
                 <Stack gap={0.25}>
                   <Typography variant='body2' fontWeight={600}>
                     Room {order.guestRoomNumber}

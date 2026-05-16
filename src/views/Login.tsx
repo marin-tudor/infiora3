@@ -40,7 +40,6 @@ import { useSettings } from '@core/hooks/useSettings'
 import { getLocalizedUrl } from '@/utils/i18n'
 import InputField from '@/components/common/InputField'
 import { useDictionary } from '@/contexts/DictionaryContext'
-import { useLoginMutation } from '@/redux/api/authApi'
 import { emailValidation, passwordValidation, stringRequired } from '@/utils/validationSchemas'
 
 const schema = yup.object().shape({
@@ -49,6 +48,20 @@ const schema = yup.object().shape({
 })
 
 export type FormData = yup.InferType<typeof schema>
+
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> => {
+  let timeout: ReturnType<typeof setTimeout>
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(message)), timeoutMs)
+  })
+
+  try {
+    return await Promise.race([promise, timeoutPromise])
+  } finally {
+    clearTimeout(timeout!)
+  }
+}
 
 const Login = () => {
   // Hooks
@@ -59,8 +72,6 @@ const Login = () => {
   const dictionary = useDictionary()
 
   const [isLoading, setIsLoading] = useState(false)
-
-  const [login] = useLoginMutation()
 
   const {
     control,
@@ -74,15 +85,33 @@ const Login = () => {
     try {
       setIsLoading(true)
 
-      const res = await login({
-        email: data.email,
-        password: data.password
-      }).unwrap()
+      const response = await withTimeout(
+        fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password
+          })
+        }),
+        15000,
+        'Login service is not responding. Check that the backend is running and try again.'
+      )
 
-      const signInResult = await signIn('credentials', {
-        data: JSON.stringify(res),
-        redirect: false
-      })
+      const res = await response.json().catch(() => null)
+
+      if (!response.ok || !res?.loginProof) {
+        throw new Error(res?.message?.[0] || 'Login failed')
+      }
+
+      const signInResult = await withTimeout(
+        signIn('credentials', {
+          loginProof: res.loginProof,
+          redirect: false
+        }),
+        15000,
+        'Session creation is not responding. Check NextAuth configuration and try again.'
+      )
 
       if (signInResult?.error) {
         throw new Error(signInResult.error)
@@ -92,6 +121,7 @@ const Login = () => {
         const redirectURL = searchParams.get('redirectTo') ?? '/'
 
         router.replace(getLocalizedUrl(redirectURL, locale as Locale))
+        router.refresh()
       }
     } catch (error: any) {
       toast.error(error.data?.message || error.message)

@@ -6,35 +6,36 @@ import { PrismaClient } from '@prisma/client'
 import type { NextAuthOptions } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 
-const prisma = new PrismaClient()
+import { verifyLoginProof } from './loginProof'
+
+const providers: NextAuthOptions['providers'] = [
+  CredentialProvider({
+    name: 'Credentials',
+    type: 'credentials',
+    credentials: {
+      loginProof: { label: 'Login proof', type: 'text' }
+    },
+    async authorize(credentials) {
+      return verifyLoginProof((credentials as any)?.loginProof)
+    }
+  })
+]
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  providers.push(
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    })
+  )
+}
+
+const prismaAdapter = process.env.DATABASE_URL ? (PrismaAdapter(new PrismaClient()) as Adapter) : undefined
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as Adapter,
+  ...(prismaAdapter ? { adapter: prismaAdapter } : {}),
 
-  providers: [
-    CredentialProvider({
-      name: 'Credentials',
-      type: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        try {
-          const user = JSON.parse((credentials as any)?.data || '{}')
-          if (user?.id && user?.email) {
-            return user
-          }
-        } catch {}
-        return null
-      },
-    }),
-
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
-    })
-  ],
+  providers,
 
   session: {
     strategy: 'jwt',
