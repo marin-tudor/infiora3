@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
   basePath: process.env.BASEPATH,
   images: {
     remotePatterns: [
@@ -26,7 +26,7 @@ const nextConfig = {
         locale: false
       },
       {
-        source: '/((?!(?:en|hr|front-pages|favicon.ico)\\b)):path',
+        source: '/:path((?!(?:api|_next|en|hr|front-pages|favicon.ico)(?:/|$)).*)',
         destination: '/en/:path',
         permanent: true,
         locale: false
