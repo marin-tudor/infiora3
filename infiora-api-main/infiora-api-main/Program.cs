@@ -18,6 +18,11 @@ var app = builder.Build();
 
 // Apply database schema for non-InMemory databases
 var databaseProvider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
+if (!app.Environment.IsDevelopment() && databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException("InMemory database is only allowed in development.");
+}
+
 if (!databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
 {
     using var scope = app.Services.CreateScope();

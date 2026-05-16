@@ -1,8 +1,12 @@
 import { MongoClient, ObjectId } from 'mongodb';
 
+const DB_NAME = 'infiora-development';
+const GUEST_APP_URL = 'http://localhost:4002';
+const DASHBOARD_URL = 'http://localhost:4000/en';
+
 const client = new MongoClient('mongodb://localhost:27017');
 await client.connect();
-const db = client.db('infiora');
+const db = client.db(DB_NAME);
 
 const user = await db.collection('users').findOne({ email: 'tudor@infiora.com' });
 if (!user) { console.error('User not found!'); process.exit(1); }
@@ -53,8 +57,10 @@ await db.collection('catalogitems').insertOne({
 console.log('✓ Kategorija + item kreiran');
 
 console.log('\n========================================');
-console.log('Dashboard: http://localhost:3001/en');
-console.log('Guest order: http://localhost:3000/r/' + slug + '/order');
+console.log('Baza: ' + DB_NAME);
+console.log('Dashboard: ' + DASHBOARD_URL);
+console.log('Guest room: ' + GUEST_APP_URL + '/' + roomId.toString());
+console.log('Guest order: ' + GUEST_APP_URL + '/r/' + slug + '/order');
 console.log('Reservation code: GOST2025');
 console.log('========================================');
 

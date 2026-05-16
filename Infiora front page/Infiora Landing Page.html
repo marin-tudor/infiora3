@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Infiora — The in-room guest platform for hotels, villas &amp; apartments</title>
+  <meta name="description" content="Infiora is a hospitality operations platform: branded in-room guest portals, multi-language guides, requests, surveys and maps — across every room and property." />
+  <meta name="theme-color" content="#F4EEE3" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Infiora — The in-room guest platform for hotels, villas & apartments" />
+  <meta property="og:description" content="Branded guest portal, multi-language guides, requests, surveys and maps — one operations platform for every room you run." />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="hr_HR" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Infiora — Hospitality operations platform" />
+  <meta name="twitter:description" content="The in-room guest platform for hotels, villas and apartments." />
+
+  <!-- Canonical & alternates -->
+  <link rel="canonical" href="https://infiora.hr/" />
+  <link rel="alternate" hreflang="en" href="https://infiora.hr/?lang=en" />
+  <link rel="alternate" hreflang="hr" href="https://infiora.hr/?lang=hr" />
+  <link rel="alternate" hreflang="x-default" href="https://infiora.hr/" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Initial Organization schema (LLM signal even before JS runs) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Infiora",
+    "url": "https://infiora.hr",
+    "description": "Hospitality operations platform for hotels, apartments and villas: branded in-room guest portals, multi-language guides, requests, surveys and maps.",
+    "areaServed": ["Europe"],
+    "knowsAbout": [
+      "hotel software",
+      "hospitality automation",
+      "villa management software",
+      "apartment management solution",
+      "guest communication platform",
+      "in-room digital concierge",
+      "multi-property operations"
+    ]
+  }
+  </script>
+
+  <!-- Static fallback so LLMs/scrapers without JS still get the gist -->
+  <noscript>
+    <style>.no-js { padding: 60px 24px; max-width: 720px; margin: 0 auto; font-family: Georgia, serif; color: #0F1612; background: #F4EEE3; min-height: 100vh; }</style>
+    <div class="no-js">
+      <h1>Infiora — the in-room guest platform for hotels, villas and apartments.</h1>
+      <p>Infiora is a hospitality operations platform. Every room, villa or apartment you run gets a branded guest portal: multi-language guides, structured housekeeping and maintenance requests, in-stay feedback and surveys, custom maps with points of interest, and engagement analytics.</p>
+      <p>Pricing is quote-based — request a tailored proposal from <a href="mailto:hello@infiora.hr">hello@infiora.hr</a>.</p>
+    </div>
+  </noscript>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- I18N dictionary (plain JS, not Babel) -->
+  <script src="i18n.js"></script>
+
+  <!-- Components -->
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="phone-preview.jsx"></script>
+  <script type="text/babel" src="dashboard-preview.jsx"></script>
+  <script type="text/babel" src="sections.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

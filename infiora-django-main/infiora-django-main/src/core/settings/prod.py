@@ -4,6 +4,8 @@ from .base import *
 DEBUG = False
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+if not ALLOWED_HOSTS:
+    raise RuntimeError('ALLOWED_HOSTS must be configured for production.')
 
 # AWS S3 Configuration (Optional - fallback to local storage if not configured)
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
@@ -62,7 +64,7 @@ if SENTRY_DSN:
             RedisIntegration(),
         ],
         traces_sample_rate=0.1,
-        send_default_pii=True,
+        send_default_pii=False,
     )
 
 # Email configuration for prod

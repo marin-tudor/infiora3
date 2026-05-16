@@ -2116,7 +2116,7 @@ Exit Criteria:
 - Generated/vendor/build artifacts are not tracked or surfaced in normal reviews.
 
 Status:
-- Wave 3 closed on 2026-05-16.
+- Wave 3 implementation snapshot recorded on 2026-05-16.
 - Completed: stale translation utility removed, Invoke-Expression replaced in PS scripts, yarn lockfiles removed from active packages (npm standardized, admin got package-lock.json with --legacy-peer-deps), dash archived with ARCHIVE-STATUS.md and docs/alternative-stacks.md updated, .gitignore extended (*.tsbuildinfo, logs/), Validate-Workspace CI artifact check added, backend console.error → winston logger in group/link/room/orders services, frontend debug console.log removed across guest app and admin, ownership middleware null-hotel 404 fix and isAccessibleUser 400 fix, orderUtils/guestValidation/orderTracking/StripePaymentForm extracted from GuestOrderPage. INF-AUDIT-046 (alt stacks archive) deferred. INF-AUDIT-033/037 resolved by ARCHIVE-STATUS marker and docs.
 
 ### Wave 4 - Performance, Testing, and Scalability
@@ -2147,7 +2147,7 @@ Exit Criteria:
 - Production monitoring can identify API errors, payment failures, queue failures, and latency.
 
 Status:
-- Wave 4 closed on 2026-05-16.
+- Wave 4 implementation snapshot recorded on 2026-05-16.
 - Completed: token TTL index (expireAfterSeconds: 0 on expires field), configurable audit-log retention TTL (default 90 days via AUDIT_LOG_RETENTION_DAYS). Compound indexes added to catalog-item (hotelId+categoryId+available+sortOrder, hotelId+available+sortOrder), link (room+isActive+position, group+isActive+position), room (hotel+isActive), feedback (hotel+createdAt, hotel+room+createdAt). Three backend integration test files: ssrf-guards.test.ts (18 tests, all passing), public-room-security.test.ts (DTO leak assertions), tenant-isolation.test.ts (cross-tenant 403 enforcement). Playwright E2E expanded with 404 handling, admin invalid-credentials toast, and protected-route redirect. storageQuota.ts (per-hotel upload count), cleanupOrphanedUploads.ts (disk vs DB diff + safe delete), cleanupOrphanedUploadsJob.ts (weekly cron, Sun 03:00 UTC) wired into index.ts. Deferred: background jobs for email/translation/webhook retries (Step 6), structured request-ID logging and health check metrics (Step 7) — these require broader infrastructure decisions.
 
 ### Wave 5 - Product Upgrades and Advanced Features
@@ -2256,4 +2256,3 @@ What could make Infiora significantly better:
 
 Recommended next move:
 - Start Wave 1 with INF-AUDIT-001, INF-AUDIT-002, and INF-AUDIT-003 as a single security stabilization sprint, with regression tests added before or alongside each fix.
-

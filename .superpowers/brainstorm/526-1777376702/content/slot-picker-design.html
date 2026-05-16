@@ -1,0 +1,142 @@
+<h2>Bookable item u order pageu — dizajn</h2>
+<p class="subtitle">Kako bookable item izgleda u meniju i kako izgleda slot-picker drawer</p>
+
+<div class="section">
+  <h3>1 — Kartica u meniju: instant vs bookable</h3>
+  <div class="split" style="gap:16px">
+
+    <!-- Instant item card -->
+    <div class="mockup">
+      <div class="mockup-header">Instant item (postojeći)</div>
+      <div class="mockup-body" style="padding:0">
+        <div style="background:#fff;border:1px solid #e8e0d0;border-radius:14px;overflow:hidden;font-family:'DM Sans',sans-serif">
+          <div style="width:100%;height:90px;background:linear-gradient(135deg,#f5f0e8,#ede8df);display:flex;align-items:center;justify-content:center;font-size:40px">🍔</div>
+          <div style="padding:12px 14px 14px">
+            <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:3px">Cheeseburger</div>
+            <div style="font-size:11px;color:#7a6f60;margin-bottom:10px">Wagyu beef, cheddar, truffle mayo</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:19px;font-weight:600;color:#b8935c">€18.00</span>
+              <button style="background:transparent;border:1.5px solid #b8935c;color:#b8935c;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookable item card -->
+    <div class="mockup">
+      <div class="mockup-header">Bookable item (novo)</div>
+      <div class="mockup-body" style="padding:0">
+        <div style="background:#fff;border:1px solid #e8e0d0;border-radius:14px;overflow:hidden;font-family:'DM Sans',sans-serif;position:relative">
+          <!-- Bookable badge -->
+          <div style="position:absolute;top:10px;left:10px;background:#b8935c;color:#fff;font-size:9px;padding:3px 8px;border-radius:20px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;z-index:1">📅 Bookable</div>
+          <div style="width:100%;height:90px;background:linear-gradient(135deg,#f5f0e8,#ede8df);display:flex;align-items:center;justify-content:center;font-size:40px">💆</div>
+          <div style="padding:12px 14px 14px">
+            <div style="font-size:17px;font-weight:600;color:#1a1a1a;margin-bottom:3px">Signature Massage</div>
+            <div style="font-size:11px;color:#7a6f60;margin-bottom:4px">60 min deep tissue — relaxation treatment</div>
+            <div style="font-size:10px;color:#b8935c;margin-bottom:8px">⏱ 60 min &nbsp;·&nbsp; Private slot</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:19px;font-weight:600;color:#b8935c">€85.00</span>
+              <button style="background:#b8935c;border:none;color:#fff;padding:7px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.3px">Book →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <p class="subtitle" style="margin-top:12px">Badge "📅 Bookable" + info o trajanju + "Book →" button umjesto "+"</p>
+</div>
+
+<div class="section">
+  <h3>2 — Slot-picker drawer (otvori se kada gost klikne "Book →")</h3>
+  <div class="mockup">
+    <div class="mockup-header">Bottom sheet — Signature Massage</div>
+    <div class="mockup-body" style="padding:0;background:#faf8f5">
+
+      <!-- Drawer handle -->
+      <div style="text-align:center;padding:10px 0 4px">
+        <div style="width:36px;height:4px;background:#d0c8bc;border-radius:2px;display:inline-block"></div>
+      </div>
+
+      <div style="padding:16px 20px 24px;font-family:'DM Sans',sans-serif">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div style="font-size:20px;font-weight:600;color:#1a1a1a;font-family:'Cormorant Garamond',serif">Signature Massage</div>
+            <div style="font-size:12px;color:#7a6f60;margin-top:2px">⏱ 60 min &nbsp;·&nbsp; €85.00 per session</div>
+          </div>
+          <button style="background:transparent;border:1px solid #d0c8bc;color:#7a6f60;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer">✕</button>
+        </div>
+
+        <!-- Date picker -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#7a6f60;margin-bottom:6px">Select Date</div>
+          <input type="date" value="2026-04-28" style="width:100%;padding:10px 13px;background:#f5f0e8;border:1px solid rgba(0,0,0,0.08);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:#1a1a1a;box-sizing:border-box" />
+        </div>
+
+        <!-- Time slots -->
+        <div>
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#7a6f60;margin-bottom:8px">Available Times</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+
+            <!-- Available slot -->
+            <button style="padding:10px 6px;border-radius:8px;border:1.5px solid #b8935c;background:rgba(184,147,92,.06);color:#b8935c;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+              10:00
+            </button>
+
+            <!-- Available slot -->
+            <button style="padding:10px 6px;border-radius:8px;border:1.5px solid #b8935c;background:rgba(184,147,92,.06);color:#b8935c;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+              11:00
+            </button>
+
+            <!-- Selected slot -->
+            <button style="padding:10px 6px;border-radius:8px;border:none;background:#b8935c;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(184,147,92,.35)">
+              14:00 ✓
+            </button>
+
+            <!-- Full slot -->
+            <button disabled style="padding:10px 6px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:#f5f0e8;color:#b0a898;font-size:13px;cursor:not-allowed;font-family:'DM Sans',sans-serif">
+              15:00
+              <div style="font-size:10px">Full</div>
+            </button>
+
+            <!-- Available slot -->
+            <button style="padding:10px 6px;border-radius:8px;border:1.5px solid #b8935c;background:rgba(184,147,92,.06);color:#b8935c;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+              16:00
+            </button>
+
+            <!-- Available slot -->
+            <button style="padding:10px 6px;border-radius:8px;border:1.5px solid #b8935c;background:rgba(184,147,92,.06);color:#b8935c;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+              17:00
+            </button>
+
+          </div>
+        </div>
+
+        <!-- CTA — appears after slot selected -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.07)">
+          <button style="background:linear-gradient(135deg,#b8935c,#a07840);color:#0f0f0f;border:none;padding:14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;letter-spacing:.5px;text-transform:uppercase">
+            Continue to Confirm →
+          </button>
+          <p style="font-size:11px;color:#7a6f60;text-align:center;margin:8px 0 0">Slobodna otkaznica 24h prije termina</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3 — Flow u jednoj liniji</h3>
+  <div style="display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;flex-wrap:wrap">
+    <div style="background:#f5f0e8;border:1px solid #d0c8bc;border-radius:8px;padding:8px 14px;color:#1a1a1a">Menu → klik "Book →"</div>
+    <div style="color:#b8935c;font-size:18px">→</div>
+    <div style="background:#f5f0e8;border:1px solid #d0c8bc;border-radius:8px;padding:8px 14px;color:#1a1a1a">Bottom sheet: datum + slot</div>
+    <div style="color:#b8935c;font-size:18px">→</div>
+    <div style="background:#f5f0e8;border:1px solid #d0c8bc;border-radius:8px;padding:8px 14px;color:#1a1a1a">"Continue" → /bookings/confirm</div>
+    <div style="color:#b8935c;font-size:18px">→</div>
+    <div style="background:rgba(74,155,111,.08);border:1px solid rgba(74,155,111,.3);border-radius:8px;padding:8px 14px;color:#2e7d5a">Booking potvrđen ✓</div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+{
+    "generatedAt":  "2026-05-16T20:41:06.4636329+02:00",
+    "authority":  "infiora-backend-main/infiora-backend-main",
+    "baseUrl":  "/v1",
+    "routePrefixes":  [
+                          "/health",
+                          "/auth",
+                          "/users",
+                          "/tickets",
+                          "/batches",
+                          "/tags",
+                          "/hotels",
+                          "/rooms",
+                          "/links",
+                          "/groups",
+                          "/subscribers",
+                          "/orders",
+                          "/stripe",
+                          "/admin",
+                          "/housekeeping",
+                          "/maintenance",
+                          "/",
+                          "/hotels/:hotelId/analytics",
+                          "/docs"
+                      ]
+}

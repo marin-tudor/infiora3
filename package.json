@@ -1,0 +1,22 @@
+{
+  "name": "infiora-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Root workspace for the active Infiora Node apps.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "install:active": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Invoke-ActiveApps.ps1 install",
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Start-InfioraActive.ps1",
+    "lint": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Invoke-ActiveApps.ps1 lint",
+    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Invoke-ActiveApps.ps1 test",
+    "test:e2e": "playwright test",
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Invoke-ActiveApps.ps1 build",
+    "audit": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Validate-Workspace.ps1",
+    "contract:sync": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/Generate-ApiContract.ps1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

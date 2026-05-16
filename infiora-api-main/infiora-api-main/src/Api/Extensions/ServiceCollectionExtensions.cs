@@ -22,6 +22,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         var databaseProvider = configuration["DatabaseProvider"] ?? "InMemory";
+        var environment = configuration["ASPNETCORE_ENVIRONMENT"] ?? Environments.Production;
+
+        if (!environment.Equals(Environments.Development, StringComparison.OrdinalIgnoreCase)
+            && databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("InMemory database is only allowed in development.");
+        }
 
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -51,6 +58,13 @@ public static class ServiceCollectionExtensions
     {
         var secretKey = configuration["Jwt:SecretKey"]
             ?? throw new InvalidOperationException("JWT SecretKey is not configured.");
+        var environment = configuration["ASPNETCORE_ENVIRONMENT"] ?? Environments.Production;
+
+        if (!environment.Equals(Environments.Development, StringComparison.OrdinalIgnoreCase)
+            && (secretKey.Length < 32 || secretKey.Contains("ChangeMe", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException("A strong JWT SecretKey is required outside development.");
+        }
 
         services.AddAuthentication(options =>
         {

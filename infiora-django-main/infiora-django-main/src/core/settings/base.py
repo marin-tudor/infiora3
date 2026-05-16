@@ -5,9 +5,13 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+DJANGO_ENVIRONMENT = config('DJANGO_ENVIRONMENT', default='dev')
+DEFAULT_SECRET_KEY = 'django-insecure-dev-only-change-me'
 
 # SECURITY WARNING: keep the secret key used in prod secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-prod')
+SECRET_KEY = config('SECRET_KEY', default=DEFAULT_SECRET_KEY)
+if DJANGO_ENVIRONMENT != 'dev' and SECRET_KEY == DEFAULT_SECRET_KEY:
+    raise RuntimeError('SECRET_KEY must be configured outside development.')
 
 # Application definition
 DJANGO_APPS = [
@@ -191,7 +195,7 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000', cast=Csv())
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
 
 # Security settings

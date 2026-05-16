@@ -1,0 +1,111 @@
+<h2>Forma za "Bookable" tip stavke menija</h2>
+<p class="subtitle">Kad odabereš tip <strong>Bookable</strong> u ItemDialog, koliko kompleksna treba biti konfiguracija?</p>
+
+<div class="options">
+  <div class="option" data-choice="full" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Puna konfiguracija — weekly schedule grid</h3>
+      <p>Sve opcije odmah vidljive u expandabilnom dijelu forme</p>
+      <div class="mockup" style="margin-top:10px">
+        <div class="mockup-header">ItemDialog — Booking konfiguracija (expanded)</div>
+        <div class="mockup-body" style="padding:12px;font-size:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Tip slota</div>
+              <div style="border:1px solid var(--border);border-radius:4px;padding:5px;display:flex;gap:6px">
+                <span style="background:var(--accent);color:white;padding:2px 8px;border-radius:3px;font-size:11px">Private</span>
+                <span style="color:var(--text-muted);padding:2px 8px;font-size:11px">Shared</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Max osoba</div>
+              <div class="mock-input" style="padding:5px;border-radius:4px;font-size:11px">1</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Trajanje (min)</div>
+              <div class="mock-input" style="padding:5px;border-radius:4px;font-size:11px">60</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Buffer (min)</div>
+              <div class="mock-input" style="padding:5px;border-radius:4px;font-size:11px">0</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:8px;margin-bottom:8px">
+            <div style="font-size:11px;font-weight:600;margin-bottom:6px">Raspored po danima</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px;align-items:center">
+              <span style="font-size:10px;color:var(--text-muted);width:26px">Pon</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div class="mock-input" style="width:50px;padding:3px;font-size:10px;text-align:center">08:00</div>
+                <span style="font-size:10px">–</span>
+                <div class="mock-input" style="width:50px;padding:3px;font-size:10px;text-align:center">22:00</div>
+                <span style="font-size:10px;color:var(--accent);cursor:pointer">+ dodaj</span>
+              </div>
+              <span style="font-size:10px;color:var(--text-muted)">Uto</span>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div class="mock-input" style="width:50px;padding:3px;font-size:10px;text-align:center">08:00</div>
+                <span style="font-size:10px">–</span>
+                <div class="mock-input" style="width:50px;padding:3px;font-size:10px;text-align:center">22:00</div>
+              </div>
+              <span style="font-size:10px;color:var(--text-muted)">Sri</span>
+              <div style="display:flex;gap:4px;align-items:center;opacity:0.4">
+                <span style="font-size:10px;color:var(--text-muted)">— nedostupan —</span>
+                <span style="font-size:10px;color:var(--accent)">+ dodaj</span>
+              </div>
+              <span style="font-size:10px;color:var(--text-muted)">...</span>
+              <div style="font-size:10px;color:var(--text-muted)">i tako za svaki dan</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px">
+            <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" checked> Zahtijeva odobrenje</label>
+            <label style="display:flex;align-items:center;gap:4px">Otkazivanje: <div class="mock-input" style="width:30px;padding:3px;margin-left:4px;font-size:10px">24</div>h</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="simple" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Pojednostavljena — samo ključna polja, bez po-danu schedule</h3>
+      <p>Radno vrijeme postavljaš globalno (od–do za sve dane), ostalo po defaultu</p>
+      <div class="mockup" style="margin-top:10px">
+        <div class="mockup-header">ItemDialog — Booking konfiguracija (simplified)</div>
+        <div class="mockup-body" style="padding:12px;font-size:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Tip slota</div>
+              <div style="border:1px solid var(--border);border-radius:4px;padding:5px;display:flex;gap:6px">
+                <span style="background:var(--accent);color:white;padding:2px 8px;border-radius:3px;font-size:11px">Private</span>
+                <span style="color:var(--text-muted);padding:2px 8px;font-size:11px">Shared</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Max osoba</div>
+              <div class="mock-input" style="padding:5px;border-radius:4px;font-size:11px">1</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Trajanje (min)</div>
+              <div class="mock-input" style="padding:5px;border-radius:4px;font-size:11px">60</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">Dostupno od–do</div>
+              <div style="display:flex;gap:4px;align-items:center">
+                <div class="mock-input" style="width:46px;padding:3px;font-size:10px;text-align:center">08:00</div>
+                <span>–</span>
+                <div class="mock-input" style="width:46px;padding:3px;font-size:10px;text-align:center">22:00</div>
+              </div>
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="display:flex;align-items:center;gap:6px;font-size:11px"><input type="checkbox"> Zahtijeva odobrenje</label>
+            </div>
+          </div>
+          <div style="margin-top:8px;padding:8px;background:var(--surface-2);border-radius:4px;font-size:10px;color:var(--text-muted)">
+            Ovo radno vrijeme vrijedi za sve dane. Za napredni po-danu raspored koristi full konfiguraciju (može se dodati kasnije).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

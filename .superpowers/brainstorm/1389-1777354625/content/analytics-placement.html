@@ -1,0 +1,67 @@
+<h2>Gdje smjestiti Revenue Analytics?</h2>
+<p class="subtitle">Trenutno postoji posebna stranica <code>/analytics</code> — ali možemo je integrirati u <code>/insights</code></p>
+
+<div class="section">
+  <p class="label">Opcija A — Nov tab u /insights</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="new-tab" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Revenue Analytics kao poseban tab u /insights</h3>
+      <p>Insertira se kao 5. tab (ili iza Orders tab-a) u postojeću Insights stranicu.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Insights stranica — tabovi</div>
+        <div class="mockup-body" style="padding:0">
+          <div style="display:flex;border-bottom:2px solid var(--border);overflow:hidden">
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Overview</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Rooms</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Buttons</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Orders</div>
+            <div style="padding:10px 16px;font-size:13px;border-bottom:2px solid var(--accent);margin-bottom:-2px;font-weight:600;color:var(--accent)">Revenue ★</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Reports</div>
+          </div>
+          <div style="padding:16px;font-size:13px;color:var(--text-muted)">
+            KPI kartice: ukupni prihod, bookings, avg prihvat, SLA breaches, avg rating<br>
+            Grafovi: prihod po kategoriji (bar), dnevni rating (line)
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Za</h4><ul><li>Čist sidebar (jedno manje nav stavke)</li><li>Sve analitike na jednom mjestu</li></ul></div>
+        <div class="cons"><h4>Protiv</h4><ul><li>Insights tab malo duži scroll</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="merge-orders" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Spoji u postojeći "Orders" tab</h3>
+      <p>Revenue analytics podaci prikazuju se unutar postojećeg Orders analitika taba — dodaje revenue sekciju ispod.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Insights — Orders tab (prošireni)</div>
+        <div class="mockup-body" style="padding:0">
+          <div style="display:flex;border-bottom:2px solid var(--border)">
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Overview</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Rooms</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Buttons</div>
+            <div style="padding:10px 16px;font-size:13px;border-bottom:2px solid var(--accent);margin-bottom:-2px;font-weight:600;color:var(--accent)">Orders ★</div>
+            <div style="padding:10px 16px;font-size:13px;color:var(--text-muted)">Reports</div>
+          </div>
+          <div style="padding:12px 16px;font-size:12px">
+            <div style="font-weight:600;margin-bottom:6px;color:var(--text)">📊 Order Analytics (postojeće)</div>
+            <div style="color:var(--text-muted);margin-bottom:12px">KPIs, revenue trend, status donuts...</div>
+            <div style="border-top:1px solid var(--border);padding-top:10px;font-weight:600;margin-bottom:6px;color:var(--text)">💰 Revenue Analytics (novo)</div>
+            <div style="color:var(--text-muted)">Prihod po kategoriji, SLA breaches, bookings prihod</div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Za</h4><ul><li>Sve ordersi + prihod na jednom tabu</li><li>Nema novog taba</li></ul></div>
+        <div class="cons"><h4>Protiv</h4><ul><li>Orders tab može biti prenatrpan</li><li>Bookings revenue ne spada logički u "Orders"</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,8 +3,9 @@ from .prod import *
 # Staging specific settings
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Less restrictive settings for staging
-ALLOWED_HOSTS = ['*']  # More permissive for staging
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+if not ALLOWED_HOSTS:
+    raise RuntimeError('ALLOWED_HOSTS must be configured for staging.')
 
 # Reduced security for easier testing
 SECURE_SSL_REDIRECT = False
