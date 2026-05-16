@@ -1,0 +1,33 @@
+{
+  "apps": [
+    {
+      "name": "app",
+      "script": "dist/index.js",
+      "instances": 1,
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "log_file": "logs/app.log",
+      "out_file": "logs/app-out.log",
+      "error_file": "logs/app-error.log",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "max_memory_restart": "500M",
+      "node_args": "--max-old-space-size=1024",
+      "log_type": "json",
+      "merge_logs": true,
+      "max_restarts": 10,
+      "min_uptime": "10s",
+      "kill_timeout": 5000,
+      "listen_timeout": 3000,
+      "restart_delay": 1000,
+      "autorestart": true,
+      "watch": false,
+      "ignore_watch": [
+        "node_modules",
+        "logs",
+        ".git"
+      ]
+    }
+  ]
+}

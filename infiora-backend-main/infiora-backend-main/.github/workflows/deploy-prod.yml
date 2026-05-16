@@ -1,0 +1,158 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.x'
+  HUSKY: 0
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: prod
+
+    steps:
+      - name: Stop Application
+        run: pm2 stop app || true
+        continue-on-error: true
+
+      - name: Disable Husky Hooks
+        run: git config core.hooksPath /dev/null
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Cleanup Old Deployments
+        run: |
+          # Clean yarn cache
+          yarn cache clean --force || true
+          # Clean PM2 logs older than 7 days
+          pm2 flush || true
+          find ~/.pm2/logs -name "*.log" -mtime +7 -delete || true
+          # Remove old build artifacts
+          rm -rf dist/ || true
+          # Clean up old node_modules if they exist
+          rm -rf node_modules || true
+        continue-on-error: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile --production=false
+
+      - name: Build Application
+        run: yarn compile
+
+      - name: Install Production Dependencies Only
+        run: |
+          rm -rf node_modules
+          yarn install --frozen-lockfile --production=true
+
+      - name: Pre-flight Checks
+        run: |
+          echo "=== Pre-flight Checks ==="
+
+          # Check if dist directory exists
+          if [ ! -d "dist" ]; then
+            echo "❌ dist directory not found!"
+            exit 1
+          fi
+
+          # Check if main entry point exists
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ dist/index.js not found!"
+            exit 1
+          fi
+
+          # Check if ecosystem config exists
+          if [ ! -f "ecosystem.config.json" ]; then
+            echo "❌ ecosystem.config.json not found!"
+            exit 1
+          fi
+
+          # Check if package.json exists
+          if [ ! -f "package.json" ]; then
+            echo "❌ package.json not found!"
+            exit 1
+          fi
+
+          echo "✅ All required files are present"
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Yarn version: $(yarn --version)"
+
+      - name: Start Application
+        run: |
+          echo "=== Starting Application ==="
+
+          # Ensure logs directory exists
+          mkdir -p logs
+
+          # Show ecosystem config for debugging
+          echo "=== Ecosystem Config ==="
+          cat ecosystem.config.json
+
+          # Show current directory contents
+          echo "=== Current Directory ==="
+          ls -la
+
+          # Kill any existing app process
+          pm2 delete app 2>/dev/null || true
+
+          # Start the application
+          echo "Starting PM2 with ecosystem config..."
+          pm2 start ecosystem.config.json
+
+          # Wait a moment for startup
+          sleep 3
+
+          echo "Initial PM2 status:"
+          pm2 status
+
+      - name: Verify Deployment
+        run: |
+          echo "=== Verifying Deployment ==="
+          sleep 5
+
+          # Check PM2 status
+          pm2 status
+
+          # Check if app is online
+          if pm2 list | grep -q "app.*online"; then
+            echo "✅ DEPLOYMENT SUCCESSFUL - App is running"
+            pm2 logs app --lines 5 --nostream || true
+            exit 0
+          else
+            echo "❌ DEPLOYMENT FAILED - App is not running"
+            echo "PM2 Status:"
+            pm2 status
+            echo "App Logs:"
+            pm2 logs app --lines 20 --nostream || true
+            echo "App Description:"
+            pm2 describe app || true
+            exit 1
+          fi
+
+      - name: Health Check
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8000/v1/health 2>/dev/null; do sleep 2; done' || echo "Health check failed - check application logs"
+        continue-on-error: true
+
+      - name: Post-Deployment Cleanup
+        run: |
+          # Clean up any temporary files
+          find /tmp -name "yarn-*" -type d -mtime +1 -exec rm -rf {} + || true
+          find /tmp -name "npm-*" -type d -mtime +1 -exec rm -rf {} + || true
+          # Report disk usage
+          echo "=== Disk Usage After Deployment ==="
+          df -h
+        continue-on-error: true
