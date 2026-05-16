@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infiora — Digital Guest Guide for Hotels & Apartments</title>
+  <meta name="description" content="One QR code. Your entire hotel guide. Wi-Fi, menus, spa, local tours and more — instantly in your guest's language. No app required. From Split, Croatia." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════
+       TOKENS & RESET
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:    #F6F0E6;
+      --cream-2:  #EDE5D8;
+      --cream-3:  #E4DAC9;
+      --white:    #FDFAF5;
+      --forest:   #1C3228;
+      --forest-2: #2B4D3A;
+      --forest-3: #3D6652;
+      --muted:    #6B8272;
+      --gold:     #A87020;
+      --gold-2:   #C08A28;
+      --terra:    #C4664A;
+      --green-ok: #3E7A56;
+      --border:   rgba(28,50,40,.1);
+      --border-2: rgba(28,50,40,.18);
+      --font-d: 'Playfair Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --sp: 110px;
+      --w: 1220px;
+      --ease: cubic-bezier(.25,.46,.45,.94);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--forest);
+      font-family: var(--font-b);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: var(--w); margin: 0 auto; padding: 0 44px; }
+
+    em {
+      font-family: var(--font-d);
+      font-style: italic;
+      color: var(--terra);
+    }
+
+    /* ═══════════════════════════════════════
+       TYPOGRAPHY
+    ═══════════════════════════════════════ */
+    h1, h2, h3, h4 { font-family: var(--font-d); font-weight: 500; line-height: 1.12; }
+
+    .label {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: .7rem; font-weight: 600;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 16px;
+    }
+    .label::before { content:''; width:24px; height:1px; background:var(--gold); }
+
+    .sh {
+      text-align: center; max-width: 640px;
+      margin: 0 auto 72px;
+    }
+    .sh h2 { font-size: clamp(2.4rem,3.8vw,3.4rem); margin-bottom: 18px; color: var(--forest); }
+    .sh p { color: var(--muted); font-size: 1.05rem; line-height: 1.78; }
+
+    /* ═══════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 4px;
+      font-family: var(--font-b); font-size: .9rem;
+      font-weight: 500; letter-spacing: .01em;
+      text-decoration: none; transition: all .22s var(--ease);
+      cursor: pointer; border: none; white-space: nowrap;
+    }
+    .btn-lg { padding: 16px 36px; font-size: 1rem; }
+    .btn-full { width: 100%; justify-content: center; }
+    .btn-primary {
+      background: var(--forest); color: var(--cream);
+    }
+    .btn-primary:hover {
+      background: var(--forest-2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(28,50,40,.22);
+    }
+    .btn-gold {
+      background: var(--gold); color: var(--white); font-weight: 600;
+    }
+    .btn-gold:hover {
+      background: var(--gold-2);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(168,112,32,.28);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--forest); border: 1.5px solid var(--border-2);
+    }
+    .btn-outline:hover {
+      background: rgba(28,50,40,.05);
+      border-color: rgba(28,50,40,.35);
+    }
+
+    /* ═══════════════════════════════════════
+       SCROLL ANIMATIONS
+    ═══════════════════════════════════════ */
+    .anim {
+      opacity: 0; transform: translateY(26px);
+      transition: opacity .7s var(--ease), transform .7s var(--ease);
+    }
+    .anim.vis { opacity: 1; transform: none; }
+
+    .anim-kids > * {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .6s var(--ease), transform .6s var(--ease);
+    }
+    .anim-kids.vis > *:nth-child(1) { opacity:1;transform:none;transition-delay:0s }
+    .anim-kids.vis > *:nth-child(2) { opacity:1;transform:none;transition-delay:.07s }
+    .anim-kids.vis > *:nth-child(3) { opacity:1;transform:none;transition-delay:.14s }
+    .anim-kids.vis > *:nth-child(4) { opacity:1;transform:none;transition-delay:.21s }
+    .anim-kids.vis > *:nth-child(5) { opacity:1;transform:none;transition-delay:.28s }
+    .anim-kids.vis > *:nth-child(6) { opacity:1;transform:none;transition-delay:.35s }
+
+    @keyframes fade-up {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:none; }
+    }
+    @keyframes float {
+      0%,100% { transform:translateY(0); }
+      50%     { transform:translateY(-8px); }
+    }
+    @keyframes pulse-ring {
+      0%   { transform:scale(.85); opacity:.6; }
+      100% { transform:scale(1.3); opacity:0; }
+    }
+    @keyframes badge-glow {
+      0%,100% { box-shadow:0 0 0 0 rgba(168,112,32,.3); }
+      50%     { box-shadow:0 0 0 8px rgba(168,112,32,.0); }
+    }
+
+    /* ═══════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════ */
+    #nav {
+      position: fixed; top:0; left:0; right:0; z-index:1000;
+      transition: background .3s, box-shadow .3s;
+    }
+    #nav.scrolled {
+      background: rgba(246,240,230,.94);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-in {
+      max-width: var(--w); margin:0 auto; padding:0 44px;
+      height:72px; display:flex; align-items:center; gap:40px;
+    }
+    .n-logo {
+      display: flex; align-items: center; gap:9px;
+      font-family: var(--font-d); font-size:1.45rem; font-weight:500;
+      color: var(--forest); text-decoration:none; flex-shrink:0;
+    }
+    .n-gem {
+      width:20px; height:20px;
+    }
+    .n-links {
+      flex:1; display:flex; justify-content:center;
+      list-style:none; gap:36px;
+    }
+    .n-links a {
+      color: var(--muted); text-decoration:none;
+      font-size:.875rem; font-weight:400; transition:color .18s;
+    }
+    .n-links a:hover { color:var(--forest); }
+    .n-cta { flex-shrink:0; padding:10px 22px; font-size:.85rem; }
+    .n-tog {
+      display:none; flex-direction:column; gap:5px;
+      background:none; border:none; cursor:pointer;
+      padding:4px; margin-left:auto;
+    }
+    .n-tog span {
+      display:block; width:22px; height:1.5px;
+      background:var(--forest); transition:all .3s;
+    }
+    .n-tog.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .n-tog.open span:nth-child(2) { opacity:0; }
+    .n-tog.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    .n-drawer {
+      display:none;
+      background:rgba(246,240,230,.97);
+      backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      padding:28px 44px 36px;
+    }
+    .n-drawer.open { display:block; }
+    .n-drawer ul { list-style:none; display:flex; flex-direction:column; gap:16px; }
+    .n-drawer a { color:var(--muted); text-decoration:none; font-size:1rem; }
+    .n-drawer .btn { margin-top:12px; display:flex; width:100%; justify-content:center; }
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    #hero {
+      min-height:100vh; display:grid;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
+      padding:140px 0 80px;
+      position:relative; overflow:hidden;
+    }
+    /* decorative botanical SVG lines */
+    #hero::before {
+      content:'';
+      position:absolute; top:0; right:0;
+      width:60%; height:100%;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 40%, rgba(168,112,32,.08), transparent),
+        radial-gradient(ellipse 40% 60% at 90% 70%, rgba(196,100,74,.06), transparent);
+      pointer-events:none;
+    }
+    .hero-left {
+      padding-right: 60px;
+      animation: fade-up .8s var(--ease) both;
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:9px;
+      padding:7px 15px; border-radius:100px;
+      border:1px solid rgba(168,112,32,.3);
+      background:rgba(168,112,32,.08);
+      font-size:.76rem; color:var(--gold); margin-bottom:32px;
+      animation:badge-glow 3s ease-in-out infinite;
+    }
+    .badge-pulse {
+      position:relative; width:7px; height:7px; flex-shrink:0;
+    }
+    .badge-pulse::before, .badge-pulse::after {
+      content:''; position:absolute; inset:0; border-radius:50%;
+    }
+    .badge-pulse::before { background:var(--gold); }
+    .badge-pulse::after {
+      background:var(--gold); opacity:.5;
+      animation:pulse-ring 2s ease-out infinite;
+    }
+    .hero-h1 {
+      font-size: clamp(3rem,5.5vw,5.4rem);
+      letter-spacing:-.025em;
+      color:var(--forest);
+      margin-bottom:24px;
+      line-height:1.08;
+    }
+    .hero-p {
+      font-size:1.1rem; color:var(--muted);
+      max-width:520px; line-height:1.8; margin-bottom:40px;
+    }
+    .hero-acts { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:56px; }
+    .hero-proof {
+      display:flex; gap:32px; flex-wrap:wrap;
+      padding-top:40px; border-top:1px solid var(--border-2);
+    }
+    .hp-item { display:flex; flex-direction:column; gap:3px; }
+    .hp-num {
+      font-family:var(--font-d); font-size:1.8rem; font-weight:500;
+      color:var(--forest); line-height:1;
+    }
+    .hp-lab { font-size:.76rem; color:var(--muted); letter-spacing:.05em; }
+
+    /* ── Phone Mockup ── */
+    .hero-right {
+      display:flex; justify-content:center; align-items:center;
+      position:relative;
+      animation: fade-up .9s var(--ease) .18s both;
+    }
+    .phone-wrap {
+      position:relative;
+      animation: float 5s ease-in-out infinite;
+    }
+    .phone {
+      width:280px;
+      background:var(--forest);
+      border-radius:36px;
+      padding:16px;
+      box-shadow:
+        0 60px 120px rgba(28,50,40,.3),
+        0 20px 40px rgba(28,50,40,.2),
+        inset 0 1px 0 rgba(255,255,255,.08);
+      position:relative; z-index:2;
+    }
+    .phone-screen {
+      background:var(--white);
+      border-radius:24px;
+      overflow:hidden;
+      min-height:520px;
+    }
+    .ps-status {
+      background:var(--forest);
+      color:rgba(255,255,255,.5); font-size:.55rem;
+      padding:8px 20px; display:flex;
+      justify-content:space-between; align-items:center;
+    }
+    .ps-body { padding:20px 16px; display:flex; flex-direction:column; gap:14px; }
+    .ps-hotel {
+      text-align:center; padding:16px;
+      background:linear-gradient(135deg,#1C3228,#2B4D3A);
+      border-radius:12px; color:var(--white);
+    }
+    .ps-hotel-name {
+      font-family:var(--font-d); font-size:.95rem;
+      font-weight:500; margin-bottom:4px;
+    }
+    .ps-room { font-size:.65rem; opacity:.6; letter-spacing:.08em; text-transform:uppercase; }
+    .ps-langs { display:flex; justify-content:center; gap:4px; margin-top:10px; }
+    .ps-lang {
+      padding:2px 7px; border-radius:4px; font-size:.58rem;
+      border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.7);
+    }
+    .ps-lang.on { background:var(--gold); color:var(--forest); border-color:var(--gold); font-weight:600; }
+    .ps-wifi {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 14px; border-radius:10px;
+      background:rgba(28,50,40,.05); border:1px solid var(--border);
+    }
+    .ps-wifi-ic { font-size:1.1rem; }
+    .ps-wifi-txt { flex:1; }
+    .ps-wifi-lab { font-size:.6rem; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+    .ps-wifi-val { font-size:.8rem; font-weight:600; color:var(--forest); }
+    .ps-btn-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .ps-btn {
+      padding:11px 10px; border-radius:10px;
+      background:var(--cream-2); border:1px solid var(--border);
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+      cursor:default;
+    }
+    .ps-btn-ic { font-size:1.2rem; }
+    .ps-btn-lb { font-size:.6rem; font-weight:500; color:var(--forest); text-align:center; }
+    .ps-menu-item {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:10px;
+      background:var(--cream); border:1px solid var(--border);
+    }
+    .ps-menu-ic { font-size:1rem; }
+    .ps-menu-txt { flex:1; font-size:.75rem; font-weight:500; color:var(--forest); }
+    .ps-menu-arr { color:var(--muted); font-size:.8rem; }
+
+    /* floating notification */
+    .phone-notif {
+      position:absolute; top:-24px; right:-48px; z-index:5;
+      background:var(--white); border-radius:12px;
+      padding:12px 16px; display:flex; align-items:center; gap:10px;
+      box-shadow:0 16px 48px rgba(28,50,40,.18), 0 2px 8px rgba(28,50,40,.1);
+      white-space:nowrap;
+    }
+    .notif-ic {
+      width:32px; height:32px; border-radius:8px;
+      background:linear-gradient(135deg,var(--green-ok),#5BAA73);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; flex-shrink:0;
+    }
+    .notif-text strong { display:block; font-size:.78rem; color:var(--forest); }
+    .notif-text span { font-size:.68rem; color:var(--muted); }
+    .phone-card {
+      position:absolute; bottom:-24px; left:-52px; z-index:5;
+      background:var(--forest); border-radius:12px;
+      padding:14px 18px; display:flex; align-items:center; gap:12px;
+      box-shadow:0 16px 48px rgba(28,50,40,.3);
+    }
+    .pcard-ic { font-size:1.2rem; }
+    .pcard-txt strong { display:block; font-size:.8rem; color:var(--cream); }
+    .pcard-txt span { font-size:.68rem; color:rgba(246,240,230,.55); }
+
+    /* ═══════════════════════════════════════
+       ACCESS METHODS STRIP
+    ═══════════════════════════════════════ */
+    #access {
+      padding:0 0 var(--sp);
+    }
+    .access-label {
+      text-align:center; margin-bottom:48px;
+    }
+    .access-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:2px; background:var(--border);
+      border:1px solid var(--border);
+    }
+    .acc-card {
+      background:var(--white); padding:44px 32px;
+      display:flex; flex-direction:column; gap:16px;
+      position:relative; overflow:hidden;
+      transition:background .25s;
+    }
+    .acc-card:hover { background:var(--cream-2); }
+    .acc-card::before {
+      content:''; position:absolute; bottom:0; left:0; right:0;
+      height:2px; background:var(--gold); transform:scaleX(0);
+      transition:transform .3s var(--ease); transform-origin:left;
+    }
+    .acc-card:hover::before { transform:scaleX(1); }
+    .acc-ic {
+      font-size:2.4rem; line-height:1;
+    }
+    .acc-card h3 {
+      font-family:var(--font-d); font-size:1.25rem; font-weight:500;
+      color:var(--forest);
+    }
+    .acc-card p { font-size:.875rem; color:var(--muted); line-height:1.7; }
+    .acc-price {
+      margin-top:auto; padding-top:16px; border-top:1px solid var(--border);
+      font-size:.78rem; font-weight:600; color:var(--gold);
+      text-transform:uppercase; letter-spacing:.06em;
+    }
+    .acc-included {
+      display:inline-flex; align-items:center; gap:5px;
+      color:var(--green-ok); font-weight:600;
+    }
+
+    /* ═══════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════ */
+    #features {
+      padding:var(--sp) 0;
+      background:var(--forest);
+    }
+    #features .sh h2 { color:var(--cream); }
+    #features .sh p { color:rgba(246,240,230,.55); }
+    #features .label { color:rgba(168,112,32,.9); }
+    #features .label::before { background:rgba(168,112,32,.9); }
+    .feat-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:1px; background:rgba(246,240,230,.06);
+    }
+    .feat-card {
+      padding:44px 36px; background:var(--forest);
+      position:relative; overflow:hidden;
+      transition:background .25s;
+    }
+    .feat-card:hover { background:var(--forest-2); }
+    .feat-card.hi { background:var(--forest-2); }
+    .feat-top {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .feat-icon { font-size:2rem; }
+    .feat-num {
+      font-family:var(--font-d); font-size:4rem; font-weight:400;
+      color:rgba(246,240,230,.07); line-height:1; user-select:none;
+    }
+    .feat-card h3 {
+      font-family:var(--font-d); font-size:1.35rem; font-weight:500;
+      color:var(--cream); margin-bottom:12px;
+    }
+    .feat-card p { color:rgba(246,240,230,.52); font-size:.9rem; line-height:1.75; }
+    .feat-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:20px; }
+    .feat-tag {
+      padding:3px 9px; border-radius:3px; font-size:.65rem;
+      letter-spacing:.04em; font-weight:500;
+      background:rgba(246,240,230,.06);
+      border:1px solid rgba(246,240,230,.1);
+      color:rgba(246,240,230,.45);
+    }
+
+    /* ═══════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════ */
+    #how { padding:var(--sp) 0; background:var(--cream-2); }
+    #how .sh p { color:var(--muted); }
+    .steps {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:2px; background:var(--border); border:1px solid var(--border);
+    }
+    .step-card {
+      background:var(--white); padding:48px 38px;
+      display:flex; flex-direction:column; gap:20px;
+      position:relative; overflow:hidden;
+    }
+    .step-card::after {
+      content:''; position:absolute; top:0; right:0;
+      width:1px; height:100%; background:var(--border);
+    }
+    .step-n {
+      font-family:var(--font-d); font-size:5rem; font-weight:400;
+      color:var(--cream-3); line-height:1; user-select:none;
+    }
+    .step-card h3 {
+      font-family:var(--font-d); font-size:1.5rem; font-weight:500;
+      color:var(--forest);
+    }
+    .step-card p { color:var(--muted); font-size:.925rem; line-height:1.78; }
+    .step-pill {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 12px; border-radius:100px;
+      background:rgba(168,112,32,.1); border:1px solid rgba(168,112,32,.2);
+      font-size:.7rem; font-weight:600; color:var(--gold);
+      letter-spacing:.04em; margin-top:auto;
+    }
+
+    /* ═══════════════════════════════════════
+       USE CASES
+    ═══════════════════════════════════════ */
+    #usecases { padding:var(--sp) 0; }
+    .uc-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:20px;
+    }
+    .uc-card {
+      border-radius:12px; overflow:hidden;
+      border:1px solid var(--border-2);
+      transition:transform .25s var(--ease), box-shadow .25s;
+      cursor:default;
+    }
+    .uc-card:hover {
+      transform:translateY(-6px);
+      box-shadow:0 24px 60px rgba(28,50,40,.14);
+    }
+    .uc-img {
+      height:180px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:3.5rem;
+    }
+    .uc-img.hotel  { background:linear-gradient(135deg,#1C3228,#2B4D3A); }
+    .uc-img.apt    { background:linear-gradient(135deg,#2A3D58,#1A2840); }
+    .uc-img.hostel { background:linear-gradient(135deg,#3D3028,#5A4638); }
+    .uc-img.cruise { background:linear-gradient(135deg,#1A2E3D,#0F1E2A); }
+    .uc-body { padding:24px 22px; background:var(--white); }
+    .uc-body h3 { font-family:var(--font-d); font-size:1.2rem; font-weight:500; color:var(--forest); margin-bottom:8px; }
+    .uc-body p { font-size:.85rem; color:var(--muted); line-height:1.7; }
+    .uc-tag {
+      display:inline-flex; margin-top:14px;
+      padding:3px 10px; border-radius:4px; font-size:.68rem;
+      font-weight:600; letter-spacing:.06em;
+      background:rgba(28,50,40,.07); color:var(--forest-3);
+    }
+
+    /* ═══════════════════════════════════════
+       ANALYTICS SECTION
+    ═══════════════════════════════════════ */
+    #analytics {
+      padding:var(--sp) 0;
+      background:var(--cream-2);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .analytics-wrap {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:80px; align-items:center;
+    }
+    .analytics-copy { display:flex; flex-direction:column; gap:20px; align-items:flex-start; }
+    .analytics-copy h2 { font-size:clamp(2rem,3.2vw,2.8rem); color:var(--forest); }
+    .analytics-copy p { color:var(--muted); font-size:1rem; line-height:1.8; }
+    .analytics-list { display:flex; flex-direction:column; gap:14px; margin-top:4px; }
+    .a-item { display:flex; align-items:flex-start; gap:12px; }
+    .a-dot { width:22px; height:22px; border-radius:50%; background:rgba(168,112,32,.12); border:1px solid rgba(168,112,32,.3); display:flex; align-items:center; justify-content:center; font-size:.7rem; flex-shrink:0; color:var(--gold); }
+    .a-text { font-size:.92rem; color:var(--muted); line-height:1.6; }
+    .a-text strong { color:var(--forest); font-weight:500; }
+
+    /* Dashboard mock */
+    .dash-mock {
+      background:var(--forest);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 40px 100px rgba(28,50,40,.25), 0 8px 24px rgba(28,50,40,.15);
+    }
+    .dm-bar {
+      padding:14px 20px; background:rgba(0,0,0,.2);
+      display:flex; align-items:center; gap:8px;
+    }
+    .dm-dot { width:9px; height:9px; border-radius:50%; }
+    .dm-dot:nth-child(1) { background:#FF6058; }
+    .dm-dot:nth-child(2) { background:#FFBE2F; }
+    .dm-dot:nth-child(3) { background:#2DCA43; }
+    .dm-title { font-size:.72rem; color:rgba(246,240,230,.4); margin-left:auto; margin-right:auto; letter-spacing:.06em; }
+    .dm-body { padding:24px; display:flex; flex-direction:column; gap:16px; }
+    .dm-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .dm-kpi {
+      background:rgba(246,240,230,.05);
+      border:1px solid rgba(246,240,230,.07);
+      border-radius:8px; padding:14px 12px;
+      display:flex; flex-direction:column; gap:5px;
+    }
+    .dm-kpi-val {
+      font-family:var(--font-d); font-size:1.5rem; color:var(--cream); line-height:1;
+    }
+    .dm-kpi-lab { font-size:.6rem; color:rgba(246,240,230,.35); letter-spacing:.06em; text-transform:uppercase; }
+    .dm-chart {
+      background:rgba(246,240,230,.03); border:1px solid rgba(246,240,230,.06);
+      border-radius:8px; padding:16px; height:80px;
+      display:flex; align-items:flex-end; gap:5px;
+    }
+    .dm-bar-el {
+      flex:1; border-radius:2px 2px 0 0;
+      background:rgba(168,112,32,.25);
+      transition:height .4s;
+    }
+    .dm-bar-el.hi { background:var(--gold); }
+    .dm-rooms { display:flex; flex-direction:column; gap:6px; }
+    .dm-room {
+      display:flex; align-items:center; gap:10px;
+      padding:8px 12px; border-radius:6px;
+      background:rgba(246,240,230,.04);
+    }
+    .dm-room-num { font-size:.72rem; color:rgba(246,240,230,.5); min-width:50px; }
+    .dm-room-bar-wrap { flex:1; height:4px; background:rgba(246,240,230,.08); border-radius:2px; overflow:hidden; }
+    .dm-room-bar { height:100%; background:var(--gold); border-radius:2px; }
+    .dm-room-pct { font-size:.7rem; color:rgba(246,240,230,.4); }
+
+    /* ═══════════════════════════════════════
+       TESTIMONIALS
+    ═══════════════════════════════════════ */
+    #testi { padding:var(--sp) 0; }
+    .testi-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:20px;
+    }
+    .testi-card {
+      border:1px solid var(--border-2); border-radius:12px;
+      padding:40px 36px; background:var(--white);
+      display:flex; flex-direction:column; gap:22px;
+      transition:box-shadow .25s, transform .25s;
+    }
+    .testi-card:hover {
+      box-shadow:0 20px 60px rgba(28,50,40,.1);
+      transform:translateY(-4px);
+    }
+    .testi-card.hi {
+      background:var(--forest); border-color:var(--forest);
+    }
+    .testi-card.hi blockquote { color:rgba(246,240,230,.8); }
+    .testi-card.hi strong { color:var(--cream); }
+    .testi-card.hi span { color:rgba(246,240,230,.45); }
+    .t-stars { color:var(--gold); letter-spacing:3px; font-size:.8rem; }
+    blockquote {
+      font-family:var(--font-d); font-size:1.05rem;
+      font-style:italic; font-weight:400; color:var(--forest);
+      line-height:1.74; flex:1;
+    }
+    .t-author { display:flex; align-items:center; gap:14px; }
+    .t-av {
+      width:42px; height:42px; border-radius:50%; flex-shrink:0;
+      background:linear-gradient(135deg,var(--gold),var(--terra));
+      display:flex; align-items:center; justify-content:center;
+      font-size:.68rem; font-weight:700; color:var(--white);
+    }
+    .t-author strong { display:block; font-size:.88rem; font-weight:600; }
+    .t-author span { font-size:.74rem; color:var(--muted); }
+
+    /* ═══════════════════════════════════════
+       STATS BAND
+    ═══════════════════════════════════════ */
+    #stats {
+      background:var(--forest);
+      border-top:1px solid rgba(246,240,230,.06);
+      padding:80px 0;
+    }
+    .stats-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:1px; background:rgba(246,240,230,.06);
+    }
+    .stat-cell {
+      padding:44px 36px;
+      display:flex; flex-direction:column; gap:10px;
+      position:relative;
+    }
+    .stat-cell::before {
+      content:''; position:absolute; top:0; left:0;
+      width:1px; height:100%; background:rgba(246,240,230,.06);
+    }
+    .stat-val-r { display:flex; align-items:baseline; gap:3px; }
+    .stat-num {
+      font-family:var(--font-d); font-size:3.2rem; font-weight:400;
+      color:var(--cream); line-height:1;
+    }
+    .stat-sfx {
+      font-family:var(--font-d); font-size:2rem;
+      color:var(--gold); line-height:1;
+    }
+    .stat-lab { font-size:.8rem; color:rgba(246,240,230,.4); line-height:1.5; }
+
+    /* ═══════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════ */
+    #faq { padding:var(--sp) 0; background:var(--cream-2); }
+    .faq-wrap { max-width:760px; margin:0 auto; }
+    .faq-item { border-bottom:1px solid var(--border-2); }
+    .faq-q {
+      width:100%; display:flex; justify-content:space-between; align-items:center;
+      padding:22px 0; background:none; border:none;
+      color:var(--forest); font-family:var(--font-b);
+      font-size:.975rem; font-weight:400; cursor:pointer;
+      text-align:left; gap:20px; transition:color .18s;
+    }
+    .faq-q:hover { color:var(--gold); }
+    .faq-ic {
+      font-size:1.4rem; color:var(--gold); flex-shrink:0;
+      transition:transform .3s var(--ease); line-height:1;
+    }
+    .faq-item.open .faq-ic { transform:rotate(45deg); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height .35s ease; }
+    .faq-item.open .faq-a { max-height:220px; }
+    .faq-a p { padding-bottom:22px; color:var(--muted); font-size:.93rem; line-height:1.78; }
+
+    /* ═══════════════════════════════════════
+       CONTACT
+    ═══════════════════════════════════════ */
+    #contact { padding:var(--sp) 0; }
+    .cta-split {
+      display:grid; grid-template-columns:1fr 1.15fr;
+      gap:80px; align-items:start;
+    }
+    .cta-copy { display:flex; flex-direction:column; gap:22px; align-items:flex-start; }
+    .cta-copy h2 { font-size:clamp(2.2rem,3.5vw,3rem); }
+    .cta-copy p { color:var(--muted); font-size:1rem; line-height:1.8; }
+    .cta-info { display:flex; flex-direction:column; gap:12px; margin-top:4px; }
+    .ci { display:flex; align-items:center; gap:12px; font-size:.9rem; color:var(--muted); }
+    .ci-ic { font-size:1rem; }
+    .ci a { color:var(--muted); text-decoration:none; transition:color .18s; }
+    .ci a:hover { color:var(--forest); }
+    .cta-checks { display:flex; flex-direction:column; gap:11px; margin-top:4px; }
+    .chk { display:flex; align-items:center; gap:10px; font-size:.9rem; color:var(--muted); }
+    .chk-ok { color:var(--green-ok); font-weight:700; }
+
+    /* Form */
+    .form { display:flex; flex-direction:column; gap:18px; }
+    .frow { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .ff { display:flex; flex-direction:column; gap:7px; }
+    .ff label {
+      font-size:.7rem; font-weight:600; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--muted);
+    }
+    .ff input, .ff select, .ff textarea {
+      background:var(--cream-2); border:1px solid var(--border-2);
+      color:var(--forest); font-family:var(--font-b);
+      font-size:.92rem; padding:13px 15px; border-radius:5px;
+      outline:none; transition:border-color .18s; -webkit-appearance:none;
+    }
+    .ff textarea { resize:vertical; min-height:96px; line-height:1.6; }
+    .ff input:focus, .ff select:focus, .ff textarea:focus { border-color:var(--gold); }
+    .ff input::placeholder, .ff textarea::placeholder { color:rgba(107,130,114,.55); }
+    .ff select option { background:var(--cream-2); color:var(--forest); }
+    .form-note { text-align:center; font-size:.72rem; color:rgba(107,130,114,.65); }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    footer {
+      background:var(--forest);
+      border-top:1px solid rgba(246,240,230,.06);
+      padding:72px 0 40px;
+    }
+    .ft-top {
+      display:grid; grid-template-columns:1fr 2fr;
+      gap:80px; margin-bottom:56px;
+    }
+    .ft-brand { display:flex; flex-direction:column; gap:16px; }
+    .ft-logo {
+      display:flex; align-items:center; gap:9px;
+      font-family:var(--font-d); font-size:1.4rem; font-weight:500;
+      color:var(--cream); text-decoration:none;
+    }
+    .ft-brand p { font-size:.86rem; color:rgba(246,240,230,.45); line-height:1.72; max-width:280px; }
+    .ft-cols { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; }
+    .ft-col h4 {
+      font-family:var(--font-b); font-size:.68rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.14em;
+      color:rgba(246,240,230,.35); margin-bottom:20px;
+    }
+    .ft-col ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .ft-col a { color:rgba(246,240,230,.5); text-decoration:none; font-size:.86rem; transition:color .18s; }
+    .ft-col a:hover { color:var(--cream); }
+    .ft-col li:not(:has(a)) { color:rgba(246,240,230,.5); font-size:.86rem; }
+    .ft-bot {
+      padding-top:28px; border-top:1px solid rgba(246,240,230,.06);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .ft-bot p { font-size:.76rem; color:rgba(246,240,230,.28); }
+    .ft-legal { display:flex; gap:22px; }
+    .ft-legal a { font-size:.76rem; color:rgba(246,240,230,.28); text-decoration:none; transition:color .18s; }
+    .ft-legal a:hover { color:rgba(246,240,230,.6); }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media(max-width:1100px) {
+      :root { --sp:80px; }
+      .container { padding:0 28px; }
+      #hero { grid-template-columns:1fr; min-height:auto; padding:120px 0 60px; }
+      .hero-left { padding-right:0; max-width:700px; }
+      .hero-right { display:none; }
+      .access-grid { grid-template-columns:repeat(2,1fr); }
+      .analytics-wrap { grid-template-columns:1fr; gap:56px; }
+      .uc-grid { grid-template-columns:repeat(2,1fr); }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+      .cta-split { grid-template-columns:1fr; gap:56px; }
+      .ft-top { grid-template-columns:1fr; gap:44px; }
+    }
+    @media(max-width:768px) {
+      .n-links, .n-cta { display:none; }
+      .n-tog { display:flex; }
+      .feat-grid, .testi-grid, .steps { grid-template-columns:1fr; }
+      .uc-grid { grid-template-columns:1fr 1fr; }
+      .frow { grid-template-columns:1fr; }
+      .ft-cols { grid-template-columns:repeat(2,1fr); }
+      .ft-bot { flex-direction:column; gap:14px; text-align:center; }
+      .hero-proof { flex-direction:column; gap:20px; }
+      .access-grid { grid-template-columns:1fr; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:480px) {
+      .hero-acts { flex-direction:column; }
+      .btn-lg { padding:14px 24px; }
+      .uc-grid { grid-template-columns:1fr; }
+      .ft-cols { grid-template-columns:1fr; }
+      .stats-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     NAV
+══════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-in">
+    <a href="#" class="n-logo">
+      <svg class="n-gem" viewBox="0 0 20 20" fill="none">
+        <path d="M10 1L18.5 6.5V13.5L10 19L1.5 13.5V6.5L10 1Z" stroke="#A87020" stroke-width="1.2"/>
+        <path d="M10 1L18.5 6.5H1.5L10 1Z" fill="rgba(168,112,32,0.2)" stroke="#A87020" stroke-width=".8"/>
+        <circle cx="10" cy="11" r="2.4" fill="rgba(168,112,32,0.25)" stroke="#A87020" stroke-width=".8"/>
+      </svg>
+      Infiora
+    </a>
+    <ul class="n-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#analytics">Analytics</a></li>
+      <li><a href="#usecases">Use Cases</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#contact" class="btn btn-primary n-cta">Book a Free Demo</a>
+    <button class="n-tog" id="ntog" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="n-drawer" id="ndrawer">
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#analytics">Analytics</a></li>
+      <li><a href="#usecases">Use Cases</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#contact" class="btn btn-primary">Book a Free Demo</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
+<section id="hero">
+  <div class="container" style="display:contents;">
+    <div class="hero-left container" style="padding-top:0;padding-bottom:0;max-width:none;width:auto;grid-column:1;padding-right:calc(44px + 60px);padding-left:max(44px, calc((100vw - 1220px)/2 + 44px));">
+      <div class="hero-badge">
+        <div class="badge-pulse"></div>
+        Trusted by hotels & apartments across Croatia
+      </div>
+      <h1 class="hero-h1">
+        Your guests have<br/>questions. Infiora<br/><em>answers instantly.</em>
+      </h1>
+      <p class="hero-p">
+        Replace paper room directories with a beautiful digital guest guide — Wi-Fi, menus, spa, local tours and more. Accessible with a single QR scan, in your guest's own language. No app required.
+      </p>
+      <div class="hero-acts">
+        <a href="https://app.infiora.hr" target="_blank" class="btn btn-primary btn-lg">
+          Try Live Demo
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+        <a href="#contact" class="btn btn-outline btn-lg">Book a Free Demo</a>
+      </div>
+      <div class="hero-proof">
+        <div class="hp-item">
+          <span class="hp-num">340+</span>
+          <span class="hp-lab">Properties using Infiora</span>
+        </div>
+        <div class="hp-item">
+          <span class="hp-num">32</span>
+          <span class="hp-lab">Languages auto-detected</span>
+        </div>
+        <div class="hp-item">
+          <span class="hp-num">0</span>
+          <span class="hp-lab">App downloads required</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right" style="padding-right:max(44px, calc((100vw - 1220px)/2 + 44px));padding-left:0;">
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ps-status">
+              <span>9:41 AM</span>
+              <span>📶 🔋</span>
+            </div>
+            <div class="ps-body">
+              <div class="ps-hotel">
+                <div class="ps-hotel-name">Villa Adriatica</div>
+                <div class="ps-room">Room 12 · Superior Sea View</div>
+                <div class="ps-langs">
+                  <span class="ps-lang on">EN</span>
+                  <span class="ps-lang">HR</span>
+                  <span class="ps-lang">DE</span>
+                  <span class="ps-lang">IT</span>
+                  <span class="ps-lang">+28</span>
+                </div>
+              </div>
+              <div class="ps-wifi">
+                <span class="ps-wifi-ic">📶</span>
+                <div class="ps-wifi-txt">
+                  <div class="ps-wifi-lab">Wi-Fi Password</div>
+                  <div class="ps-wifi-val">Adriatica2024</div>
+                </div>
+              </div>
+              <div class="ps-btn-row">
+                <div class="ps-btn">
+                  <div class="ps-btn-ic">🍽</div>
+                  <div class="ps-btn-lb">Restaurant Menu</div>
+                </div>
+                <div class="ps-btn">
+                  <div class="ps-btn-ic">🧖</div>
+                  <div class="ps-btn-lb">Spa & Wellness</div>
+                </div>
+                <div class="ps-btn">
+                  <div class="ps-btn-ic">🗺</div>
+                  <div class="ps-btn-lb">Local Tours</div>
+                </div>
+                <div class="ps-btn">
+                  <div class="ps-btn-ic">📺</div>
+                  <div class="ps-btn-lb">TV & AC Guide</div>
+                </div>
+              </div>
+              <div class="ps-menu-item">
+                <span class="ps-menu-ic">🏖</span>
+                <span class="ps-menu-txt">Beach chairs &amp; umbrellas</span>
+                <span class="ps-menu-arr">›</span>
+              </div>
+              <div class="ps-menu-item">
+                <span class="ps-menu-ic">⏰</span>
+                <span class="ps-menu-txt">Late checkout request</span>
+                <span class="ps-menu-arr">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-notif">
+          <div class="notif-ic">⭐</div>
+          <div class="notif-text">
+            <strong>New 5-star review!</strong>
+            <span>"Loved the digital guide" · Booking.com</span>
+          </div>
+        </div>
+        <div class="phone-card">
+          <span class="pcard-ic">📡</span>
+          <div class="pcard-txt">
+            <strong>Auto-detected: Deutsch</strong>
+            <span>Switching to German</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     ACCESS METHODS
+══════════════════════════════════ -->
+<section id="access">
+  <div class="container">
+    <div class="access-label anim">
+      <span class="label">How Guests Access Your Guide</span>
+    </div>
+    <div class="access-grid anim-kids">
+      <div class="acc-card">
+        <div class="acc-ic">📷</div>
+        <h3>QR Code Stickers</h3>
+        <p>Professional QR stickers that guests scan with their phone camera. Place them on doors, bedside tables, bathroom mirrors, or elevator panels — wherever your guests need instant answers.</p>
+        <div class="acc-price">
+          <span class="acc-included">✓ Included with every plan</span>
+        </div>
+      </div>
+      <div class="acc-card">
+        <div class="acc-ic">💳</div>
+        <h3>NFC Cards</h3>
+        <p>Premium personalized cards that guests tap with their phone — no camera, no scanning. Perfect as a welcome card, key card companion, or elegant bedside concierge accessory.</p>
+        <div class="acc-price">€5 per card — order as needed</div>
+      </div>
+      <div class="acc-card">
+        <div class="acc-ic">🏛</div>
+        <h3>NFC / QR Stands</h3>
+        <p>Elegant countertop stands for your reception desk, restaurant tables, or lobby. Guests tap or scan to access your full property guide instantly — no interaction with staff required.</p>
+        <div class="acc-price">€12 per stand — any quantity</div>
+      </div>
+      <div class="acc-card">
+        <div class="acc-ic">🔗</div>
+        <h3>Direct Links</h3>
+        <p>Share your guest guide as a link in Airbnb messages, Booking.com reservation emails, WhatsApp pre-arrival messages, or your own confirmation emails. Guests arrive already informed.</p>
+        <div class="acc-price">
+          <span class="acc-included">✓ Included with every plan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FEATURES
+══════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="sh anim">
+      <span class="label">Platform Features</span>
+      <h2>Everything your guests need,<br/><em>right when they need it</em></h2>
+      <p>One guide. Infinite answers. Infiora gives every guest instant access to everything about your property — in their language, on any device.</p>
+    </div>
+    <div class="feat-grid anim-kids">
+      <div class="feat-card hi">
+        <div class="feat-top">
+          <div class="feat-icon">📶</div>
+          <div class="feat-num">01</div>
+        </div>
+        <h3>Instant Wi-Fi Access</h3>
+        <p>Guests see your Wi-Fi credentials the moment they open the guide — no more handwritten cards, no more front desk calls. One-tap connect on supported devices.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">One-tap connect</span>
+          <span class="feat-tag">Per-room passwords</span>
+          <span class="feat-tag">Always visible</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top">
+          <div class="feat-icon">🍽</div>
+          <div class="feat-num">02</div>
+        </div>
+        <h3>Restaurant Menus & Room Service</h3>
+        <p>Digital menus that guests can browse in their language, with real-time updates — no reprinting when dishes change. Add photos, allergens, and ordering instructions.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Photo menus</span>
+          <span class="feat-tag">Real-time updates</span>
+          <span class="feat-tag">Allergen info</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top">
+          <div class="feat-icon">📺</div>
+          <div class="feat-num">03</div>
+        </div>
+        <h3>Device & Equipment Guides</h3>
+        <p>Step-by-step instructions for smart TVs, air conditioning units, Jacuzzis, and any room equipment. Reduce frustration and the most common guest service calls.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Smart TV setup</span>
+          <span class="feat-tag">AC instructions</span>
+          <span class="feat-tag">Custom per room</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top">
+          <div class="feat-icon">🌍</div>
+          <div class="feat-num">04</div>
+        </div>
+        <h3>Automatic Language Detection</h3>
+        <p>Infiora reads your guest's browser language and automatically serves the guide in their preferred language — Croatian, German, Italian, French, English, and 27 more. Zero setup needed.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">32 languages</span>
+          <span class="feat-tag">Fully automatic</span>
+          <span class="feat-tag">Guest-preferred</span>
+        </div>
+      </div>
+      <div class="feat-card hi">
+        <div class="feat-top">
+          <div class="feat-icon">🗺</div>
+          <div class="feat-num">05</div>
+        </div>
+        <h3>Local Tours & Experiences</h3>
+        <p>Curate and promote local activities, boat tours, wine tastings, and transfers directly in your guide. Create upsell opportunities and add a revenue stream your guests appreciate.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Bookable activities</span>
+          <span class="feat-tag">Local partnerships</span>
+          <span class="feat-tag">Revenue upsells</span>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-top">
+          <div class="feat-icon">🏊</div>
+          <div class="feat-num">06</div>
+        </div>
+        <h3>Facility Info & Operating Hours</h3>
+        <p>Pool hours, spa booking links, gym access, parking instructions, checkout times — every piece of operational information your guests need, updated instantly without reprinting.</p>
+        <div class="feat-tags">
+          <span class="feat-tag">Live updates</span>
+          <span class="feat-tag">Spa & pool</span>
+          <span class="feat-tag">Check-in / out</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════ -->
+<section id="how">
+  <div class="container">
+    <div class="sh anim">
+      <span class="label">Our Process</span>
+      <h2>Live in your property<br/><em>within days</em></h2>
+      <p>No complex integrations. No IT department. No developer required. Getting Infiora running is genuinely simple.</p>
+    </div>
+    <div class="steps anim-kids">
+      <div class="step-card">
+        <div class="step-n">01</div>
+        <h3>We Build Your Guide Together</h3>
+        <p>Share your hotel's details — Wi-Fi passwords, menus, services, and house rules. Our team builds your complete digital guide, customized to your property's brand and content. Most properties go live in 3–5 business days.</p>
+        <div class="step-pill">✓ Done-for-you setup</div>
+      </div>
+      <div class="step-card">
+        <div class="step-n">02</div>
+        <h3>Place QR Codes in Every Room</h3>
+        <p>We send print-ready QR stickers for every room and area. Simply place them on bedside tables, bathroom mirrors, or welcome cards. Guests scan once and your entire guide opens instantly — in their language.</p>
+        <div class="step-pill">✓ No app download ever</div>
+      </div>
+      <div class="step-card">
+        <div class="step-n">03</div>
+        <h3>Update, Analyze, and Grow</h3>
+        <p>Change your menu, add a new service, or update pool hours instantly from your dashboard — no reprinting. Watch your guest engagement analytics, spot patterns, and see exactly where your guests are clicking.</p>
+        <div class="step-pill">✓ Real-time updates & insights</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     USE CASES
+══════════════════════════════════ -->
+<section id="usecases">
+  <div class="container">
+    <div class="sh anim">
+      <span class="label">Who It's For</span>
+      <h2>Built for every type<br/>of <em>accommodation</em></h2>
+      <p>From boutique hotels to cruise ships, Infiora adapts to any property's needs and brand identity.</p>
+    </div>
+    <div class="uc-grid anim-kids">
+      <div class="uc-card">
+        <div class="uc-img hotel">🏨</div>
+        <div class="uc-body">
+          <h3>Hotels</h3>
+          <p>Reduce front desk calls, showcase facilities and services, promote spa bookings and late checkouts across all your rooms.</p>
+          <span class="uc-tag">HOTELS</span>
+        </div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-img apt">🏠</div>
+        <div class="uc-body">
+          <h3>Apartments & Villas</h3>
+          <p>Share check-in instructions, house rules, appliance guides, and local recommendations — perfect for remote host management.</p>
+          <span class="uc-tag">APARTMENTS & VILLAS</span>
+        </div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-img hostel">🛏</div>
+        <div class="uc-body">
+          <h3>Hostels</h3>
+          <p>Provide common area information, locker instructions, tour bookings, and local social events in one multilingual hub.</p>
+          <span class="uc-tag">HOSTELS</span>
+        </div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-img cruise">🚢</div>
+        <div class="uc-body">
+          <h3>Cruise Ships</h3>
+          <p>Deliver daily schedules, deck maps, dining hours, and excursion bookings to thousands of guests simultaneously.</p>
+          <span class="uc-tag">CRUISE SHIPS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     ANALYTICS
+══════════════════════════════════ -->
+<section id="analytics">
+  <div class="container">
+    <div class="analytics-wrap">
+      <div class="analytics-copy anim">
+        <span class="label">Analytics Dashboard</span>
+        <h2>Know exactly how your guests engage with your property</h2>
+        <p>The Infiora dashboard gives you a clear window into guest behavior — no guesswork, just actionable data that helps you improve.</p>
+        <div class="analytics-list">
+          <div class="a-item">
+            <div class="a-dot">👁</div>
+            <div class="a-text"><strong>Total views & unique guests</strong> — tracked per room and per time period</div>
+          </div>
+          <div class="a-item">
+            <div class="a-dot">🌍</div>
+            <div class="a-text"><strong>Language & device breakdown</strong> — know where your guests come from and what they use</div>
+          </div>
+          <div class="a-item">
+            <div class="a-dot">⏰</div>
+            <div class="a-text"><strong>Peak usage times</strong> — see when guests are most active and what they need</div>
+          </div>
+          <div class="a-item">
+            <div class="a-dot">📊</div>
+            <div class="a-text"><strong>Most-clicked content</strong> — discover which services guests care about most</div>
+          </div>
+          <div class="a-item">
+            <div class="a-dot">⭐</div>
+            <div class="a-text"><strong>Guest feedback & sentiment</strong> — collect ratings and intercept issues early</div>
+          </div>
+        </div>
+        <a href="#contact" class="btn btn-primary" style="margin-top:8px;">See the Dashboard Live</a>
+      </div>
+      <div class="anim" style="transition-delay:.12s">
+        <div class="dash-mock">
+          <div class="dm-bar">
+            <div class="dm-dot"></div>
+            <div class="dm-dot"></div>
+            <div class="dm-dot"></div>
+            <div class="dm-title">Infiora Analytics — Villa Adriatica</div>
+          </div>
+          <div class="dm-body">
+            <div class="dm-kpis">
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">1,247</div>
+                <div class="dm-kpi-lab">Views today</div>
+              </div>
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">843</div>
+                <div class="dm-kpi-lab">Unique guests</div>
+              </div>
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">4.7★</div>
+                <div class="dm-kpi-lab">Avg rating</div>
+              </div>
+            </div>
+            <div class="dm-chart" id="dash-chart">
+              <div class="dm-bar-el" style="height:38%"></div>
+              <div class="dm-bar-el" style="height:55%"></div>
+              <div class="dm-bar-el" style="height:44%"></div>
+              <div class="dm-bar-el" style="height:68%"></div>
+              <div class="dm-bar-el hi" style="height:90%"></div>
+              <div class="dm-bar-el" style="height:72%"></div>
+              <div class="dm-bar-el" style="height:61%"></div>
+            </div>
+            <div class="dm-kpis" style="margin-top:0">
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">EN 48%</div>
+                <div class="dm-kpi-lab">Top language</div>
+              </div>
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">DE 22%</div>
+                <div class="dm-kpi-lab">2nd language</div>
+              </div>
+              <div class="dm-kpi">
+                <div class="dm-kpi-val">iPhone</div>
+                <div class="dm-kpi-lab">63% of devices</div>
+              </div>
+            </div>
+            <div class="dm-rooms">
+              <div class="dm-room">
+                <span class="dm-room-num">Room 12</span>
+                <div class="dm-room-bar-wrap"><div class="dm-room-bar" style="width:88%"></div></div>
+                <span class="dm-room-pct">88%</span>
+              </div>
+              <div class="dm-room">
+                <span class="dm-room-num">Room 7</span>
+                <div class="dm-room-bar-wrap"><div class="dm-room-bar" style="width:74%"></div></div>
+                <span class="dm-room-pct">74%</span>
+              </div>
+              <div class="dm-room">
+                <span class="dm-room-num">Room 3</span>
+                <div class="dm-room-bar-wrap"><div class="dm-room-bar" style="width:61%"></div></div>
+                <span class="dm-room-pct">61%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     TESTIMONIALS
+══════════════════════════════════ -->
+<section id="testi">
+  <div class="container">
+    <div class="sh anim">
+      <span class="label">Client Stories</span>
+      <h2>What property owners<br/><em>say about Infiora</em></h2>
+    </div>
+    <div class="testi-grid anim-kids">
+      <div class="testi-card">
+        <div class="t-stars">★★★★★</div>
+        <blockquote>"We used to get 10–15 calls a day about Wi-Fi passwords and TV instructions. Since putting Infiora QR codes in every room, those calls have almost completely stopped. Guests find everything themselves — and they love it."</blockquote>
+        <div class="t-author">
+          <div class="t-av">MK</div>
+          <div>
+            <strong>Marko Kovačević</strong>
+            <span>Owner, Boutique Hotel Vela, Split</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card hi">
+        <div class="t-stars">★★★★★</div>
+        <blockquote>"Our guests are mostly German and Austrian, and they always struggled with the language barrier. With Infiora, the guide automatically shows in German. Our review scores improved noticeably in just the first season — guests felt more confident and cared for."</blockquote>
+        <div class="t-author">
+          <div class="t-av">IP</div>
+          <div>
+            <strong>Ivana Petrić</strong>
+            <span>Manager, Vila Horizont, Hvar</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="t-stars">★★★★★</div>
+        <blockquote>"The upselling features alone paid for it. We added our local tour partners and late checkout option to the guide — guests book through it regularly now. It's become a real revenue channel, not just a convenience tool."</blockquote>
+        <div class="t-author">
+          <div class="t-av">TM</div>
+          <div>
+            <strong>Tomislav Marić</strong>
+            <span>Director, Hotel Adriatic Palace, Dubrovnik</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     STATS BAND
+══════════════════════════════════ -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid anim-kids">
+      <div class="stat-cell">
+        <div class="stat-val-r">
+          <span class="stat-num" data-target="340">0</span>
+          <span class="stat-sfx">+</span>
+        </div>
+        <span class="stat-lab">Properties using Infiora<br/>across Croatia &amp; the Adriatic</span>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val-r">
+          <span class="stat-num" data-target="32">0</span>
+        </div>
+        <span class="stat-lab">Languages automatically<br/>detected &amp; supported</span>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val-r">
+          <span class="stat-num" data-target="0">0</span>
+        </div>
+        <span class="stat-lab">App downloads required<br/>by guests — ever</span>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val-r">
+          <span class="stat-num" data-target="3">0</span>
+          <span class="stat-sfx">–5</span>
+        </div>
+        <span class="stat-lab">Business days to go live<br/>with your first guide</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FAQ
+══════════════════════════════════ -->
+<section id="faq">
+  <div class="container">
+    <div class="sh anim">
+      <span class="label">FAQ</span>
+      <h2>Questions from<br/><em>property owners like you</em></h2>
+    </div>
+    <div class="faq-wrap anim">
+      <div class="faq-item">
+        <button class="faq-q">
+          Do guests need to download an app?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Never. Guests simply scan the QR code with their phone's built-in camera or tap an NFC card — the guide opens directly in their browser. No app download, no account, no password. It works on any smartphone on any network.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          How does the automatic language detection work?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>When a guest opens the guide, Infiora reads their device's language setting and automatically displays all content in that language. If a guest's language isn't available, the guide defaults to English. Guests can also manually switch languages at any time from the guide.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          Can I update the content myself?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — you have full access to a simple editor where you can update Wi-Fi passwords, menu items, facility hours, or add new services at any time. Changes appear instantly for all guests without any reprinting or technical work.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          What physical materials are included?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>QR code stickers are included with every plan and sent to you ready to place. NFC cards (€5 each) and NFC/QR stands (€12 each) are optional premium accessories you can order in any quantity. We also send you print-ready QR files if you want to create your own printed materials.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          How quickly can we go live?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Most properties are live within 3–5 business days. Our team handles the initial setup — you provide the content and we build the guide. After launch, you can update everything yourself through the dashboard.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          Do you work with apartments and villas, not just hotels?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Absolutely. Infiora works for any accommodation type — hotels, boutique properties, apartments, villas, hostels, and cruise ships. For remote-managed apartments and Airbnb properties, the direct-link access method is particularly valuable as you can send it in your pre-arrival message.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          Can I see a live demo before signing up?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — you can explore live demo guides at app.infiora.hr right now, or book a free call with our team where we'll show you exactly how Infiora would look for your specific property. We can mock up your guide during the demo call.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     CONTACT
+══════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="cta-split">
+      <div class="cta-copy anim">
+        <span class="label">Let's Talk</span>
+        <h2>Ready to give your guests <em>the guide they deserve?</em></h2>
+        <p>Book a free 30-minute demo call with our team in Split. We'll show you Infiora live, answer all your questions, and set up a mock guide for your property on the spot.</p>
+        <div class="cta-info">
+          <div class="ci"><span class="ci-ic">📍</span> Spinčićeva 7, 21000 Split, Croatia</div>
+          <div class="ci"><span class="ci-ic">📞</span> <a href="tel:+385958006660">+385 95 800 6660</a></div>
+          <div class="ci"><span class="ci-ic">✉️</span> <a href="mailto:info@infiora.hr">info@infiora.hr</a></div>
+          <div class="ci"><span class="ci-ic">🌐</span> <a href="https://app.infiora.hr" target="_blank">app.infiora.hr — Live demo</a></div>
+        </div>
+        <div class="cta-checks">
+          <div class="chk"><span class="chk-ok">✓</span> Free 30-minute strategy demo</div>
+          <div class="chk"><span class="chk-ok">✓</span> We'll mock up your property live</div>
+          <div class="chk"><span class="chk-ok">✓</span> QR stickers included with every plan</div>
+          <div class="chk"><span class="chk-ok">✓</span> Available in Croatian &amp; English</div>
+          <div class="chk"><span class="chk-ok">✓</span> We reply within 24 hours</div>
+        </div>
+      </div>
+      <div class="anim" style="transition-delay:.1s">
+        <form class="form" id="main-form">
+          <div class="frow">
+            <div class="ff">
+              <label>Your Name</label>
+              <input type="text" placeholder="Ana Horvat" required />
+            </div>
+            <div class="ff">
+              <label>Email Address</label>
+              <input type="email" placeholder="ana@hotel.hr" required />
+            </div>
+          </div>
+          <div class="ff">
+            <label>Property Name</label>
+            <input type="text" placeholder="Hotel / Apartment / Villa..." required />
+          </div>
+          <div class="frow">
+            <div class="ff">
+              <label>Property Type</label>
+              <select>
+                <option value="">Select type</option>
+                <option>Hotel</option>
+                <option>Boutique Hotel</option>
+                <option>Villa / Luxury Rental</option>
+                <option>Apartments (Airbnb / Booking)</option>
+                <option>Hostel</option>
+                <option>B&amp;B / Guesthouse</option>
+                <option>Cruise Ship</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="ff">
+              <label>Number of Rooms / Units</label>
+              <select>
+                <option>1–5</option>
+                <option>6–15</option>
+                <option>16–40</option>
+                <option>41–100</option>
+                <option>100+</option>
+              </select>
+            </div>
+          </div>
+          <div class="ff">
+            <label>What's your biggest challenge right now?</label>
+            <textarea placeholder="e.g. Too many front desk calls, language barrier with guests, want to reduce printing costs..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold btn-lg btn-full" id="sbtn">
+            Book My Free Demo Call
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="form-note">We'll be in touch within 24 hours · Spinčićeva 7, 21000 Split</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FOOTER
+══════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="#" class="ft-logo">
+          <svg class="n-gem" viewBox="0 0 20 20" fill="none" style="width:18px;height:18px">
+            <path d="M10 1L18.5 6.5V13.5L10 19L1.5 13.5V6.5L10 1Z" stroke="#A87020" stroke-width="1.2"/>
+            <path d="M10 1L18.5 6.5H1.5L10 1Z" fill="rgba(168,112,32,0.25)" stroke="#A87020" stroke-width=".8"/>
+            <circle cx="10" cy="11" r="2.4" fill="rgba(168,112,32,0.2)" stroke="#A87020" stroke-width=".8"/>
+          </svg>
+          Infiora
+        </a>
+        <p>Digital guest guide platform for hotels, apartments, villas, and hostels. Split, Croatia.</p>
+      </div>
+      <div class="ft-cols">
+        <div class="ft-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#">Digital Guest Guide</a></li>
+            <li><a href="#">QR Code Access</a></li>
+            <li><a href="#">NFC Cards &amp; Stands</a></li>
+            <li><a href="#">Analytics Dashboard</a></li>
+            <li><a href="#">Multilingual Support</a></li>
+            <li><a href="https://app.infiora.hr" target="_blank">Live Demo ↗</a></li>
+          </ul>
+        </div>
+        <div class="ft-col">
+          <h4>Use Cases</h4>
+          <ul>
+            <li><a href="#">Hotels</a></li>
+            <li><a href="#">Apartments &amp; Villas</a></li>
+            <li><a href="#">Hostels</a></li>
+            <li><a href="#">Cruise Ships</a></li>
+            <li><a href="#">Airbnb Properties</a></li>
+          </ul>
+        </div>
+        <div class="ft-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:info@infiora.hr">info@infiora.hr</a></li>
+            <li><a href="tel:+385958006660">+385 95 800 6660</a></li>
+            <li>Spinčićeva 7</li>
+            <li>21000 Split, Croatia</li>
+            <li><a href="https://instagram.com/Infiora-hr" target="_blank">Instagram</a></li>
+            <li><a href="#">Facebook</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>© 2024 Infiora d.o.o. · All rights reserved · Split, Croatia</p>
+      <div class="ft-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
+<script>
+  /* NAV */
+  const nav = document.getElementById('nav');
+  const ntog = document.getElementById('ntog');
+  const ndrawer = document.getElementById('ndrawer');
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 28);
+  }, { passive: true });
+
+  ntog.addEventListener('click', () => {
+    const open = ntog.classList.toggle('open');
+    ndrawer.classList.toggle('open', open);
+  });
+  ndrawer.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      ntog.classList.remove('open');
+      ndrawer.classList.remove('open');
+    });
+  });
+
+  /* SMOOTH SCROLL */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (!t) return;
+      e.preventDefault();
+      const off = nav.offsetHeight + 16;
+      window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+    });
+  });
+
+  /* SCROLL ANIMATIONS */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.anim, .anim-kids').forEach(el => io.observe(el));
+
+  /* COUNTER */
+  function countUp(el, target, dur = 1600) {
+    const start = performance.now();
+    const tick = now => {
+      const p = Math.min((now - start) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(e * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    };
+    requestAnimationFrame(tick);
+  }
+  const sio = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target.querySelector('[data-target]');
+      if (el && !el.dataset.done) {
+        el.dataset.done = '1';
+        countUp(el, +el.dataset.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-cell').forEach(c => sio.observe(c));
+
+  /* FAQ */
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.parentElement;
+      const was = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!was) item.classList.add('open');
+    });
+  });
+
+  /* FORM */
+  document.getElementById('main-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = document.getElementById('sbtn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Sent! We\'ll be in touch within 24 hours.';
+    btn.style.background = '#3E7A56';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 5000);
+  });
+
+  /* ANIMATED DASHBOARD BARS */
+  setInterval(() => {
+    document.querySelectorAll('.dm-bar-el').forEach(b => {
+      const h = 22 + Math.random() * 72;
+      b.style.height = h + '%';
+      b.classList.toggle('hi', h > 75);
+    });
+  }, 2400);
+</script>
+
+</body>
+</html>
