@@ -1,0 +1,15 @@
+{
+  "name": "@infiora/api-contract",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Generated OpenAPI contract and TypeScript types for the Infiora Node API.",
+  "main": "types.ts",
+  "types": "types.ts",
+  "files": [
+    "generated",
+    "types.ts"
+  ],
+  "scripts": {
+    "generate": "node ../../tools/generate-openapi.cjs"
+  }
+}
